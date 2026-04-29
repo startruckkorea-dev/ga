@@ -705,7 +705,7 @@ async function loadApprovalBadge(){
 async function loadStationeryData(){
   try{
     const t=await token();
-    const searchRes=await api('/sites/'+siteId+'/drive/root/search(q='Stationery list')');
+    const searchRes=await api('/sites/'+siteId+'/drive/root/search(q=\'Stationery list\')');
     let fileItem=null;
     if(searchRes.value&&searchRes.value.length)
       fileItem=searchRes.value.find(f=>f.name&&f.name.toLowerCase().includes('stationery list')&&f.name.toLowerCase().endsWith('.xlsx'));
