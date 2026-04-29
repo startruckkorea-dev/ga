@@ -447,24 +447,32 @@ async function boot(account){
 // ── Load Excel from SharePoint ──
 async function loadStationeryData(){
   try{
-    const drivesData=await api('/sites/'+siteId+'/drives');
-    // SharePoint 드라이브 이름은 환경마다 다를 수 있어 여러 이름 시도
-    const drive=drivesData.value.find(d=>d.name==='Documents')
-      ||drivesData.value.find(d=>d.name==='공유 문서')
-      ||drivesData.value.find(d=>d.name==='Shared Documents')
-      ||drivesData.value[0];
-    console.log('Using drive:', drive?.name, drive?.id);
     const t=await token();
-    // 파일명에 공백이 있으므로 인코딩
-    const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/Stationery%20list.xlsx:/content',{headers:{Authorization:'Bearer '+t}});
-    if(!res.ok){
-      // 인코딩 없이도 시도
-      const res2=await fetch(GRAPH+'/drives/'+drive.id+'/root:/Stationery list.xlsx:/content',{headers:{Authorization:'Bearer '+t}});
-      if(!res2.ok)throw new Error('파일 로드 실패 '+res2.status);
-      const buf2=await res2.arrayBuffer();
-      parseExcel(buf2);return;
+    // 파일명으로 직접 검색 (드라이브명 무관)
+    const searchRes=await api('/sites/'+siteId+'/drive/root/search(q=\'Stationery list\')');
+    let fileItem=null;
+    if(searchRes.value&&searchRes.value.length){
+      fileItem=searchRes.value.find(f=>f.name&&f.name.toLowerCase().includes('stationery list')&&f.name.toLowerCase().endsWith('.xlsx'));
     }
-    const buf=await res.arrayBuffer();
+    let buf;
+    if(fileItem){
+      console.log('Found file via search:', fileItem.name, fileItem.id);
+      const res=await fetch(GRAPH+'/sites/'+siteId+'/drive/items/'+fileItem.id+'/content',{headers:{Authorization:'Bearer '+t}});
+      if(!res.ok)throw new Error('파일 다운로드 실패 '+res.status);
+      buf=await res.arrayBuffer();
+    } else {
+      // fallback: 드라이브 목록 순회
+      const drivesData=await api('/sites/'+siteId+'/drives');
+      console.log('Available drives:', drivesData.value.map(d=>d.name));
+      let found=false;
+      for(const drive of drivesData.value){
+        try{
+          const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/Stationery list.xlsx:/content',{headers:{Authorization:'Bearer '+t}});
+          if(res.ok){buf=await res.arrayBuffer();found=true;console.log('Found in drive:',drive.name);break;}
+        }catch(e){}
+      }
+      if(!found)throw new Error('Stationery list.xlsx 파일을 찾을 수 없습니다');
+    }
     parseExcel(buf);
   }catch(e){
     console.error('비품 목록 로드 실패:',e.message);
@@ -549,14 +557,14 @@ function renderOrderTable(){
       <td style="font-size:.8rem">${item.name}</td>
       <td style="text-align:center;color:#605e5c;font-size:.78rem">${item.code}</td>
       <td style="text-align:center">${item.unit}</td>
-      <td style="text-align:center"><input type="number" min="1" value="${item.qty}" onchange="updateQty(${i},this.value)"></td>
+      <td style="text-align:center"><input type="number" min="0" value="${item.qty}" onchange="updateQty(${i},this.value)"></td>
       <td style="text-align:right">${item.price.toLocaleString()}</td>
       <td style="text-align:right;font-weight:600" id="rt-${i}">${(item.price*item.qty).toLocaleString()}</td>
       <td style="text-align:center"><button class="btn-del" onclick="removeItem(${i})">✕</button></td>
     </tr>`).join('');
   updateTotalSum();
 }
-function updateQty(i,v){orderItems[i].qty=Math.max(1,parseInt(v)||1);document.getElementById('rt-'+i).textContent=(orderItems[i].price*orderItems[i].qty).toLocaleString();updateTotalSum();}
+function updateQty(i,v){orderItems[i].qty=Math.max(0,parseInt(v)||0);document.getElementById('rt-'+i).textContent=(orderItems[i].price*orderItems[i].qty).toLocaleString();updateTotalSum();}
 function removeItem(i){orderItems.splice(i,1);renderOrderTable();}
 function updateTotalSum(){document.getElementById('total-sum').textContent=orderItems.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString();}
 
@@ -630,8 +638,8 @@ function fmtAmt(n){return Number(n||0).toLocaleString()+'원';}
 async function loadMyList(){
   if(!siteId)return;
   try{
-    const data=await api('/sites/'+siteId+'/lists/'+LIST_REQ+'/items?$expand=fields&$filter=fields/RequesterEmail eq \''+user.email+'\''+'&$top=500');
-    const items=data.value.sort((a,b)=>b.id-a.id);
+    const data=await api('/sites/'+siteId+'/lists/'+LIST_REQ+'/items?$expand=fields&$top=500');
+    const items=data.value.filter(i=>(i.fields.RequesterEmail||'')===user.email).sort((a,b)=>b.id-a.id);
     pgSet('list',items,item=>{
       const f=item.fields;
       return`<tr onclick="showDetail(${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td>${f.Company||''}</td><td>${f.CostCenter||''}</td><td style="text-align:center">${f.ItemCount||0}건</td><td style="text-align:right">${fmtAmt(f.TotalAmount)}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;
@@ -734,8 +742,9 @@ async function showDetail(id){
       api('/sites/'+siteId+'/lists/'+LIST_APR+'/items?$expand=fields&$top=500'),
     ]);
     const f=r.fields;
-    const apprList=apprData.value.filter(i=>i.fields.RequestID===parseInt(id)).sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
+    const apprList=apprData.value.filter(i=>Number(i.fields.RequestID)===Number(id)).sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
+    const sc_bg={'대기':'#fff4ce','승인':'#dff6dd','반려':'#fde7e9','대기(잠김)':'#f3f2f1','승인완료':'#dff6dd'};
     const sec=t=>`<div style="font-size:.82rem;font-weight:600;color:#0078d4;margin:16px 0 8px;padding:5px 10px;background:#f0f6ff;border-radius:4px;border-left:3px solid #0078d4">${t}</div>`;
     const row=(l,v)=>`<div class="modal-row"><div class="modal-label">${l}</div><div class="modal-value">${v||'-'}</div></div>`;
 
@@ -754,14 +763,21 @@ async function showDetail(id){
       }catch(e){console.warn(e);}
     }
 
-    const apprHtml=apprList.map(a=>{
+    const apprHtml=apprList.length ? apprList.map(a=>{
       const af=a.fields;
-      return`<div class="appr-block"><div class="appr-title">${af.ApproverRole||''}</div>
-        <div style="font-size:.78rem;color:#605e5c">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>
-        ${af.Comment?`<div style="font-size:.75rem;color:#a4262c;margin-top:4px">💬 ${af.Comment}</div>`:''}
-        <div style="text-align:right;margin-top:4px"><span style="color:${sc[af.Status]||'#605e5c'};font-weight:700;font-size:.82rem">${af.Status||''}</span></div>
+      const st=af.Status||'';
+      return`<div class="appr-block ${st==='대기'?'appr-fixed':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="appr-title">${af.ApproverRole||''}</div>
+            <div style="font-size:.78rem;color:#605e5c;margin-top:2px">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>
+            ${af.Comment?`<div style="font-size:.75rem;color:#a4262c;margin-top:5px;background:#fde7e9;padding:4px 8px;border-radius:4px">💬 ${af.Comment}</div>`:''}
+          </div>
+          <span style="background:${sc_bg[st]||'#f3f2f1'};color:${sc[st]||'#605e5c'};font-weight:700;font-size:.75rem;padding:3px 10px;border-radius:10px;white-space:nowrap;margin-left:8px">${st}</span>
+        </div>
+        ${af.ApprovalDate?`<div style="font-size:.72rem;color:#a19f9d;margin-top:6px">처리일: ${fmtDate(af.ApprovalDate)}</div>`:''}
       </div>`;
-    }).join('');
+    }).join('') : '<div style="font-size:.82rem;color:#a19f9d;padding:12px 0">결재 이력이 없습니다.</div>';
 
     document.getElementById('modal-content').innerHTML=
       sec('기본 정보')+
