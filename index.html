@@ -255,7 +255,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="form-row">
         <div class="form-group">
           <label>Company <span class="req-mark">*</span></label>
-          <select id="f-company"><option value="STK">STK</option><option value="DTKL">DTKL</option><option value="DTKA">DTKA</option></select>
+          <select id="f-company"><option value="STK">STK</option></select>
         </div>
         <div class="form-group">
           <label>Cost Center <span class="req-mark">*</span></label>
@@ -263,9 +263,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         </div>
       </div>
 
-      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-        <span>2. 주문 항목</span>
-        <button class="btn-add" onclick="openAddModal()">➕ Add</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div class="section-title" style="margin-bottom:0">2. 주문 항목</div>
+        <button class="btn-secondary" onclick="openAddModal()" style="display:inline-flex;align-items:center;gap:5px;font-size:.82rem;padding:6px 14px"><span style="font-size:.85rem">＋</span> Add</button>
       </div>
       <table class="item-table">
         <thead>
@@ -291,6 +291,27 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           </tr>
         </tfoot>
       </table>
+    </div>
+    <div class="card">
+      <div class="section-title">3. 결재자 지정 (Approvers)</div>
+      <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem">
+        <div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div>
+        <div>1차 Martin Schindele (CFO) <span style="color:#0078d4">(고정)</span> → 2차 Hye-jin Yoon <span style="color:#0078d4">(고정)</span></div>
+      </div>
+      <div class="appr-block appr-fixed">
+        <div class="appr-title">1차 결재자 <span class="hint">— CFO (자동 지정)</span></div>
+        <div class="appr-info">
+          <input type="text" value="Martin Schindele" readonly>
+          <input type="email" value="martin.s.schindele@hyosung.com" readonly>
+        </div>
+      </div>
+      <div class="appr-block appr-fixed">
+        <div class="appr-title">2차 결재자 <span class="hint">— 관리자 (자동 지정)</span></div>
+        <div class="appr-info">
+          <input type="text" value="Hye-jin Yoon" readonly>
+          <input type="email" value="hye-jin.yun@hyosung.com" readonly>
+        </div>
+      </div>
     </div>
     <div class="btn-row">
       <button class="btn-secondary" onclick="resetForm()">Reset</button>
@@ -763,29 +784,29 @@ async function showDetail(id){
       }catch(e){console.warn(e);}
     }
 
-    const apprHtml=apprList.length ? apprList.map(a=>{
-      const af=a.fields;
-      const st=af.Status||'';
-      return`<div class="appr-block ${st==='대기'?'appr-fixed':''}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    const apprHtml = sec('결재 이력') +
+      '<div style="background:#f9f9f9;border-radius:6px;border:1px solid #edebe9;overflow:hidden">' +
+      (apprList.length ? apprList.map(a=>{
+        const af=a.fields;
+        return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid #edebe9">
           <div>
-            <div class="appr-title">${af.ApproverRole||''}</div>
-            <div style="font-size:.78rem;color:#605e5c;margin-top:2px">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>
-            ${af.Comment?`<div style="font-size:.75rem;color:#a4262c;margin-top:5px;background:#fde7e9;padding:4px 8px;border-radius:4px">💬 ${af.Comment}</div>`:''}
+            <div style="font-weight:600;font-size:13px">${af.ApprovalOrder||''}차 ${af.ApproverRole||''}</div>
+            <div style="font-size:12px;color:#605e5c;margin-top:2px">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>
+            ${af.ApprovalDate?`<div style="font-size:11px;color:#a19f9d;margin-top:2px">${fmtDate(af.ApprovalDate)}</div>`:''}
+            ${af.Comment?`<div style="margin-top:4px;background:#fff;border:1px solid #edebe9;border-radius:4px;padding:4px 8px;font-size:12px;color:#605e5c">💬 ${af.Comment}</div>`:''}
           </div>
-          <span style="background:${sc_bg[st]||'#f3f2f1'};color:${sc[st]||'#605e5c'};font-weight:700;font-size:.75rem;padding:3px 10px;border-radius:10px;white-space:nowrap;margin-left:8px">${st}</span>
-        </div>
-        ${af.ApprovalDate?`<div style="font-size:.72rem;color:#a19f9d;margin-top:6px">처리일: ${fmtDate(af.ApprovalDate)}</div>`:''}
-      </div>`;
-    }).join('') : '<div style="font-size:.82rem;color:#a19f9d;padding:12px 0">결재 이력이 없습니다.</div>';
+          <span style="color:${sc[af.Status]||'#323130'};font-weight:700;font-size:12px;white-space:nowrap;margin-left:8px">${af.Status||''}</span>
+        </div>`;
+      }).join('') : '<div style="padding:12px;font-size:.82rem;color:#a19f9d">결재 이력이 없습니다.</div>') +
+      '</div>';
 
     document.getElementById('modal-content').innerHTML=
       sec('기본 정보')+
       row('티켓번호',id)+row('신청자',f.RequesterEmail)+row('Company',f.Company)+row('Cost Center',f.CostCenter)+
       row('항목 수',f.ItemCount+'건')+row('Total Amount',fmtAmt(f.TotalAmount))+
-      row('상태',`<span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+
+      row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']||'#323130'}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+
       sec('주문 항목')+itemsHtml+
-      sec('결재 이력')+apprHtml;
+      apprHtml;
 
     const myAppr=apprList.find(a=>a.fields.ApproverEmail===user.email&&a.fields.Status==='대기');
     if(myAppr){
