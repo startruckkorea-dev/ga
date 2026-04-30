@@ -304,8 +304,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="stn-a1-name" readonly placeholder="이름">
           <input type="email" id="stn-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
@@ -700,15 +699,14 @@ function gaResetA1(prefix){
   gaInitDept(prefix);
 }
 async function createApprovals(cat,reqId){
-  // 1차: Dept. Head (동적 선택)
   const a1name=document.getElementById(cat+'-a1-name').value;
   const a1email=document.getElementById(cat+'-a1-email').value;
   if(!a1email){throw new Error('1차 결재자(Department Head)를 선택해주세요.');}
-  const approvers=[
-    {name:a1name,email:a1email,role:'Department Head',order:1},
-    {name:A2.name,email:A2.email,role:A2.role,order:2},
-    {name:A3.name,email:A3.email,role:A3.role,order:3}
-  ];
+  // STN: 1차 Dept.Head → 2차 GA담당자 (인사팀장 없음)
+  // BC/IDC: 1차 Dept.Head → 2차 인사팀장 → 3차 GA담당자
+  const approvers=cat==='stn'
+    ?[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A3.name,email:A3.email,role:A3.role,order:2}]
+    :[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A2.name,email:A2.email,role:A2.role,order:2},{name:A3.name,email:A3.email,role:A3.role,order:3}];
   for(const a of approvers){
     await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
   }
