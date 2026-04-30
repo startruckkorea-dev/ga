@@ -293,9 +293,19 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <tfoot><tr class="total-row"><td colspan="6" style="text-align:right;padding-right:16px">Total Sum</td><td id="stn-total-sum">0</td><td></td></tr></tfoot>
         </table>
         <div class="section-title" style="margin-top:18px">3. 결재자 지정 (Approvers)</div>
-        <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Jimmy Lee <span style="color:#0078d4">(고정)</span> → 2차 Jimmy Lee <span style="color:#0078d4">(고정)</span></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">1차 결재자 <span class="hint">— CFO (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 관리자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Dept. Head <span style="color:#0078d4">(선택)</span> → 2차 Robin (인사팀장) <span style="color:#0078d4">(고정)</span> → 3차 Hye-jin Yoon (GA) <span style="color:#0078d4">(고정)</span></div></div>
+        <div class="appr-block" id="stn-a1-block"><div class="appr-title">1차 결재자 <span class="req-mark">*</span> <span class="hint">— Department Head</span></div>
+        <div class="appr-grid">
+          <select id="stn-a1-dept" onchange="gaDeptChange('stn')"><option value="">부서</option></select>
+          <select id="stn-a1-team" onchange="gaTeamChange('stn')" disabled><option value="">팀</option></select>
+          <select id="stn-a1-person" onchange="gaPersonChange('stn')" disabled><option value="">직원 선택</option></select>
+        </div>
+        <div class="appr-info">
+          <input type="text" id="stn-a1-name" readonly placeholder="이름">
+          <input type="email" id="stn-a1-email" readonly placeholder="이메일">
+        </div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
@@ -369,9 +379,19 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea id="bc-desc" rows="3" style="border:1px solid #d2d0ce;border-radius:4px;padding:7px 10px;font-size:.82rem;font-family:inherit;resize:vertical;width:100%" placeholder="추가 요청 사항"></textarea></div>
 
         <div class="section-title">4. 결재자 지정 (Approvers)</div>
-        <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Jimmy Lee <span style="color:#0078d4">(고정)</span> → 2차 Jimmy Lee <span style="color:#0078d4">(고정)</span></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">1차 결재자 <span class="hint">— CFO (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 관리자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Dept. Head <span style="color:#0078d4">(선택)</span> → 2차 Robin (인사팀장) <span style="color:#0078d4">(고정)</span> → 3차 Hye-jin Yoon (GA) <span style="color:#0078d4">(고정)</span></div></div>
+        <div class="appr-block" id="bc-a1-block"><div class="appr-title">1차 결재자 <span class="req-mark">*</span> <span class="hint">— Department Head</span></div>
+        <div class="appr-grid">
+          <select id="bc-a1-dept" onchange="gaDeptChange('bc')"><option value="">부서</option></select>
+          <select id="bc-a1-team" onchange="gaTeamChange('bc')" disabled><option value="">팀</option></select>
+          <select id="bc-a1-person" onchange="gaPersonChange('bc')" disabled><option value="">직원 선택</option></select>
+        </div>
+        <div class="appr-info">
+          <input type="text" id="bc-a1-name" readonly placeholder="이름">
+          <input type="email" id="bc-a1-email" readonly placeholder="이메일">
+        </div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
@@ -444,9 +464,19 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea id="idc-desc" rows="3" style="border:1px solid #d2d0ce;border-radius:4px;padding:7px 10px;font-size:.82rem;font-family:inherit;resize:vertical;width:100%" placeholder="추가 요청 사항 (분실 사유 등)"></textarea></div>
 
         <div class="section-title">4. 결재자 지정 (Approvers)</div>
-        <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Jimmy Lee <span style="color:#0078d4">(고정)</span> → 2차 Jimmy Lee <span style="color:#0078d4">(고정)</span></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">1차 결재자 <span class="hint">— CFO (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 관리자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Dept. Head <span style="color:#0078d4">(선택)</span> → 2차 Robin (인사팀장) <span style="color:#0078d4">(고정)</span> → 3차 Hye-jin Yoon (GA) <span style="color:#0078d4">(고정)</span></div></div>
+        <div class="appr-block" id="idc-a1-block"><div class="appr-title">1차 결재자 <span class="req-mark">*</span> <span class="hint">— Department Head</span></div>
+        <div class="appr-grid">
+          <select id="idc-a1-dept" onchange="gaDeptChange('idc')"><option value="">부서</option></select>
+          <select id="idc-a1-team" onchange="gaTeamChange('idc')" disabled><option value="">팀</option></select>
+          <select id="idc-a1-person" onchange="gaPersonChange('idc')" disabled><option value="">직원 선택</option></select>
+        </div>
+        <div class="appr-info">
+          <input type="text" id="idc-a1-name" readonly placeholder="이름">
+          <input type="email" id="idc-a1-email" readonly placeholder="이메일">
+        </div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
@@ -516,8 +546,12 @@ const GRAPH='https://graph.microsoft.com/v1.0';
 const SCOPES=['User.Read','Sites.ReadWrite.All','Files.ReadWrite.All'];
 const LISTS={stn:{req:'STN_Requests',apr:'STN_Approvals'},bc:{req:'BC_Requests',apr:'BC_Approvals'},idc:{req:'IDC_Requests',apr:'IDC_Approvals'}};
 const ADMIN_EMAILS=['hye-jin.yun@hyosung.com','hyojung.kim@hyosung.com','admin@startruckkorea.onmicrosoft.com'];
-const A1={name:'Jimmy Lee',email:'jimmy.lee@hyosung.com',role:'1차결재자',order:1};
-const A2={name:'Jimmy Lee',email:'jimmy.lee@hyosung.com',role:'2차결재자',order:2};
+// 2차: Robin 인사팀장 (테스트: jimmy.lee)
+const A2={name:'Jimmy Lee',email:'jimmy.lee@hyosung.com',role:'인사팀장',order:2};
+// 3차: 윤혜진 GA담당자 (테스트: jimmy.lee)
+const A3={name:'Jimmy Lee',email:'jimmy.lee@hyosung.com',role:'GA담당자',order:3};
+
+let employeeData=[];
 
 let msalApp=null,user=null,siteId=null;
 let stationeryData=[],orderItems=[],_pendingApproval=null;
@@ -572,6 +606,7 @@ async function boot(account){
     siteId=site.id;
     loadStationeryData();
     loadApprovalBadge();
+    loadEmployees();
   }catch(e){alert('SharePoint 연결 오류: '+e.message);}
 }
 
@@ -612,8 +647,69 @@ function pgRender(id){
   pgDiv.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:12px"><button class="btn-secondary" style="padding:4px 12px;font-size:.78rem" onclick="pgGo('${id}',${st.page-1})" ${st.page===0?'disabled':''}>◀</button><span style="font-size:.78rem;color:#605e5c;padding:0 8px">${st.page+1} / ${pages}</span><button class="btn-secondary" style="padding:4px 12px;font-size:.78rem" onclick="pgGo('${id}',${st.page+1})" ${st.page>=pages-1?'disabled':''}>▶</button></div>`;
 }
 function pgGo(id,p){if(_pgState[id]){_pgState[id].page=p;pgRender(id);}}
+async function loadEmployees(){
+  try{
+    const drivesData=await api('/sites/'+siteId+'/drives');
+    const docDrive=drivesData.value.find(d=>d.name==='문서')||drivesData.value[0];
+    const t=await token();
+    const res=await fetch(GRAPH+'/drives/'+docDrive.id+'/root:/employee_search.xlsx:/content',{headers:{Authorization:'Bearer '+t}});
+    if(!res.ok)throw new Error('직원 데이터 로드 실패');
+    const buf=await res.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    employeeData=rows.map(r=>({dept:r['Department']||'',team:r['Team']||'',name:r['EngName']||'',email:(r['EMail']||r['email']||'')})).filter(r=>r.email&&r.name);
+    // 로드 후 부서 드롭다운 초기화
+    for(const prefix of ['stn','bc','idc']) gaInitDept(prefix);
+  }catch(e){console.warn('직원 데이터 로드 실패:',e);}
+}
+function gaInitDept(prefix){
+  const sel=document.getElementById(prefix+'-a1-dept');
+  if(!sel)return;
+  const depts=[...new Set(employeeData.map(e=>e.dept))].sort();
+  sel.innerHTML='<option value="">부서</option>'+depts.map(d=>`<option value="${d}">${d}</option>`).join('');
+}
+function gaDeptChange(prefix){
+  const dept=document.getElementById(prefix+'-a1-dept').value;
+  const tSel=document.getElementById(prefix+'-a1-team');
+  const pSel=document.getElementById(prefix+'-a1-person');
+  document.getElementById(prefix+'-a1-name').value='';
+  document.getElementById(prefix+'-a1-email').value='';
+  const teams=[...new Set(employeeData.filter(e=>e.dept===dept).map(e=>e.team))].sort();
+  tSel.innerHTML='<option value="">팀</option>'+teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+  tSel.disabled=!dept; pSel.innerHTML='<option value="">직원 선택</option>'; pSel.disabled=true;
+}
+function gaTeamChange(prefix){
+  const dept=document.getElementById(prefix+'-a1-dept').value;
+  const team=document.getElementById(prefix+'-a1-team').value;
+  const pSel=document.getElementById(prefix+'-a1-person');
+  document.getElementById(prefix+'-a1-name').value='';
+  document.getElementById(prefix+'-a1-email').value='';
+  const persons=employeeData.filter(e=>e.dept===dept&&e.team===team);
+  pSel.innerHTML='<option value="">직원 선택</option>'+persons.map(p=>`<option value="${p.email}">${p.name}</option>`).join('');
+  pSel.disabled=!team;
+}
+function gaPersonChange(prefix){
+  const email=document.getElementById(prefix+'-a1-person').value;
+  const p=employeeData.find(e=>e.email===email);
+  document.getElementById(prefix+'-a1-name').value=p?p.name:'';
+  document.getElementById(prefix+'-a1-email').value=p?p.email:'';
+}
+function gaResetA1(prefix){
+  ['dept','team','person'].forEach(f=>{const el=document.getElementById(prefix+'-a1-'+f);if(el){el.selectedIndex=0;el.disabled=f!=='dept';}});
+  ['name','email'].forEach(f=>{const el=document.getElementById(prefix+'-a1-'+f);if(el)el.value='';});
+  gaInitDept(prefix);
+}
 async function createApprovals(cat,reqId){
-  for(const a of [A1,A2]){
+  // 1차: Dept. Head (동적 선택)
+  const a1name=document.getElementById(cat+'-a1-name').value;
+  const a1email=document.getElementById(cat+'-a1-email').value;
+  if(!a1email){throw new Error('1차 결재자(Department Head)를 선택해주세요.');}
+  const approvers=[
+    {name:a1name,email:a1email,role:'Department Head',order:1},
+    {name:A2.name,email:A2.email,role:A2.role,order:2},
+    {name:A3.name,email:A3.email,role:A3.role,order:3}
+  ];
+  for(const a of approvers){
     await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
   }
 }
@@ -716,7 +812,7 @@ async function stnSubmit(){
     alert('✅ 신청 완료! (번호: '+item.id+')');stnReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function stnReset(){document.getElementById('stn-costcenter').value='';orderItems=[];renderOrderTable();}
+function stnReset(){document.getElementById('stn-costcenter').value='';orderItems=[];renderOrderTable();gaResetA1('stn');}
 
 // ══ BUSINESS CARD ══
 function bcUpdatePreview(){
@@ -742,7 +838,7 @@ async function bcSubmit(){
     alert('✅ 신청 완료! (번호: '+item.id+')');bcReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();}
+function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();gaResetA1('bc');}
 
 // ══ ID CARD ══
 function idcIssueChange(){
@@ -798,7 +894,7 @@ async function idcSubmit(){
     alert('✅ 신청 완료! (번호: '+reqId+')');idcReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function idcReset(){document.getElementById('idc-issue').selectedIndex=0;document.getElementById('idc-costcenter').value='';document.getElementById('idc-desc').value='';document.getElementById('idc-reissue-label').style.display='none';idcPhotoClear();}
+function idcReset(){document.getElementById('idc-issue').selectedIndex=0;document.getElementById('idc-costcenter').value='';document.getElementById('idc-desc').value='';document.getElementById('idc-reissue-label').style.display='none';idcPhotoClear();gaResetA1('idc');}
 
 // ══ LIST / APPR / ADMIN ══
 async function loadMyList(cat){
