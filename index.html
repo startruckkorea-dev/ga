@@ -815,12 +815,19 @@ function stnReset(){document.getElementById('stn-costcenter').value='';orderItem
 
 // ══ BUSINESS CARD ══
 function bcUpdatePreview(){
-  const en=document.getElementById('bc-name-en').value||'Name (EN)';
-  const ko=document.getElementById('bc-name-ko').value||'Name(KO)';
-  const em=document.getElementById('bc-email').value||'Email address';
-  document.getElementById('bc-prev-name-en').textContent=en;
-  document.getElementById('bc-prev-name-ko').textContent=ko;
-  document.getElementById('bc-prev-email').textContent=em;
+  const enInput=document.getElementById('bc-name-en');
+  const koInput=document.getElementById('bc-name-ko');
+  const emInput=document.getElementById('bc-email');
+  if(!enInput||!koInput||!emInput) return;
+  const en=enInput.value||'Name (EN)';
+  const ko=koInput.value||'Name(KO)';
+  const em=emInput.value||'Email address';
+  const enEl=document.getElementById('bc-prev-name-en');
+  const koEl=document.getElementById('bc-prev-name-ko');
+  const emEl=document.getElementById('bc-prev-email');
+  if(enEl)enEl.textContent=en;
+  if(koEl)koEl.textContent=ko;
+  if(emEl)emEl.textContent=em;
 }
 async function bcSubmit(){
   const nameEN=document.getElementById('bc-name-en').value.trim();
@@ -834,7 +841,7 @@ async function bcSubmit(){
   try{
     const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+nameEN,RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Status:'대기',RequestDate:new Date().toISOString()}});
     await createApprovals('bc',parseInt(item.id));
-    alert('✅ 신청 완료! (번호: '+item.id+')');bcReset();switchTab('list');
+    alert('✅ 신청 완료! (번호: '+item.id+')');switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
 function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc'].forEach(id=>document.getElementById(id).value='');document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();gaResetA1('bc');}
