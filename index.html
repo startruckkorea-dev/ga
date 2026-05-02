@@ -893,7 +893,7 @@ async function idcSubmit(){
         const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/IDC_Requests_AttachedFiles/'+reqId+'/'+encodeURIComponent(photoFile.name)+':/content',
           {method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':photoFile.type||'image/jpeg'},body:buf});
         if(res.ok){const u=await res.json();const safeKey=btoa(unescape(encodeURIComponent(drive.id+'###'+u.id)));
-        await api('/sites/'+siteId+'/lists/IDC_Requests/items/'+reqId,'PATCH',{fields:{AttachedFiles:photoFile.name+'||ENC||'+safeKey}});}
+        await api('/sites/'+siteId+'/lists/IDC_Requests/items/'+reqId,'PATCH',{fields:{AttachedFiles:photoFile.name+'||ENC||'+safeKey,PhotoFileName:photoFile.name}});}
       }catch(fe){console.error('Photo upload error:',fe);}
     }
     await createApprovals('idc',reqId);
