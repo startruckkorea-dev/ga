@@ -645,12 +645,12 @@ async function boot(account){
     // system_config.xlsx 로드 후 설정 반영
     const _cfg = await loadSystemConfig();
     if (_cfg) {
-      const _contact = cfgVal(_cfg,'CONTACT_EMAIL',{email:'hye-jin.yun@hyosung.com'});
+      const _contact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:'hye-jin.yun@hyosung.com'}));
       document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='문의 Email: '+_contact.email;});
-      const _adminList = cfgEmails(_cfg,['ADMIN_1','ADMIN_2','ADMIN_3','ADMIN_4','ADMIN_SP']);
+      const _adminList = cfgEmails(_cfg,['GA_ADMIN_1','GA_ADMIN_2','ADMIN_SP']);
       if(_adminList.length) ADMIN_EMAILS.splice(0,ADMIN_EMAILS.length,..._adminList);
       Object.assign(A2, cfgVal(_cfg,'GA_PERSONNEL_MGR',A2));
-      Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',      A3));
+      Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',A3));
       // UI 결재자 표시 업데이트
       document.querySelectorAll('[data-cfg="A2-name"]').forEach(el=>el.value=A2.name);
       document.querySelectorAll('[data-cfg="A2-email"]').forEach(el=>el.value=A2.email);
