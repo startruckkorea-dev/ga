@@ -594,6 +594,45 @@ async function api(path,method='GET',body=null){
   if(!r.ok){const e=await r.text();throw new Error(r.status+' '+e);}
   return r.json();
 }
+
+// ── System Config from SharePoint (system_config.xlsx) ──
+let _sysConfig = null;
+async function loadSystemConfig() {
+  if (_sysConfig) return _sysConfig;
+  try {
+    const t = await token();
+    const drivesRes = await api('/sites/' + siteId + '/drives');
+    let docDrive = (drivesRes.value || []).find(d => d.name === 'Documents' || d.name === '문서');
+    if (!docDrive && drivesRes.value && drivesRes.value.length) docDrive = drivesRes.value[0];
+    const res = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/system_config.xlsx:/content',
+      { headers: { Authorization: 'Bearer ' + t } });
+    if (!res.ok) throw new Error('system_config.xlsx not found');
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array' });
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+    const cfg = {};
+    rows.forEach(row => {
+      const key = (row[0] || '').toString().trim();
+      if (!key || key.startsWith('[') || key === '설정 키 (KEY)' || key.startsWith('이 파일') || key.startsWith('STK Korea')) return;
+      cfg[key] = { name: (row[1] || '').toString().trim(), email: (row[2] || '').toString().trim() };
+    });
+    _sysConfig = cfg;
+    console.log('[Config] Loaded system_config.xlsx:', Object.keys(cfg).length, 'entries');
+    return cfg;
+  } catch(e) {
+    console.warn('[Config] system_config.xlsx 로드 실패, 기본값 사용:', e.message);
+    return null;
+  }
+}
+function cfgVal(cfg, key, defaultObj) {
+  if (!cfg || !cfg[key]) return defaultObj;
+  const v = cfg[key];
+  return { ...defaultObj, name: v.name || defaultObj.name, email: v.email || defaultObj.email };
+}
+function cfgEmails(cfg, keys) {
+  return keys.map(k => (cfg && cfg[k] ? cfg[k].email : '')).filter(Boolean);
+}
+
 async function boot(account){
   user={name:account.name,email:account.username};
   document.getElementById('user-name').textContent=user.name+' ('+user.email+')';
@@ -603,6 +642,21 @@ async function boot(account){
   try{
     const site=await api('/sites/'+SITE_PATH);
     siteId=site.id;
+    // system_config.xlsx 로드 후 설정 반영
+    const _cfg = await loadSystemConfig();
+    if (_cfg) {
+      const _contact = cfgVal(_cfg,'CONTACT_EMAIL',{email:'hye-jin.yun@hyosung.com'});
+      document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='문의 Email: '+_contact.email;});
+      const _adminList = cfgEmails(_cfg,['ADMIN_1','ADMIN_2','ADMIN_3','ADMIN_4','ADMIN_SP']);
+      if(_adminList.length) ADMIN_EMAILS.splice(0,ADMIN_EMAILS.length,..._adminList);
+      Object.assign(A2, cfgVal(_cfg,'GA_PERSONNEL_MGR',A2));
+      Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',      A3));
+      // UI 결재자 표시 업데이트
+      document.querySelectorAll('[data-cfg="A2-name"]').forEach(el=>el.value=A2.name);
+      document.querySelectorAll('[data-cfg="A2-email"]').forEach(el=>el.value=A2.email);
+      document.querySelectorAll('[data-cfg="A3-name"]').forEach(el=>el.value=A3.name);
+      document.querySelectorAll('[data-cfg="A3-email"]').forEach(el=>el.value=A3.email);
+    }
     loadStationeryData();
     loadApprovalBadge();
     loadEmployees();
