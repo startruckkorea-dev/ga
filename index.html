@@ -508,7 +508,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <thead><tr><th>No</th><th>상품코드</th><th>상품명</th><th>카테고리</th><th style="width:52px">단위</th><th style="width:90px;text-align:right">단가(VAT포함)</th></tr></thead>
       <tbody id="add-list-body"></tbody>
     </table></div>
-    <div class="add-footer"><button class="btn-secondary" onclick="closeAddModal()">닫기</button></div>
+    <div class="add-footer" style="display:flex;justify-content:space-between;align-items:center"><span id="add-selected-count" style="font-size:.82rem;color:#0078d4;font-weight:600"></span><div style="display:flex;gap:8px"><button class="btn-secondary" onclick="closeAddModal()">닫기</button><button class="btn-primary" id="add-confirm-btn" onclick="confirmAddItems()" style="display:none">✔ 확인 (<span id="add-confirm-cnt">0</span>건 추가)</button></div></div>
   </div>
 </div>
 
@@ -837,7 +837,7 @@ function buildCatFilter(){
   wrap.innerHTML='<button class="cat-btn active" id="cat-all" onclick="setCat(\'\')">전체</button>'+cats.map(c=>`<button class="cat-btn" onclick="setCat('${c}')">${c}</button>`).join('');
 }
 function setCat(c){_activeCat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',c===''?b.id==='cat-all':b.textContent===c));renderAddList();}
-function openAddModal(){
+function openAddModal(){_pendingItems=[];const cntEl=document.getElementById('add-confirm-cnt');const btn=document.getElementById('add-confirm-btn');const info=document.getElementById('add-selected-count');if(cntEl)cntEl.textContent='0';if(btn)btn.style.display='none';if(info)info.textContent='';
   document.getElementById('add-search-input').value='';_activeCat='';
   if(!stationeryData.length){document.getElementById('add-list-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#605e5c">📦 로딩 중...</td></tr>';document.getElementById('add-modal').classList.add('open');loadStationeryData().then(()=>{document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.id==='cat-all'));renderAddList();});return;}
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.id==='cat-all'));
@@ -849,12 +849,39 @@ function renderAddList(){
   const filtered=stationeryData.filter(d=>(!_activeCat||d.category===_activeCat)&&(!q||d.name.toLowerCase().includes(q)||d.code.toLowerCase().includes(q)));
   const tbody=document.getElementById('add-list-body');
   if(!filtered.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:20px;color:#a19f9d">검색 결과 없음</td></tr>';return;}
-  tbody.innerHTML=filtered.map(d=>`<tr onclick='addItem(${JSON.stringify(d).replace(/'/g,"\\'")})'>
-    <td style="color:#a19f9d;text-align:center">${d.no}</td><td style="color:#0078d4;font-weight:500">${d.code}</td><td>${d.name}</td>
-    <td><span class="cat-tag">${d.category}</span></td><td style="text-align:center">${d.unit}</td><td style="text-align:right;font-weight:600">${d.price.toLocaleString()}</td>
-  </tr>`).join('');
+  tbody.innerHTML=filtered.map(d=>{
+    const sel=_pendingItems.some(p=>p.code===d.code);
+    return`<tr onclick='togglePendingItem(${JSON.stringify(d).replace(/'/g,"\\'")})'
+      style="cursor:pointer;background:${sel?'#e8f4fd':''}">
+      <td style="color:#a19f9d;text-align:center;width:28px"><input type="checkbox" onclick="event.stopPropagation();togglePendingItem(${JSON.stringify(d).replace(/'/g,"\\'")})" ${sel?'checked':''}></td>
+      <td style="color:#a19f9d;text-align:center">${d.no}</td><td style="color:#0078d4;font-weight:500">${d.code}</td><td>${d.name}</td>
+      <td><span class="cat-tag">${d.category}</span></td><td style="text-align:center">${d.unit}</td><td style="text-align:right;font-weight:600">${d.price.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
 }
-function addItem(d){const exists=orderItems.find(i=>i.code===d.code);if(exists){exists.qty++;renderOrderTable();closeAddModal();return;}orderItems.push({...d,qty:1});renderOrderTable();closeAddModal();}
+let _pendingItems=[];
+function togglePendingItem(d){
+  const idx=_pendingItems.findIndex(p=>p.code===d.code);
+  if(idx>=0) _pendingItems.splice(idx,1); else _pendingItems.push(d);
+  const cnt=_pendingItems.length;
+  const cntEl=document.getElementById('add-confirm-cnt');
+  const btn=document.getElementById('add-confirm-btn');
+  const info=document.getElementById('add-selected-count');
+  if(cntEl) cntEl.textContent=cnt;
+  if(btn) btn.style.display=cnt>0?'':'none';
+  if(info) info.textContent=cnt>0?cnt+'개 선택됨':'';
+  renderAddList();
+}
+function confirmAddItems(){
+  _pendingItems.forEach(d=>{
+    const exists=orderItems.find(i=>i.code===d.code);
+    if(exists) exists.qty++; else orderItems.push({...d,qty:1});
+  });
+  _pendingItems=[];
+  renderOrderTable();
+  closeAddModal();
+}
+function addItem(d){const exists=orderItems.find(i=>i.code===d.code);if(exists){exists.qty++;}else{orderItems.push({...d,qty:1});}renderOrderTable();}
 function renderOrderTable(){
   const tbody=document.getElementById('stn-order-body');
   if(!orderItems.length){tbody.innerHTML='<tr><td colspan="8" class="no-data-cell">There is no data.</td></tr>';document.getElementById('stn-total-sum').textContent='0';return;}
@@ -1000,12 +1027,12 @@ async function loadApprovalQueue(cat){
     const rows=mine.map(i=>{
       const rf=reqMap[i.fields.RequestID]||{};
       let mid='';
-      if(cat==='stn')mid=`<td style="text-align:right">${fmtAmt(rf.TotalAmount)}</td>`;
+      if(cat==='stn')mid=`<td style="font-size:.78rem">${rf.CostCenter||''}</td><td style="text-align:right">${fmtAmt(rf.TotalAmount)}</td>`;
       else if(cat==='bc')mid=`<td>${rf.NameEN||''}</td><td>${rf.Quantity||0}매</td>`;
       else mid=`<td>${rf.IssueType||''}</td>`;
       return`<tr><td style="color:#0078d4;cursor:pointer" onclick="showDetail('${cat}',${i.fields.RequestID})">${i.fields.RequestID}</td><td style="font-size:.78rem">${rf.RequesterEmail||''}</td>${mid}<td><span class="badge-${rf.Status||'대기'}">${rf.Status||''}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
     });
-    const cols={stn:7,bc:7,idc:7};
+    const cols={stn:8,bc:7,idc:7};
     pgSet(cat+'-appr',rows,r=>r,'결재 대기 항목이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
