@@ -304,7 +304,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="stn-a1-name" readonly placeholder="이름">
           <input type="email" id="stn-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-stn-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a3-stn-email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
@@ -389,8 +389,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="bc-a1-name" readonly placeholder="이름">
           <input type="email" id="bc-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a2-bc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a2-bc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-bc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a3-bc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
@@ -474,8 +474,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="idc-a1-name" readonly placeholder="이름">
           <input type="email" id="idc-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" value="Jimmy Lee" readonly><input type="email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a2-idc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a2-idc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-idc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a3-idc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
@@ -652,10 +652,13 @@ async function boot(account){
       Object.assign(A2, cfgVal(_cfg,'GA_PERSONNEL_MGR',A2));
       Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',A3));
       // UI 결재자 표시 업데이트
-      document.querySelectorAll('[data-cfg="A2-name"]').forEach(el=>el.value=A2.name);
-      document.querySelectorAll('[data-cfg="A2-email"]').forEach(el=>el.value=A2.email);
-      document.querySelectorAll('[data-cfg="A3-name"]').forEach(el=>el.value=A3.name);
-      document.querySelectorAll('[data-cfg="A3-email"]').forEach(el=>el.value=A3.email);
+      // 모든 고정 결재자 input DOM 업데이트
+      [['cfg-a3-stn-name',A3.name],['cfg-a3-stn-email',A3.email],
+       ['cfg-a2-bc-name',A2.name], ['cfg-a2-bc-email',A2.email],
+       ['cfg-a3-bc-name',A3.name], ['cfg-a3-bc-email',A3.email],
+       ['cfg-a2-idc-name',A2.name],['cfg-a2-idc-email',A2.email],
+       ['cfg-a3-idc-name',A3.name],['cfg-a3-idc-email',A3.email],
+      ].forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.value=val;});
     }
     loadStationeryData();
     loadApprovalBadge();
