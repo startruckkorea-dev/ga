@@ -244,7 +244,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
   <div class="header">
     <div>
       <div class="title">🏢 STK General Affairs</div>
-      <div class="sub" id="ga-contact-email">문의 Email: hye-jin.yun@hyosung.com</div>
+      <div class="sub" id="ga-contact-email">문의 Email: (Excel 설정값)</div>
     </div>
     <div class="user-info">
       <div><span id="user-name"></span><button id="btn-logout" onclick="signOut()">로그아웃</button></div>
@@ -304,7 +304,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="stn-a1-name" readonly placeholder="이름">
           <input type="email" id="stn-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-stn-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a3-stn-email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-stn-name" value="" readonly><input type="email" id="cfg-a3-stn-email" value="" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
@@ -389,8 +389,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="bc-a1-name" readonly placeholder="이름">
           <input type="email" id="bc-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a2-bc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a2-bc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-bc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a3-bc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a2-bc-name" value="" readonly><input type="email" id="cfg-a2-bc-email" value="" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-bc-name" value="" readonly><input type="email" id="cfg-a3-bc-email" value="" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
@@ -474,8 +474,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <input type="text" id="idc-a1-name" readonly placeholder="이름">
           <input type="email" id="idc-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a2-idc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a2-idc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-idc-name" value="Jimmy Lee" readonly><input type="email" id="cfg-a3-idc-email" value="jimmy.lee@hyosung.com" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">2차 결재자 <span class="hint">— 인사팀장 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a2-idc-name" value="" readonly><input type="email" id="cfg-a2-idc-email" value="" readonly></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-title">3차 결재자 <span class="hint">— GA 담당자 (자동 지정)</span></div><div class="appr-info"><input type="text" id="cfg-a3-idc-name" value="" readonly><input type="email" id="cfg-a3-idc-email" value="" readonly></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
@@ -544,11 +544,11 @@ const SITE_PATH='startruckkorea.sharepoint.com:/sites/STK-DB:';
 const GRAPH='https://graph.microsoft.com/v1.0';
 const SCOPES=['User.Read','Sites.ReadWrite.All','Files.ReadWrite.All'];
 const LISTS={stn:{req:'STN_Requests',apr:'STN_Approvals'},bc:{req:'BC_Requests',apr:'BC_Approvals'},idc:{req:'IDC_Requests',apr:'IDC_Approvals'}};
-const ADMIN_EMAILS=['hye-jin.yun@hyosung.com','hyojung.kim@hyosung.com','admin@startruckkorea.onmicrosoft.com'];
+const ADMIN_EMAILS=['','',''];
 // 2차: Robin 인사팀장 (테스트: jimmy.lee)
-const A2={name:'Jimmy Lee',email:'jimmy.lee@hyosung.com',role:'인사팀장',order:2};
+const A2={name:'',email:'',role:'인사팀장',order:2};
 // 3차: 윤혜진 GA담당자 (테스트: jimmy.lee)
-const A3={name:'Jimmy Lee',email:'jimmy.lee@hyosung.com',role:'GA담당자',order:3};
+const A3={name:'',email:'',role:'GA담당자',order:3};
 
 let employeeData=[];
 
@@ -645,7 +645,7 @@ async function boot(account){
     // system_config_final.xlsx 로드 후 설정 반영
     const _cfg = await loadSystemConfig();
     if (_cfg) {
-      const _contact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:'hye-jin.yun@hyosung.com'}));
+      const _contact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:''}));
       document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='문의 Email: '+_contact.email;});
       const _adminList = cfgEmails(_cfg,['GA_ADMIN_1','GA_ADMIN_2','ADMIN_SP']);
       if(_adminList.length) ADMIN_EMAILS.splice(0,ADMIN_EMAILS.length,..._adminList);
@@ -653,7 +653,7 @@ async function boot(account){
       Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',A3));
       // UI 결재자 표시 업데이트
       // 문의 이메일 업데이트
-      const _gaContact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:'hye-jin.yun@hyosung.com'}));
+      const _gaContact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:''}));
       const _gaContactEl = document.getElementById('ga-contact-email');
       if(_gaContactEl) _gaContactEl.textContent='문의 Email: '+_gaContact.email;
       // 모든 고정 결재자 input DOM 업데이트
