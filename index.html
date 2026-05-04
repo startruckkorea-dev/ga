@@ -1016,7 +1016,8 @@ async function idcSubmit(){
   if(!photoFile){if(!confirm('ID Photo가 첨부되지 않았습니다. 계속 진행하시겠습니까?'))return;}
   loading(true);
   try{
-    const item=await api('/sites/'+siteId+'/lists/IDC_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+issue,RequesterEmail:user.email,Company:'STK',IssueType:issue,CostCenter:costCenter,Description:document.getElementById('idc-desc').value,Status:'대기',RequestDate:new Date().toISOString()}});
+    const _idcName=document.getElementById('idc-name')?.value.trim()||'';
+    const item=await api('/sites/'+siteId+'/lists/IDC_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+issue,RequesterEmail:user.email,Company:'STK',IssueType:issue,CostCenter:costCenter,Description:document.getElementById('idc-desc').value,Name:_idcName,Status:'대기',RequestDate:new Date().toISOString()}});
     const reqId=parseInt(item.id);
     if(photoFile){
       try{
@@ -1035,7 +1036,7 @@ async function idcSubmit(){
     alert('✅ 신청 완료! (번호: '+reqId+')');idcReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function idcReset(){document.getElementById('idc-issue').selectedIndex=0;document.getElementById('idc-costcenter').value='';document.getElementById('idc-desc').value='';document.getElementById('idc-reissue-label').style.display='none';idcPhotoClear();gaResetA1('idc');}
+function idcReset(){document.getElementById('idc-issue').selectedIndex=0;document.getElementById('idc-costcenter').value='';document.getElementById('idc-desc').value='';const _in=document.getElementById('idc-name');if(_in)_in.value='';document.getElementById('idc-reissue-label').style.display='none';idcPhotoClear();gaResetA1('idc');}
 
 // ══ LIST / APPR / ADMIN ══
 async function loadMyList(cat){
