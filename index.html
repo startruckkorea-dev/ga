@@ -650,7 +650,6 @@ async function boot(account){
   document.getElementById('user-name').textContent=user.name+' ('+user.email+')';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
-  if(ADMIN_EMAILS.includes(user.email))document.getElementById('tab-admin-btn').style.display='';
   try{
     const site=await api('/sites/'+SITE_PATH);
     siteId=site.id;
@@ -661,6 +660,11 @@ async function boot(account){
       document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='문의 Email: '+_contact.email;});
       const _adminList = cfgEmails(_cfg,['GA_ADMIN_1','GA_ADMIN_2','ADMIN_SP']);
       if(_adminList.length) ADMIN_EMAILS.splice(0,ADMIN_EMAILS.length,..._adminList);
+      // config 로드 후 관리자 탭 표시 여부 재확인 (대소문자 무시)
+      const _ue = (user.email||'').toLowerCase();
+      if(ADMIN_EMAILS.some(e=>e.toLowerCase()===_ue)){
+        document.getElementById('tab-admin-btn').style.display='';
+      }
       Object.assign(A2, cfgVal(_cfg,'GA_PERSONNEL_MGR',A2));
       Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',A3));
       // UI 결재자 표시 업데이트
