@@ -345,6 +345,15 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <div class="form-group"><label>Email</label><input type="email" id="bc-email" placeholder="email@hyosung.com" oninput="bcUpdatePreview()"></div>
         </div>
 
+        <div class="form-group" style="margin-bottom:10px">
+          <label>Address</label>
+          <textarea id="bc-address" rows="3" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box">서울특별시 중구 한강대로 416 서울스퀘어 (04637)&#10;8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea</textarea>
+          <div style="font-size:11px;color:#605e5c;margin-top:3px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Mobile Number</label>
+          <input type="text" id="bc-mobile" placeholder="ex) +82-10-9999-9999" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
+        </div>
         <div class="section-title">3. 주문 수량</div>
         <div class="form-row">
           <div class="form-group">
@@ -461,6 +470,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           </div>
         </div>
         <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea id="idc-desc" rows="3" style="border:1px solid #d2d0ce;border-radius:4px;padding:7px 10px;font-size:.82rem;font-family:inherit;resize:vertical;width:100%" placeholder="추가 요청 사항 (분실 사유 등)"></textarea></div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Name (사원증 표기 이름)</label>
+          <input type="text" id="idc-name" placeholder="예) Hong Gil-dong / 홍길동" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
+        </div>
 
         <div class="section-title">4. 결재자 지정 (Approvers)</div>
         <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Dept. Head <span style="color:#0078d4">(선택)</span> → 2차 Robin (인사팀장) <span style="color:#0078d4">(고정)</span> → 3차 Hye-jin Yoon (GA) <span style="color:#0078d4">(고정)</span></div></div>
