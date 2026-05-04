@@ -1077,10 +1077,10 @@ async function loadApprovalQueue(cat){
       let mid='';
       if(cat==='stn')mid=`<td style="font-size:.78rem">${rf.CostCenter||''}</td><td style="text-align:right">${fmtAmt(rf.TotalAmount)}</td>`;
       else if(cat==='bc')mid=`<td>${rf.NameEN||''}</td><td>${rf.Quantity||0}매</td>`;
-      else mid=`<td>${rf.IssueType||''}</td>`;
+      else mid=`<td>${rf.IssueType||''}</td><td style="font-size:.78rem">${rf.CostCenter||''}</td>`;
       return`<tr><td style="color:#0078d4;cursor:pointer" onclick="showDetail('${cat}',${i.fields.RequestID})">${i.fields.RequestID}</td><td style="font-size:.78rem">${rf.RequesterEmail||''}</td>${mid}<td><span class="badge-${rf.Status||'대기'}">${rf.Status||''}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
     });
-    const cols={stn:8,bc:7,idc:7};
+    const cols={stn:8,bc:7,idc:8};
     pgSet(cat+'-appr',rows,r=>r,'결재 대기 항목이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
