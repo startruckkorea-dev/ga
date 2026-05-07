@@ -351,8 +351,17 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <select id="bc-address-select" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;font-family:inherit;margin-bottom:6px;background:#fff" onchange="bcAddressSelect()">
             <option value="">-- 지점 주소 선택 (선택 후 자동 입력) --</option>
           </select>
-          <textarea id="bc-address" rows="3" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value=''">서울특별시 중구 한강대로 416 서울스퀘어 (04637)&#10;8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea</textarea>
-          <div style="font-size:11px;color:#605e5c;margin-top:3px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
+          <div style="display:flex;gap:6px;margin-bottom:3px">
+            <div style="flex:1">
+              <div style="font-size:11px;color:#605e5c;margin-bottom:3px">🇰🇷 국문 주소</div>
+              <textarea id="bc-address" rows="2" placeholder="서울특별시 중구 한강대로 416 서울스퀘어 (04637)" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value=''"></textarea>
+            </div>
+            <div style="flex:1">
+              <div style="font-size:11px;color:#605e5c;margin-bottom:3px">🇺🇸 English Address</div>
+              <textarea id="bc-address-eng" rows="2" placeholder="8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value=''"></textarea>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#605e5c;margin-top:2px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
         </div>
         <div class="form-group" style="margin-bottom:14px">
           <label>Mobile Number</label>
@@ -996,14 +1005,21 @@ function bcAddressInitDropdown(){
     opt.dataset.en=a.en;
     sel.appendChild(opt);
   });
+  // 기본값: 서울 본사(1번)
+  var _ba=document.getElementById('bc-address');
+  var _baE=document.getElementById('bc-address-eng');
+  if(_ba&&!_ba.value) _ba.value=BC_ADDRESS_LIST[0].ko;
+  if(_baE&&!_baE.value) _baE.value=BC_ADDRESS_LIST[0].en;
 }
 function bcAddressSelect(){
   const sel=document.getElementById('bc-address-select');
-  const textarea=document.getElementById('bc-address');
-  if(!sel||!textarea)return;
+  const taKO=document.getElementById('bc-address');
+  const taEN=document.getElementById('bc-address-eng');
+  if(!sel)return;
   const opt=sel.options[sel.selectedIndex];
   if(opt&&opt.value){
-    textarea.value=opt.dataset.ko+'\n'+opt.dataset.en;
+    if(taKO) taKO.value=opt.dataset.ko;
+    if(taEN) taEN.value=opt.dataset.en;
   }
 }
 // ══ BUSINESS CARD ══
@@ -1032,8 +1048,8 @@ async function bcSubmit(){
   if(!nameEN||!nameKO||!dept||!qty||!stickerQty||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
   loading(true);
   try{
-    const _bcAddr=(document.getElementById('bc-address')?.value||'').replace(/\r\n|\r|\n/g,'\r\n');const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';
-    const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+nameEN,RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,MobileNumber:_bcMobile,Status:'대기',RequestDate:new Date().toISOString()}});
+    const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';
+    const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+nameEN,RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,Status:'대기',RequestDate:new Date().toISOString()}});
     await createApprovals('bc',parseInt(item.id));
     alert('✅ 신청 완료! (번호: '+item.id+')');switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
@@ -1041,7 +1057,9 @@ async function bcSubmit(){
 function bcReset(){
   ['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(function(id){document.getElementById(id).value='';});
   var _ba=document.getElementById('bc-address');
-  if(_ba) _ba.value=BC_ADDRESS_LIST[0].ko+'\n'+BC_ADDRESS_LIST[0].en;
+  if(_ba) _ba.value=BC_ADDRESS_LIST[0].ko;
+  var _baE=document.getElementById('bc-address-eng');
+  if(_baE) _baE.value=BC_ADDRESS_LIST[0].en;
   var _bs=document.getElementById('bc-address-select');
   if(_bs) _bs.value='';
   document.getElementById('bc-qty').selectedIndex=0;
