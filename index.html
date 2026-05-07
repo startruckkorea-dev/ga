@@ -347,7 +347,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 
         <div class="form-group" style="margin-bottom:10px">
           <label>Address</label>
-          <textarea id="bc-address" rows="3" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box">서울특별시 중구 한강대로 416 서울스퀘어 (04637)&#10;8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea</textarea>
+          <select id="bc-address-select" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;font-family:inherit;margin-bottom:6px;background:#fff" onchange="bcAddressSelect()">
+            <option value="">-- 지점 주소 선택 (선택 후 자동 입력) --</option>
+          </select>
+          <textarea id="bc-address" rows="3" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value=''">서울특별시 중구 한강대로 416 서울스퀘어 (04637)&#10;8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea</textarea>
           <div style="font-size:11px;color:#605e5c;margin-top:3px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
         </div>
         <div class="form-group" style="margin-bottom:14px">
@@ -706,6 +709,7 @@ function switchCat(cat){
     document.getElementById('cat-'+c).style.display=c===cat?'block':'none';
     document.getElementById('cat-'+c+'-btn').classList.toggle('active',c===cat);
   });
+  if(cat==='bc') bcAddressInitDropdown();
   switchTab('form');
 }
 function switchTab(t){
@@ -959,6 +963,48 @@ async function stnSubmit(){
 }
 function stnReset(){document.getElementById('stn-costcenter').value='';orderItems=[];renderOrderTable();gaResetA1('stn');}
 
+// ══ BC Address List (BC_Address.xlsx 기준) ══
+const BC_ADDRESS_LIST=[
+  {id:1,ko:'서울특별시 중구 한강대로 416 서울스퀘어 (04637)',en:'8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea'},
+  {id:2,ko:'경기도 여주시 가남읍 경충대로 904-67 (12663)',en:'904-67 Gyeongchung-daero, Ganam-eup, Yeoju-si, Gyeonggi-do 12663, Korea'},
+  {id:3,ko:'경기도 용인시 기흥구 공세로 58, 3층 (17086)',en:'3F, 58 Gongse-ro, Giheung-gu, Yongin-si, Gyeonggi-do 17086, Korea'},
+  {id:4,ko:'충청남도 아산시 음봉면 음봉로 232 (31415)',en:'232 Eumbong-ro, Eumbong-myeon, Asan-si, Chungnam 31415, Korea'},
+  {id:5,ko:'경기도 연천군 전곡읍 양연로 703 (11041)',en:'703 Yangyeon-ro, Jeongok-eup, Yeoncheon-gun, Gyeonggi-do 11041, Korea'},
+  {id:6,ko:'인천 동구 중봉대로 68번길 48 (22534)',en:'48 Jungbong-daero 68beon-gil, Dong-gu, Incheon 22534, Korea'},
+  {id:7,ko:'경기도 평택시 진위면 남부대로 552 3층 (17709)',en:'3F, 552 Nambu-daero, Jinwi-myeon, Pyeongtaek-si, Gyeonggi-do 17709, Korea'},
+  {id:8,ko:'경상남도 양산시 물금읍 제방로 225 양산 ICD 6단지 한진CY내 (50615)',en:'Inside Hanjin CY, Yangsan ICD Complex 6, 225 Jebang-ro, Mulgeum-eup, Yangsan-si, Gyeongnam 50615, Korea'},
+  {id:9,ko:'경상남도 창원시 진해구 안골로 52 (51609)',en:'52 Angol-ro, Jinhae-gu, Changwon-si, Gyeongnam 51609, Korea'},
+  {id:10,ko:'경상남도 함안군 군북면 장지4길 4 (52063)',en:'4 Jangji 4-gil, Gunbuk-myeon, Haman-gun, Gyeongnam 52063, Korea'},
+  {id:11,ko:'경상북도 포항시 남구 대솔면 철강산단로34번길 28, 2층 (37875)',en:'2F, 28 Cheolgangsandan-ro 34beon-gil, Daesong-myeon, Nam-gu, Pohang-si, Gyeongbuk 37875, Korea'},
+  {id:12,ko:'광주광역시 광산구 평동산단3번로 105 (62414)',en:'105 Pyeongdongsandan 3beon-ro, Gwangsan-gu, Gwangju 62414, Korea'},
+  {id:13,ko:'전라남도 광양시 광양읍 제철로 256 2층 (57759)',en:'2F, 256 Jecheol-ro, Gwangyang-eup, Gwangyang-si, Jeonnam 57759, Korea'},
+  {id:14,ko:'충청북도 제천시 단양로 14번길 48-13 2층 (27134)',en:'2F, 48-13 Danyang-ro 14beon-gil, Je-cheon-si, Chungbuk 27134, Korea'},
+  {id:15,ko:'강원도 강릉시 강변로 126번길 10, 2층 2호 (25603)',en:'202, 2F, 10 Gangbyeon-ro 126beon-gil, Gangneung-si, Gangwon-do 25603, Korea'},
+  {id:16,ko:'전라북도 김제시 금구면 용지리 430-1, 2층 (54340)',en:'2F, 430-1 Yongji-ri, Geumgu-myeon, Gimje-si, Jeonbuk 54340, Korea'},
+  {id:17,ko:'충청북도 청주시 서원구 남이면 연청로 1288-8 (28185)',en:'1288-8 Yeoncheong-ro, Nami-myeon, Seowon-gu, Cheongju-si, Chungbuk 28185, Korea'},
+  {id:18,ko:'울산광역시 울주군 온산읍 우불강양로 26 (우불리) (45011)',en:'26, Ubonggangyang-ro, Onsan-eup, Ulju-gun, Ulsan 45011, Korea'}
+];
+function bcAddressInitDropdown(){
+  const sel=document.getElementById('bc-address-select');
+  if(!sel||sel.options.length>1)return;
+  BC_ADDRESS_LIST.forEach(a=>{
+    const opt=document.createElement('option');
+    opt.value=a.id;
+    opt.textContent=a.id+'. '+a.ko;
+    opt.dataset.ko=a.ko;
+    opt.dataset.en=a.en;
+    sel.appendChild(opt);
+  });
+}
+function bcAddressSelect(){
+  const sel=document.getElementById('bc-address-select');
+  const textarea=document.getElementById('bc-address');
+  if(!sel||!textarea)return;
+  const opt=sel.options[sel.selectedIndex];
+  if(opt&&opt.value){
+    textarea.value=opt.dataset.ko+'\n'+opt.dataset.en;
+  }
+}
 // ══ BUSINESS CARD ══
 function bcUpdatePreview(){
   const enInput=document.getElementById('bc-name-en');
@@ -991,7 +1037,8 @@ async function bcSubmit(){
     alert('✅ 신청 완료! (번호: '+item.id+')');switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(id=>document.getElementById(id).value='');const _ba=document.getElementById('bc-address');if(_ba)_ba.value='서울특별시 중구 한강대로 416 서울스퀘어 (04637)\n8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea';document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();gaResetA1('bc');}
+function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(id=>document.getElementById(id).value='');const _ba=document.getElementById('bc-address');if(_ba)_ba.value='서울특별시 중구 한강대로 416 서울스퀘어 (04637)
+8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea';const _bs=document.getElementById('bc-address-select');if(_bs)_bs.value='';document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();gaResetA1('bc');}
 
 // ══ ID CARD ══
 function idcIssueChange(){
