@@ -1037,8 +1037,7 @@ async function bcSubmit(){
     alert('✅ 신청 완료! (번호: '+item.id+')');switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(id=>document.getElementById(id).value='');const _ba=document.getElementById('bc-address');if(_ba)_ba.value='서울특별시 중구 한강대로 416 서울스퀘어 (04637)
-8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea';const _bs=document.getElementById('bc-address-select');if(_bs)_bs.value='';document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();gaResetA1('bc');}
+function bcReset(){['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(id=>document.getElementById(id).value='');const _ba=document.getElementById('bc-address');if(_ba)_ba.value='서울특별시 중구 한강대로 416 서울스퀘어 (04637)\n8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea';const _bs=document.getElementById('bc-address-select');if(_bs)_bs.value='';document.getElementById('bc-qty').selectedIndex=0;document.getElementById('bc-sticker-qty').selectedIndex=0;bcUpdatePreview();gaResetA1('bc');}
 
 // ══ ID CARD ══
 function idcIssueChange(){
