@@ -1130,7 +1130,7 @@ async function stnSubmit(){
     if(!_stnName){alert('수령자 이름을 입력해주세요.');loading(false);return;}
     const item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:{Title:'STN-tmp',Company:'STK',CostCenter:costCenter,ItemCount:orderItems.length,TotalAmount:total,ItemsData:JSON.stringify(orderItems.map(i=>{return{code:i.code,name:i.name,unit:i.unit,price:i.price,qty:i.qty,rowTotal:i.price*i.qty};})),ItemsDataHTML:_itemsHtml,StnName:_stnName,StnDept:_stnDept,Address:_stnAddrKor,AddressEng:_stnAddrEng,Description:_stnDesc,Status:'대기',RequesterEmail:user.email,RequestDate:new Date().toISOString()}});
     const _stnId=parseInt(item.id);
-    await api('/sites/'+siteId+'/lists/STN_Requests/items/'+_stnId,'PATCH',{fields:{Title:'STN-'+new Date().toISOString().slice(0,10)+'-'+_stnId}});
+    await api('/sites/'+siteId+'/lists/STN_Requests/items/'+_stnId,'PATCH',{fields:{Title:'STN-'+new Date().toISOString().slice(0,10)+'_ID-'+_stnId}});
     await createApprovals('stn',_stnId);
     alert('✅ 신청 완료! (번호: '+_stnId+')');stnReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
@@ -1234,7 +1234,7 @@ async function bcSubmit(){
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';
     const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,Status:'대기',RequestDate:new Date().toISOString()}});
     const _bcId=parseInt(item.id);
-    await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date().toISOString().slice(0,10)+'-'+_bcId}});
+    await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date().toISOString().slice(0,10)+'_ID-'+_bcId}});
     await createApprovals('bc',_bcId);
     alert('✅ 신청 완료! (번호: '+_bcId+')');switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
@@ -1305,7 +1305,7 @@ async function idcSubmit(){
         }
       }catch(fe){console.error('Photo upload error:',fe);}
     }
-    await api('/sites/'+siteId+'/lists/IDC_Requests/items/'+reqId,'PATCH',{fields:{Title:'IDC-'+new Date().toISOString().slice(0,10)+'-'+reqId}});
+    await api('/sites/'+siteId+'/lists/IDC_Requests/items/'+reqId,'PATCH',{fields:{Title:'IDC-'+new Date().toISOString().slice(0,10)+'_ID-'+reqId}});
     await createApprovals('idc',reqId);
     alert('✅ 신청 완료! (번호: '+reqId+')');idcReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
