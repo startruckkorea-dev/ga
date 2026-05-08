@@ -1400,7 +1400,7 @@ async function showDetail(cat,id){
   document.getElementById('modal-content').innerHTML='<div style="text-align:center;padding:30px;color:#a19f9d">로딩 중...</div>';
   document.getElementById('detail-modal').classList.add('open');
   try{
-    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,StnName,StnDept)'),api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
+    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,StnName,StnDept,PhotoFileName,AttachedFiles)'),api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
     const f=r.fields;
     const apprList=apprData.value.filter(i=>Number(i.fields.RequestID)===Number(id)).sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
@@ -1414,7 +1414,26 @@ async function showDetail(cat,id){
     }else if(cat==='bc'){
       body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?row('주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng?row('Address (EN)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
     }else{
-      body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Issue Type',f.IssueType)+row('Cost Center',f.CostCenter)+row('Description',f.Description)+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
+      // IDC 첨부파일 처리
+      let _idcFiles = '';
+      if(f.AttachedFiles){
+        const _links = f.AttachedFiles.split(';').filter(Boolean).map(item=>{
+          const parts = item.split('||ENC||');
+          const name = parts[0];
+          if(parts[1]){
+            try{
+              const dec = decodeURIComponent(escape(atob(parts[1])));
+              const [driveId, itemId] = dec.split('###');
+              return `<div style="margin:3px 0"><a href="https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content" style="color:#0078d4;font-size:.82rem" target="_blank">📎 ${name}</a></div>`;
+            }catch(e){return `<div style="margin:3px 0">📎 ${name}</div>`;}
+          }
+          return `<div style="margin:3px 0">📎 ${name}</div>`;
+        }).join('');
+        if(_links) _idcFiles = row('첨부파일', _links);
+      } else if(f.PhotoFileName){
+        _idcFiles = row('첨부파일', `<span style="font-size:.82rem">📎 ${f.PhotoFileName}</span>`);
+      }
+      body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Issue Type',f.IssueType)+row('Cost Center',f.CostCenter)+row('Description',f.Description)+_idcFiles+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
     }
     const ah=sec('결재 이력')+'<div style="background:#f9f9f9;border-radius:6px;border:1px solid #edebe9;overflow:hidden">'+(apprList.length?apprList.map(a=>{const af=a.fields;return`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid #edebe9"><div><div style="font-weight:600;font-size:13px">${af.ApprovalOrder||''}차 ${af.ApproverRole||''}</div><div style="font-size:12px;color:#605e5c;margin-top:2px">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>${af.ApprovalDate?`<div style="font-size:11px;color:#a19f9d;margin-top:2px">${fmtDate(af.ApprovalDate)}</div>`:''}${af.Comment?`<div style="margin-top:4px;background:#fff;border:1px solid #edebe9;border-radius:4px;padding:4px 8px;font-size:12px;color:#605e5c">💬 ${af.Comment}</div>`:''}</div><span style="color:${sc[af.Status]||'#323130'};font-weight:700;font-size:12px;white-space:nowrap;margin-left:8px">${af.Status||''}</span></div>`;}  ).join(''):'<div style="padding:12px;font-size:.82rem;color:#a19f9d">결재 이력이 없습니다.</div>')+'</div>';
     document.getElementById('modal-content').innerHTML=body+ah;
