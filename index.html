@@ -846,6 +846,13 @@ async function loadEmployees(){
     // 주소 드롭다운도 초기화 (최초 로드 시 stn이 기본 탭이라 switchCat 미호출)
     stnAddressInitDropdown();
     bcAddressInitDropdown();
+    // 로드 완료 후: 이미 체크된 경우 부서 자동 채우기 (타이밍 문제 해결)
+    const _myEmp=employeeData.find(e=>(e.email||'').toLowerCase()===(user.email||'').toLowerCase());
+    if(_myEmp){
+      if(document.getElementById('stn-same-as-requester')?.checked){
+        document.getElementById('stn-requester-dept').value=_myEmp.dept;
+      }
+    }
   }catch(e){console.warn('직원 데이터 로드 실패:',e);}
 }
 function gaInitDept(prefix){
