@@ -327,8 +327,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <select id="stn-address-select" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;font-family:inherit;margin-bottom:6px;background:#fff" onchange="stnAddressSelect()">
             <option value="">-- 지점 주소 선택 (선택 후 자동 입력) --</option>
           </select>
-          <textarea id="stn-address" rows="3" placeholder="수령 주소를 입력하거나 위에서 선택해주세요." style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('stn-address-select').value=''"></textarea>
-          <div style="font-size:11px;color:#605e5c;margin-top:3px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
+          <textarea id="stn-address" rows="3" placeholder="위에서 지점을 선택하거나 직접 입력해주세요." style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('stn-address-select').value=''"></textarea>
+          <div style="font-size:11px;color:#605e5c;margin-top:3px">위 수령 주소로 지점을 선택하시고, 목록에 없다면 임의로 입력해 주세요.</div>
         </div>
         <div class="section-title" style="margin-top:18px">4. 결재자 지정 (Approvers)</div>
         <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Dept. Head <span style="color:#0078d4">(선택)</span> → 2차 Hye-jin Yoon (GA) <span style="color:#0078d4">(고정)</span></div></div>
@@ -1003,8 +1003,10 @@ function stnFillRequester(){
   if(chk.checked){
     if(otherChk) otherChk.checked=false;
     document.getElementById('stn-other-emp-search').style.display='none';
-    document.getElementById('stn-requester-name').value=user.username||'';
-    document.getElementById('stn-requester-dept').value='';
+    // 이름: user.name (displayName), 부서: employeeData에서 이메일로 검색
+    const _emp = employeeData.find(e=>(e.email||'').toLowerCase()===(user.email||'').toLowerCase());
+    document.getElementById('stn-requester-name').value=user.name||'';
+    document.getElementById('stn-requester-dept').value=_emp?_emp.dept:'';
     document.getElementById('stn-requester-name').readOnly=true;
     document.getElementById('stn-requester-dept').readOnly=true;
   } else {
