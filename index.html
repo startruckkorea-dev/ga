@@ -830,6 +830,9 @@ async function loadEmployees(){
     employeeData=rows.map(r=>({dept:r['Department']||'',team:r['Team']||'',name:r['EngName']||'',email:(r['EMail']||r['email']||'')})).filter(r=>r.email&&r.name);
     // 로드 후 부서 드롭다운 초기화
     for(const prefix of ['stn','bc','idc']) gaInitDept(prefix);
+    // 주소 드롭다운도 초기화 (최초 로드 시 stn이 기본 탭이라 switchCat 미호출)
+    stnAddressInitDropdown();
+    bcAddressInitDropdown();
   }catch(e){console.warn('직원 데이터 로드 실패:',e);}
 }
 function gaInitDept(prefix){
