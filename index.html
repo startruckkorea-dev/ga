@@ -293,7 +293,44 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <tbody id="stn-order-body"><tr><td colspan="8" class="no-data-cell">There is no data.</td></tr></tbody>
           <tfoot><tr class="total-row"><td colspan="6" style="text-align:right;padding-right:16px">Total Sum</td><td id="stn-total-sum">0</td><td></td></tr></tfoot>
         </table>
-        <div class="section-title" style="margin-top:18px">3. 결재자 지정 (Approvers)</div>
+        <div class="section-title" style="margin-top:18px">3. 신청자 정보 및 수령 주소</div>
+        <!-- 신청자 정보 -->
+        <div style="display:flex;gap:12px;margin-bottom:10px;align-items:center">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" id="stn-same-as-requester" onchange="stnFillRequester()"> 신청자와 동일
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" id="stn-other-employee" onchange="stnToggleOtherEmployee()"> 다른 STK 직원
+          </label>
+        </div>
+        <div class="form-row" style="margin-bottom:10px">
+          <div class="form-group">
+            <label>Name <span class="req-mark">*</span></label>
+            <input type="text" id="stn-requester-name" placeholder="수령자 이름">
+          </div>
+          <div class="form-group">
+            <label>Department</label>
+            <input type="text" id="stn-requester-dept" placeholder="수령자 부서">
+          </div>
+        </div>
+        <!-- 다른 직원 검색 (숨김) -->
+        <div id="stn-other-emp-search" style="display:none;margin-bottom:12px">
+          <div class="appr-grid">
+            <select id="stn-drv-dept-sel" onchange="stnDrvDeptChange()"><option value="">부서</option></select>
+            <select id="stn-drv-team-sel" onchange="stnDrvTeamChange()" disabled><option value="">팀</option></select>
+            <select id="stn-drv-person-sel" onchange="stnDrvPersonChange()" disabled><option value="">직원 선택</option></select>
+          </div>
+        </div>
+        <!-- 수령 주소 -->
+        <div class="form-group" style="margin-bottom:14px">
+          <label>수령 주소</label>
+          <select id="stn-address-select" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;font-family:inherit;margin-bottom:6px;background:#fff" onchange="stnAddressSelect()">
+            <option value="">-- 지점 주소 선택 (선택 후 자동 입력) --</option>
+          </select>
+          <textarea id="stn-address" rows="3" placeholder="수령 주소를 입력하거나 위에서 선택해주세요." style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('stn-address-select').value=''"></textarea>
+          <div style="font-size:11px;color:#605e5c;margin-top:3px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
+        </div>
+        <div class="section-title" style="margin-top:18px">4. 결재자 지정 (Approvers)</div>
         <div style="background:#f0f6ff;border:1px solid #c7e0f4;border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:.75rem"><div style="font-weight:600;color:#0078d4;margin-bottom:4px">결재 라인</div><div>1차 Dept. Head <span style="color:#0078d4">(선택)</span> → 2차 Hye-jin Yoon (GA) <span style="color:#0078d4">(고정)</span></div></div>
         <div class="appr-block" id="stn-a1-block"><div class="appr-title">1차 결재자 <span class="req-mark">*</span> <span class="hint">— Department Head</span></div>
         <div class="appr-grid">
@@ -720,6 +757,7 @@ function switchCat(cat){
     document.getElementById('cat-'+c+'-btn').classList.toggle('active',c===cat);
   });
   if(cat==='bc') bcAddressInitDropdown();
+  if(cat==='stn') stnAddressInitDropdown();
   switchTab('form');
 }
 function switchTab(t){
@@ -958,6 +996,95 @@ function renderOrderTable(){
 function updateQty(i,v){orderItems[i].qty=Math.max(0,parseInt(v)||0);document.getElementById('rt-'+i).textContent=(orderItems[i].price*orderItems[i].qty).toLocaleString();updateTotalSum();}
 function removeItem(i){orderItems.splice(i,1);renderOrderTable();}
 function updateTotalSum(){document.getElementById('stn-total-sum').textContent=orderItems.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString();}
+// ══ STN 신청자/수령자 정보 함수 ══
+function stnFillRequester(){
+  const chk=document.getElementById('stn-same-as-requester');
+  const otherChk=document.getElementById('stn-other-employee');
+  if(chk.checked){
+    if(otherChk) otherChk.checked=false;
+    document.getElementById('stn-other-emp-search').style.display='none';
+    document.getElementById('stn-requester-name').value=user.username||'';
+    document.getElementById('stn-requester-dept').value='';
+    document.getElementById('stn-requester-name').readOnly=true;
+    document.getElementById('stn-requester-dept').readOnly=true;
+  } else {
+    document.getElementById('stn-requester-name').value='';
+    document.getElementById('stn-requester-dept').value='';
+    document.getElementById('stn-requester-name').readOnly=false;
+    document.getElementById('stn-requester-dept').readOnly=false;
+  }
+}
+function stnToggleOtherEmployee(){
+  const chk=document.getElementById('stn-other-employee');
+  const sameChk=document.getElementById('stn-same-as-requester');
+  const searchDiv=document.getElementById('stn-other-emp-search');
+  if(chk.checked){
+    if(sameChk) sameChk.checked=false;
+    document.getElementById('stn-requester-name').value='';
+    document.getElementById('stn-requester-dept').value='';
+    document.getElementById('stn-requester-name').readOnly=false;
+    document.getElementById('stn-requester-dept').readOnly=false;
+    searchDiv.style.display='block';
+    // 부서 드롭다운 채우기
+    const dSel=document.getElementById('stn-drv-dept-sel');
+    if(dSel&&dSel.options.length<=1){
+      [...new Set(employeeData.map(e=>e.dept))].filter(Boolean).sort().forEach(d=>{
+        const o=document.createElement('option');o.value=d;o.textContent=d;dSel.appendChild(o);
+      });
+    }
+  } else {
+    searchDiv.style.display='none';
+  }
+}
+function stnDrvDeptChange(){
+  const dept=document.getElementById('stn-drv-dept-sel').value;
+  const tSel=document.getElementById('stn-drv-team-sel');
+  const pSel=document.getElementById('stn-drv-person-sel');
+  tSel.innerHTML='<option value="">팀</option>';
+  [...new Set(employeeData.filter(e=>e.dept===dept).map(e=>e.team))].sort().forEach(t=>{
+    const o=document.createElement('option');o.value=t;o.textContent=t;tSel.appendChild(o);
+  });
+  tSel.disabled=!dept; pSel.innerHTML='<option value="">직원 선택</option>'; pSel.disabled=true;
+}
+function stnDrvTeamChange(){
+  const dept=document.getElementById('stn-drv-dept-sel').value;
+  const team=document.getElementById('stn-drv-team-sel').value;
+  const pSel=document.getElementById('stn-drv-person-sel');
+  pSel.innerHTML='<option value="">직원 선택</option>';
+  employeeData.filter(e=>e.dept===dept&&e.team===team).forEach(p=>{
+    const o=document.createElement('option');o.value=JSON.stringify({name:p.name,dept:p.dept});o.textContent=p.name;pSel.appendChild(o);
+  });
+  pSel.disabled=!team;
+}
+function stnDrvPersonChange(){
+  const pSel=document.getElementById('stn-drv-person-sel');
+  if(!pSel.value) return;
+  try{
+    const p=JSON.parse(pSel.value);
+    document.getElementById('stn-requester-name').value=p.name||'';
+    document.getElementById('stn-requester-dept').value=p.dept||'';
+  }catch(e){}
+}
+function stnAddressInitDropdown(){
+  const sel=document.getElementById('stn-address-select');
+  if(!sel||sel.options.length>1) return;
+  BC_ADDRESS_LIST.forEach(a=>{
+    const opt=document.createElement('option');
+    opt.value=a.id;
+    opt.textContent=a.id+'. '+a.ko;
+    opt.dataset.ko=a.ko;
+    opt.dataset.en=a.en;
+    sel.appendChild(opt);
+  });
+}
+function stnAddressSelect(){
+  const sel=document.getElementById('stn-address-select');
+  const ta=document.getElementById('stn-address');
+  if(!sel||!ta) return;
+  const opt=sel.options[sel.selectedIndex];
+  if(opt&&opt.value) ta.value=opt.dataset.ko+'\n'+opt.dataset.en;
+}
+
 async function stnSubmit(){
   const costCenter=document.getElementById('stn-costcenter').value.trim();
   if(!costCenter){alert('Cost Center를 입력해주세요.');return;}
@@ -966,12 +1093,28 @@ async function stnSubmit(){
   try{
     const total=orderItems.reduce((s,i)=>s+i.price*i.qty,0);
     const _itemsHtml = '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;width:100%"><thead><tr style="background:#4472C4;color:#fff"><th>상품명</th><th>코드</th><th>단위</th><th>Q\'ty</th><th>단가</th><th>소계</th></tr></thead><tbody>' + orderItems.map(i=>'<tr><td>'+i.name+'</td><td style="text-align:center">'+i.code+'</td><td style="text-align:center">'+i.unit+'</td><td style="text-align:center">'+i.qty+'</td><td style="text-align:right">'+Number(i.price).toLocaleString()+'</td><td style="text-align:right;font-weight:bold">'+Number(Number(i.price)*Number(i.qty)).toLocaleString()+'</td></tr>').join('') + '<tr style="background:#4472C4;color:#fff"><td colspan="5" style="text-align:right;font-weight:bold">Total Sum</td><td style="text-align:right;font-weight:bold">'+Number(total).toLocaleString()+'원</td></tr></tbody></table>';
-    const item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+costCenter,Company:'STK',CostCenter:costCenter,ItemCount:orderItems.length,TotalAmount:total,ItemsData:JSON.stringify(orderItems.map(i=>{return{code:i.code,name:i.name,unit:i.unit,price:i.price,qty:i.qty,rowTotal:i.price*i.qty};})),ItemsDataHTML:_itemsHtml,Status:'대기',RequesterEmail:user.email,RequestDate:new Date().toISOString()}});
+      const _stnName=document.getElementById('stn-requester-name')?.value.trim()||'';
+    const _stnDept=document.getElementById('stn-requester-dept')?.value.trim()||'';
+    const _stnAddr=(document.getElementById('stn-address')?.value||'').trim();
+    if(!_stnName){alert('수령자 이름을 입력해주세요.');loading(false);return;}
+    const item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:{Title:new Date().toISOString().substring(0,10)+' '+costCenter,Company:'STK',CostCenter:costCenter,ItemCount:orderItems.length,TotalAmount:total,ItemsData:JSON.stringify(orderItems.map(i=>{return{code:i.code,name:i.name,unit:i.unit,price:i.price,qty:i.qty,rowTotal:i.price*i.qty};})),ItemsDataHTML:_itemsHtml,StnName:_stnName,StnDept:_stnDept,Address:_stnAddr,Status:'대기',RequesterEmail:user.email,RequestDate:new Date().toISOString()}});
     await createApprovals('stn',parseInt(item.id));
     alert('✅ 신청 완료! (번호: '+item.id+')');stnReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
-function stnReset(){document.getElementById('stn-costcenter').value='';orderItems=[];renderOrderTable();gaResetA1('stn');}
+function stnReset(){
+  document.getElementById('stn-costcenter').value='';
+  orderItems=[];renderOrderTable();gaResetA1('stn');
+  document.getElementById('stn-requester-name').value='';
+  document.getElementById('stn-requester-dept').value='';
+  document.getElementById('stn-requester-name').readOnly=false;
+  document.getElementById('stn-requester-dept').readOnly=false;
+  document.getElementById('stn-same-as-requester').checked=false;
+  document.getElementById('stn-other-employee').checked=false;
+  document.getElementById('stn-other-emp-search').style.display='none';
+  const _sa=document.getElementById('stn-address'); if(_sa) _sa.value='';
+  const _ss=document.getElementById('stn-address-select'); if(_ss) _ss.value='';
+}
 
 // ══ BC Address List (BC_Address.xlsx 기준) ══
 const BC_ADDRESS_LIST=[
@@ -1214,7 +1357,7 @@ async function showDetail(cat,id){
   document.getElementById('modal-content').innerHTML='<div style="text-align:center;padding:30px;color:#a19f9d">로딩 중...</div>';
   document.getElementById('detail-modal').classList.add('open');
   try{
-    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber)'),api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
+    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,StnName,StnDept)'),api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
     const f=r.fields;
     const apprList=apprData.value.filter(i=>Number(i.fields.RequestID)===Number(id)).sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
@@ -1224,7 +1367,7 @@ async function showDetail(cat,id){
     if(cat==='stn'){
       let ih='<div style="font-size:.82rem;color:#a19f9d">항목 없음</div>';
       if(f.ItemsData){try{const _raw=f.ItemsData.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#34;/g,'"').replace(/&#58;/g,':').replace(/&#123;/g,'{').replace(/&#125;/g,'}').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim();const items=JSON.parse(_raw);const tot=items.reduce((s,i)=>s+i.rowTotal,0);ih=`<table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-top:6px"><thead><tr style="background:#4472C4;color:#fff"><th style="padding:7px 10px;text-align:left">상품명</th><th style="padding:7px 8px;text-align:center">코드</th><th style="padding:7px 8px;text-align:center">단위</th><th style="padding:7px 8px;text-align:center">Q'ty</th><th style="padding:7px 8px;text-align:right">단가</th><th style="padding:7px 8px;text-align:right">소계</th></tr></thead><tbody>${items.map(i=>`<tr style="border-bottom:1px solid #edebe9"><td style="padding:6px 10px">${i.name}</td><td style="padding:6px 8px;text-align:center;color:#605e5c">${i.code}</td><td style="padding:6px 8px;text-align:center">${i.unit}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${Number(i.price).toLocaleString()}</td><td style="padding:6px 8px;text-align:right;font-weight:600">${Number(i.rowTotal).toLocaleString()}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#4472C4;color:#fff"><td colspan="5" style="padding:7px 10px;text-align:right;font-weight:700">Total Sum</td><td style="padding:7px 8px;text-align:right;font-weight:700">${tot.toLocaleString()}원</td></tr></tfoot></table>`;}catch(e){}}
-      body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Company',f.Company)+row('Cost Center',f.CostCenter)+row('항목 수',f.ItemCount+'건')+row('Total',fmtAmt(f.TotalAmount))+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+sec('주문 항목')+ih;
+      body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Company',f.Company)+row('Cost Center',f.CostCenter)+(f.StnName?row('수령자',f.StnName):'')+( f.StnDept?row('수령자 부서',f.StnDept):'')+( f.Address?row('수령 주소',f.Address.replace(/\r\n|\n/g,'<br>')):'') +row('항목 수',f.ItemCount+'건')+row('Total',fmtAmt(f.TotalAmount))+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+sec('주문 항목')+ih;
     }else if(cat==='bc'){
       body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?row('주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng?row('Address (EN)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
     }else{
