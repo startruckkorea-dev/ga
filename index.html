@@ -662,6 +662,17 @@ async function token(){
     throw e;
   }
 }
+
+// ── 페이지네이션 전체 조회 헬퍼 (기존 .value 접근 호환) ──
+async function apiAll(path) {
+  let items = [], url = path;
+  while(url) {
+    const d = await api(url);
+    items = items.concat(d.value || []);
+    url = d['@odata.nextLink'] ? d['@odata.nextLink'].replace('https://graph.microsoft.com/v1.0','') : null;
+  }
+  return {value: items};
+}
 async function api(path,method='GET',body=null){
   const t=await token();
   const opts={method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'}};
@@ -910,7 +921,7 @@ async function loadApprovalBadge(){
   let total=0;
   for(const cat of ['stn','bc','idc']){
     try{
-      const data=await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500');
+      const data=await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500');
       const cnt=data.value.filter(i=>(i.fields.ApproverEmail||'')===(user.email||'')&&(i.fields.Status||'')==='대기').length;
       total+=cnt;
       const badge=document.getElementById('badge-'+cat);
@@ -1330,7 +1341,7 @@ async function loadMyList(cat){
 async function loadApprovalQueue(cat){
   if(!siteId)return;
   try{
-    const [apprData,reqData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500'),api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
+    const [apprData,reqData]=await Promise.all([apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500'),api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
     const mine=apprData.value.filter(i=>i.fields.ApproverEmail===user.email&&(i.fields.Status||'')==='대기').sort((a,b)=>b.fields.RequestID-a.fields.RequestID);
     const reqMap=Object.fromEntries(reqData.value.map(r=>[r.id,r.fields]));
     const rows=mine.map(i=>{
@@ -1400,7 +1411,7 @@ async function showDetail(cat,id){
   document.getElementById('modal-content').innerHTML='<div style="text-align:center;padding:30px;color:#a19f9d">로딩 중...</div>';
   document.getElementById('detail-modal').classList.add('open');
   try{
-    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,StnName,StnDept,PhotoFileName,AttachedFiles)'),api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
+    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,StnName,StnDept,PhotoFileName,AttachedFiles)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
     const f=r.fields;
     const apprList=apprData.value.filter(i=>Number(i.fields.RequestID)===Number(id)).sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
