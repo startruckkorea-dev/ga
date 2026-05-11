@@ -663,7 +663,7 @@ async function token(){
   }
 }
 
-// ── 페이지네이션 전체 조회 헬퍼 ──
+// ── 페이지네이션 전체 조회 헬퍼 (기존 .value 접근 호환) ──
 async function apiAll(path) {
   let items = [], url = path;
   while(url) {
@@ -672,12 +672,6 @@ async function apiAll(path) {
     url = d['@odata.nextLink'] ? d['@odata.nextLink'].replace('https://graph.microsoft.com/v1.0','') : null;
   }
   return {value: items};
-}
-// ApproverEmail 인덱싱 → 서버사이드 필터로 빠르게 조회
-async function apiMyApprovals(listPath, myEmail) {
-  const encoded = encodeURIComponent(myEmail);
-  const url = listPath + "/items?$expand=fields&$filter=ApproverEmail eq '" + myEmail + "'&$top=999";
-  return apiAll(url);
 }
 async function api(path,method='GET',body=null){
   const t=await token();
@@ -1347,7 +1341,7 @@ async function loadMyList(cat){
 async function loadApprovalQueue(cat){
   if(!siteId)return;
   try{
-    const [apprData,reqData]=await Promise.all([apiMyApprovals('/sites/'+siteId+'/lists/'+LISTS[cat].apr, user.email||user.username||''),api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=999')]);
+    const [apprData,reqData]=await Promise.all([apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500'),api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
     const mine=apprData.value.filter(i=>i.fields.ApproverEmail===user.email&&(i.fields.Status||'')==='대기').sort((a,b)=>b.fields.RequestID-a.fields.RequestID);
     const reqMap=Object.fromEntries(reqData.value.map(r=>[r.id,r.fields]));
     const rows=mine.map(i=>{
@@ -1463,4 +1457,4 @@ function closeModal(){document.getElementById('detail-modal').classList.remove('
 document.getElementById('btn-login').addEventListener('click',signIn);
 </script>
 </body>
-</html><!-- cache-bust 1778507252 -->
+</html>
