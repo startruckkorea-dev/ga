@@ -360,11 +360,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>Company</th><th>Cost Center</th><th>항목 수</th><th>Total</th><th>상태</th><th>신청일</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
       <tbody id="stn-list-body"></tbody></table><div id="stn-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Cost Center</th><th>Total</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="stn-appr-body"></tbody></table><div id="stn-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -372,7 +372,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <select id="stn-admin-status" onchange="loadAdminList('stn')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="stn-admin-search" oninput="loadAdminList('stn')" placeholder="신청자/코스트센터..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
       </div>
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Cost Center</th><th>Total</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table>
       <div id="stn-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -467,7 +467,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Name (EN)</th><th>Quantity</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
       <tbody id="bc-list-body"></tbody></table><div id="bc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -479,7 +479,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <select id="bc-admin-status" onchange="loadAdminList('bc')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="bc-admin-search" oninput="loadAdminList('bc')" placeholder="신청자/이름..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
       </div>
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Name (EN)</th><th>Quantity</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table>
       <div id="bc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -556,11 +556,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Issue Type</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
       <tbody id="idc-list-body"></tbody></table><div id="idc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Issue Type</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="idc-appr-body"></tbody></table><div id="idc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -568,7 +568,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <select id="idc-admin-status" onchange="loadAdminList('idc')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="idc-admin-search" oninput="loadAdminList('idc')" placeholder="신청자..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
       </div>
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Issue Type</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table>
       <div id="idc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -1346,9 +1346,9 @@ async function loadApprovalQueue(cat){
     const reqMap=Object.fromEntries(reqData.value.map(r=>[r.id,r.fields]));
     const rows=mine.map(i=>{
       const rf=reqMap[i.fields.RequestID]||{};
-      return`<tr><td style="color:#0078d4;cursor:pointer" onclick="showDetail('${cat}',${i.fields.RequestID})">${i.fields.RequestID}</td><td style="font-size:.78rem">${rf.RequesterEmail||''}</td><td style="font-size:.78rem">${rf.Title||''}</td><td><span class="badge-${rf.Status||'대기'}">${rf.Status||''}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
+      return`<tr><td style="color:#0078d4;cursor:pointer" onclick="showDetail('${cat}',${i.fields.RequestID})">${i.fields.RequestID}</td><td style="font-size:.78rem">${rf.RequesterEmail||''}</td><td style="font-size:.78rem">${rf.Title||''}</td><td style="font-size:.78rem">${rf.CostCenter||''}</td><td><span class="badge-${rf.Status||'대기'}">${rf.Status||''}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
     });
-    const cols={stn:6,bc:6,idc:6};
+    const cols={stn:7,bc:7,idc:7};
     pgSet(cat+'-appr',rows,r=>r,'결재 대기 항목이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
@@ -1362,11 +1362,11 @@ async function loadAdminList(cat){
     if(status)items=items.filter(i=>(i.fields.Status||'')==status);
     if(q)items=items.filter(i=>((i.fields.RequesterEmail||'')+' '+(i.fields.CostCenter||'')+' '+(i.fields.NameEN||'')+' '+(i.fields.IssueType||'')).toLowerCase().includes(q));
     const r={
-      stn:item=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      bc: item=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      idc:item=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      stn:item=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      bc: item=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      idc:item=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
     };
-    const cols={stn:5,bc:5,idc:5};
+    const cols={stn:7,bc:7,idc:7};
     pgSet(cat+'-admin',items,r[cat],'조회 결과가 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
