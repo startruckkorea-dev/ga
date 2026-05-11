@@ -471,7 +471,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <tbody id="bc-list-body"></tbody></table><div id="bc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>Name (EN)</th><th>Quantity</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="bc-appr-body"></tbody></table><div id="bc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -1330,11 +1330,11 @@ async function loadMyList(cat){
     const data=await api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
     const items=data.value.filter(i=>(i.fields.RequesterEmail||'')===user.email).sort((a,b)=>b.id-a.id);
     const r={
-      stn:item=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td>${f.Company||''}</td><td>${f.CostCenter||''}</td><td style="text-align:center">${f.ItemCount||0}건</td><td style="text-align:right">${fmtAmt(f.TotalAmount)}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      bc: item=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td>${f.NameEN||''}</td><td>${f.Quantity||0}매</td><td>${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      idc:item=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td>${f.IssueType||''}</td><td>${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      stn:item=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      bc: item=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      idc:item=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
     };
-    const cols={stn:7,bc:7,idc:6};
+    const cols={stn:6,bc:6,idc:6};
     pgSet(cat+'-list',items,r[cat],'신청 내역이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
