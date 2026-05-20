@@ -14,13 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 
-
-
-
 .login-sub{font-size:.8rem;color:#605e5c;margin-bottom:28px}
-
-
-
 
 #app{display:none;max-width:960px;margin:0 auto;padding:24px 16px 48px}
 .header{background:#fff;border-radius:8px;padding:18px 24px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;border:1px solid #edebe9;box-shadow:0 1px 4px rgba(0,0,0,.08)}
@@ -157,14 +151,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .dyn-refresh{display:none;background:#0078d4;color:#fff;border:none;border-radius:4px;padding:8px 20px;font-size:.82rem;cursor:pointer;font-family:inherit;margin-top:4px}
 /* ── Login ── */
 
-
-
-
-
-
-
-
-
 /* ── Login ── */
 #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(145deg,#0f2744 0%,#0078d4 100%)}
 .login-card{background:#fff;border-radius:20px;padding:52px 48px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.22);max-width:400px;width:100%}
@@ -175,7 +161,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,120,212,.4)}
 .btn-login:disabled{background:#cbd5e0;cursor:not-allowed;transform:none;box-shadow:none}
 #login-err{color:#e53e3e;font-size:.78rem;margin-top:10px;display:none}
-
 
 /* GA 공통 */
 .cat-tabs{background:#fff;border-bottom:2px solid #edebe9;padding:0 24px;display:flex;gap:0}
@@ -288,8 +273,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div class="section-title" style="margin-bottom:0">2. 주문 항목</div>
           <button class="btn-secondary" onclick="openAddModal()" style="display:inline-flex;align-items:center;gap:5px;font-size:.82rem;padding:6px 14px"><span>＋</span> Add</button>
-        </div>
-        <table class="item-table">
+        <span style="margin-left:auto"></span>
+      </div>
+      <table class="item-table">
           <thead><tr><th style="width:40px">No</th><th>Item Name</th><th style="width:95px">Model Code</th><th style="width:55px">Unit</th><th style="width:75px">Q'ty</th><th style="width:95px">Unit Price</th><th style="width:95px">Total</th><th style="width:36px"></th></tr></thead>
           <tbody id="stn-order-body"><tr><td colspan="8" class="no-data-cell">There is no data.</td></tr></tbody>
           <tfoot><tr class="total-row"><td colspan="6" style="text-align:right;padding-right:16px">Total Sum</td><td id="stn-total-sum">0</td><td></td></tr></tfoot>
@@ -372,6 +358,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <select id="stn-admin-status" onchange="loadAdminList('stn')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="stn-admin-search" oninput="loadAdminList('stn')" placeholder="신청자/코스트센터..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
+        <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
       <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table>
@@ -480,6 +467,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <select id="bc-admin-status" onchange="loadAdminList('bc')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="bc-admin-search" oninput="loadAdminList('bc')" placeholder="신청자/이름..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
+        <span style="margin-left:auto"></span>
+        <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
       <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table>
       <div id="bc-admin-pagination"></div>
@@ -569,6 +558,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <select id="idc-admin-status" onchange="loadAdminList('idc')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="idc-admin-search" oninput="loadAdminList('idc')" placeholder="신청자..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
+        <span style="margin-left:auto"></span>
+        <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
       <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table>
       <div id="idc-admin-pagination"></div>
