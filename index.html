@@ -372,6 +372,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <select id="stn-admin-status" onchange="loadAdminList('stn')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
         <input id="stn-admin-search" oninput="loadAdminList('stn')" placeholder="신청자/코스트센터..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
+        <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
       <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table>
       <div id="stn-admin-pagination"></div>
@@ -650,6 +651,39 @@ window.addEventListener('load',async()=>{
   }catch(e){setTimeout(()=>{btn.disabled=false;btn.textContent='Microsoft 계정으로 로그인';},5000);}
 });
 async function signIn(){if(!msalApp)return;try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e){alert(e.message);}}
+
+async function exportAdminExcel() {
+  loading(true, 'Excel 생성 중...');
+  try {
+    const cats = ['stn','bc','idc'];
+    const rows = [['번호','카테고리','신청자','Title','Cost Center','상태','신청일','1차 역할','1차 결재자','1차 상태','1차 일시']];
+    for(const cat of cats) {
+      const data = await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields');
+      const aprs = await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields');
+      const aprMap = {};
+      (aprs.value||[]).forEach(a=>{const r=String(a.fields.RequestID);if(!aprMap[r])aprMap[r]=[];aprMap[r].push(a.fields);});
+      (data.value||[]).forEach(item=>{
+        const f=item.fields;
+        const ap=(aprMap[String(item.id)]||[]).sort((a,b)=>(a.ApprovalOrder||0)-(b.ApprovalOrder||0));
+        const row=[item.id,cat.toUpperCase(),f.RequesterEmail||'',f.Title||'',f.CostCenter||'',f.Status||'',f.RequestDate?fmtDate(f.RequestDate):''];
+        (ap[0]?[ap[0]]:[{}]).forEach(a=>{row.push(a.ApproverRole||'',a.ApproverName||'',a.Status||'',a.ApprovalDate?fmtDate(a.ApprovalDate):'');});
+        rows.push(row);
+      });
+    }
+    if(rows.length<=1){alert('내보낼 데이터가 없습니다.');return;}
+    const wb=XLSX.utils.book_new();
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:6},{wch:8},{wch:28},{wch:24},{wch:16},{wch:10},{wch:18},{wch:20},{wch:16},{wch:10},{wch:18}];
+    const range=XLSX.utils.decode_range(ws['!ref']);
+    for(let C=range.s.c;C<=range.e.c;C++){const ca=XLSX.utils.encode_cell({r:0,c:C});if(!ws[ca])continue;ws[ca].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F4E79'}},alignment:{horizontal:'center',wrapText:true}};}
+    XLSX.utils.book_append_sheet(wb,ws,'GA 신청 목록');
+    const now=new Date(new Date().getTime()+9*3600*1000);
+    const ds=now.getUTCFullYear()+String(now.getUTCMonth()+1).padStart(2,'0')+String(now.getUTCDate()).padStart(2,'0')+'_'+String(now.getUTCHours()).padStart(2,'0')+String(now.getUTCMinutes()).padStart(2,'0');
+    XLSX.writeFile(wb,'GA_Export_'+ds+'.xlsx');
+  } catch(e){alert('Excel 생성 실패: '+e.message);}
+  finally{loading(false);}
+}
+
 function signOut(){msalApp.logoutRedirect();}
 async function token(){
   try{
