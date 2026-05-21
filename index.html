@@ -272,9 +272,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div class="section-title" style="margin-bottom:0">2. 주문 항목</div>
-          <button class="btn-secondary" onclick="openAddModal()" style="display:inline-flex;align-items:center;gap:5px;font-size:.82rem;padding:6px 14px"><span>＋</span> Add</button>
-        <span style="margin-left:auto"></span>
-      </div>
+          <button class="btn-primary" onclick="openAddModal()" style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;padding:7px 16px;border-radius:4px;font-weight:600">
+            <span style="font-size:1rem;line-height:1">＋</span> Add
+          </button>
+        </div>
       <table class="item-table">
           <thead><tr><th style="width:40px">No</th><th>Item Name</th><th style="width:95px">Model Code</th><th style="width:55px">Unit</th><th style="width:75px">Q'ty</th><th style="width:95px">Unit Price</th><th style="width:95px">Total</th><th style="width:36px"></th></tr></thead>
           <tbody id="stn-order-body"><tr><td colspan="8" class="no-data-cell">There is no data.</td></tr></tbody>
