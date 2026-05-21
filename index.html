@@ -1457,14 +1457,14 @@ async function showDetail(cat,id){
             try{
               const dec = decodeURIComponent(escape(atob(parts[1])));
               const [driveId, itemId] = dec.split('###');
-              return `<div style="margin:3px 0"><a href="#" onclick="downloadAttachment('${driveId}','${itemId}','${name.replace(/'/g,"\\'")}');return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">📎 ${name}</a></div>`;
-            }catch(e){return `<div style="margin:3px 0">📎 ${name}</div>`;}
+              return `<div style="margin:3px 0"><a href="#" onclick="downloadAttachment('${driveId}','${itemId}','${name.replace(/'/g,"\\'")}');return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${name}</a></div>`;
+            }catch(e){return `<div style="margin:3px 0">${name}</div>`;}
           }
-          return `<div style="margin:3px 0">📎 ${name}</div>`;
+          return `<div style="margin:3px 0">${name}</div>`;
         }).join('');
         if(_links) _idcFiles = row('첨부파일', _links);
       } else if(f.PhotoFileName){
-        _idcFiles = row('첨부파일', `<a href="#" onclick="downloadIDCPhoto('${f.PhotoFileName.replace(/'/g,"\\'")}',${id});return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">📎 ${f.PhotoFileName}</a>`);
+        _idcFiles = row('첨부파일', `<a href="#" onclick="downloadIDCPhoto('${f.PhotoFileName.replace(/'/g,"\\'")}',${id});return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${f.PhotoFileName}</a>`);
       }
       body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Issue Type',f.IssueType)+row('Cost Center',f.CostCenter)+row('Description',f.Description)+_idcFiles+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
     }
@@ -1477,19 +1477,14 @@ async function showDetail(cat,id){
 async function downloadAttachment(driveId, itemId, fileName){
   try{
     const t = await token();
-    const res = await fetch(`https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}?$select=@microsoft.graph.downloadUrl,name`,
+    const res = await fetch(`https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/content`,
       {headers:{Authorization:'Bearer '+t}});
-    if(!res.ok) throw new Error('파일 정보 조회 실패: '+res.status);
-    const data = await res.json();
-    const url = data['@microsoft.graph.downloadUrl'];
-    if(!url) throw new Error('다운로드 URL을 가져올 수 없습니다.');
+    if(!res.ok) throw new Error('다운로드 실패 ('+res.status+')');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName || data.name || 'download';
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href = url; a.download = fileName; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }catch(e){alert('다운로드 오류: '+e.message);}
 }
 
@@ -1498,20 +1493,14 @@ async function downloadIDCPhoto(fileName, reqId){
     const t = await token();
     const drivesData = await api('/sites/'+siteId+'/drives');
     const drive = drivesData.value.find(d=>d.name==='AttachedFiles')||drivesData.value[0];
-    const path = `/drives/${drive.id}/root:/IDC_Requests_AttachedFiles/${reqId}/${encodeURIComponent(fileName)}`;
-    const res = await fetch(`https://graph.microsoft.com/v1.0${path}?$select=@microsoft.graph.downloadUrl,name`,
+    const res = await fetch(`https://graph.microsoft.com/v1.0/drives/${drive.id}/root:/IDC_Requests_AttachedFiles/${reqId}/${encodeURIComponent(fileName)}:/content`,
       {headers:{Authorization:'Bearer '+t}});
-    if(!res.ok) throw new Error('파일 정보 조회 실패: '+res.status);
-    const data = await res.json();
-    const url = data['@microsoft.graph.downloadUrl'];
-    if(!url) throw new Error('다운로드 URL을 가져올 수 없습니다.');
+    if(!res.ok) throw new Error('다운로드 실패 ('+res.status+')');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href = url; a.download = fileName; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }catch(e){alert('다운로드 오류: '+e.message);}
 }
 
