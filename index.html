@@ -615,6 +615,7 @@ const GRAPH='https://graph.microsoft.com/v1.0';
 const SCOPES=['User.Read','Sites.ReadWrite.All','Files.ReadWrite.All'];
 const LISTS={stn:{req:'STN_Requests',apr:'STN_Approvals'},bc:{req:'BC_Requests',apr:'BC_Approvals'},idc:{req:'IDC_Requests',apr:'IDC_Approvals'}};
 const ADMIN_EMAILS=['','',''];
+let _configLoaded = false;
 // 2차: Robin 인사팀장 (테스트: jimmy.lee)
 const A2={name:'',email:'',role:'인사팀장',order:2};
 // 3차: 윤혜진 GA담당자 (테스트: jimmy.lee)
@@ -774,6 +775,7 @@ async function boot(account){
       document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='문의 Email: '+_contact.email;});
       const _adminList = cfgEmails(_cfg,['GA_ADMIN_1','GA_ADMIN_2','ADMIN_SP']);
       if(_adminList.length) ADMIN_EMAILS.splice(0,ADMIN_EMAILS.length,..._adminList);
+      _configLoaded = true;
       // config 로드 후 관리자 탭 표시 여부 재확인 (대소문자 무시)
       const _ue = (user.email||'').toLowerCase();
       if(ADMIN_EMAILS.some(e=>e.toLowerCase()===_ue)){
@@ -813,6 +815,15 @@ function switchCat(cat){
 }
 function switchTab(t){
   if (t === 'admin') {
+    if (!_configLoaded) {
+      const _btn = document.getElementById('tab-admin-btn');
+      if (_btn) { _btn.style.opacity='0.6'; _btn.style.pointerEvents='none'; _btn.title='권한 확인 중...'; }
+      setTimeout(() => {
+        if (_btn) { _btn.style.opacity=''; _btn.style.pointerEvents=''; _btn.title=''; }
+        switchTab('admin');
+      }, 1500);
+      return;
+    }
     const _emails = typeof ADMIN_EMAILS !== 'undefined' ? ADMIN_EMAILS : [];
     const _user = typeof user !== 'undefined' ? user : null;
     const _isAdmin = _user && _emails.map(e=>e.toLowerCase()).some(e =>
