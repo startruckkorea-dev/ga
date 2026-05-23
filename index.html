@@ -231,7 +231,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
   <div class="header">
     <div>
       <div class="title">STK General Affairs</div>
-      <div class="sub" id="ga-contact-email">문의 Email: (로딩중...)</div>
+      <div class="sub" id="ga-contact-email">BU Admin 문의 Email: (로딩중...)</div>
     </div>
     <div class="user-info">
       <div><span id="user-name"></span><button id="btn-logout" onclick="signOut()">로그아웃</button></div>
@@ -772,7 +772,7 @@ async function boot(account){
     const _cfg = await loadSystemConfig();
     if (_cfg) {
       const _contact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:''}));
-      document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='문의 Email: '+_contact.email;});
+      document.querySelectorAll('.sub').forEach(el=>{if(el.textContent.includes('@'))el.textContent='BU Admin 문의 Email: '+_contact.email;});
       const _adminList = cfgEmails(_cfg,['GA_ADMIN_1','GA_ADMIN_2','ADMIN_SP']);
       if(_adminList.length) ADMIN_EMAILS.splice(0,ADMIN_EMAILS.length,..._adminList);
       _configLoaded = true;
@@ -787,7 +787,7 @@ async function boot(account){
       // 문의 이메일 업데이트
       const _gaContact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:''}));
       const _gaContactEl = document.getElementById('ga-contact-email');
-      if(_gaContactEl) _gaContactEl.textContent='문의 Email: '+_gaContact.email;
+      if(_gaContactEl) _gaContactEl.textContent='BU Admin 문의 Email: '+_gaContact.email;
       // 모든 고정 결재자 input DOM 업데이트
       [['cfg-a3-stn-name',A3.name],['cfg-a3-stn-email',A3.email],
        ['cfg-a2-bc-name',A2.name], ['cfg-a2-bc-email',A2.email],
