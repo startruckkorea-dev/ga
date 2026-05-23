@@ -964,7 +964,7 @@ async function createApprovals(cat,reqId){
     ?[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A3.name,email:A3.email,role:A3.role,order:2}]
     :[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A2.name,email:A2.email,role:A2.role,order:2},{name:A3.name,email:A3.email,role:A3.role,order:3}];
   for(const a of approvers){
-    await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
+    await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:cat.toUpperCase()+'-'+new Date().toISOString().slice(0,10)+'_ID-'+reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
   }
 }
 async function loadApprovalBadge(){
