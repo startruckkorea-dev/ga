@@ -973,7 +973,8 @@ async function loadApprovalBadge(){
   for(const cat of ['stn','bc','idc']){
     try{
       const data=await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500');
-      const cnt=data.value.filter(i=>(i.fields.ApproverEmail||'')===(user.email||'')&&(i.fields.Status||'')==='대기').length;
+      const _ue=(user.email||'').toLowerCase(),_uu=(user.username||'').toLowerCase();
+      const cnt=data.value.filter(i=>{const e=(i.fields.ApproverEmail||'').toLowerCase();return (e===_ue||e===_uu)&&(i.fields.Status||'')==='대기';}).length;
       total+=cnt;
       const badge=document.getElementById('badge-'+cat);
       if(badge){badge.textContent=cnt?cnt:'';badge.className='cat-tab-count'+(cnt?' has-item':'');}
