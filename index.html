@@ -801,6 +801,9 @@ async function boot(account){
     loadEmployees();
     loadSampleImages();
   }catch(e){alert('SharePoint 연결 오류: '+e.message);}
+
+  // 배지 자동 갱신 (60초마다)
+  setInterval(function(){ try{loadApprovalBadge();}catch(e){} }, 60000);
 }
 
 function switchCat(cat){
