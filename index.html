@@ -375,7 +375,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
       <tbody id="stn-list-body"></tbody></table><div id="stn-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -484,7 +484,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
       <tbody id="bc-list-body"></tbody></table><div id="bc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -575,7 +575,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead>
+      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
       <tbody id="idc-list-body"></tbody></table><div id="idc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -1494,11 +1494,11 @@ async function loadMyList(cat){
     const data=await api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
     const items=data.value.filter(i=>(i.fields.RequesterEmail||'')===user.email).sort((a,b)=>b.id-a.id);
     const r={
-      stn:item=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      bc: item=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      idc:item=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      stn:item=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td style="font-size:.82rem;color:#605e5c">${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'STN_Approvals','STN_Requests',f.Status)}</td></tr>`;},
+      bc: item=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td style="font-size:.82rem;color:#605e5c">${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'BC_Approvals','BC_Requests',f.Status)}</td></tr>`;},
+      idc:item=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${item.id}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td style="font-size:.82rem;color:#605e5c">${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'IDC_Approvals','IDC_Requests',f.Status)}</td></tr>`;},
     };
-    const cols={stn:6,bc:6,idc:6};
+    const cols={stn:7,bc:7,idc:7};
     pgSet(cat+'-list',items,r[cat],'신청 내역이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
