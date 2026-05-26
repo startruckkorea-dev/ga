@@ -1505,16 +1505,14 @@ async function withdrawRequest(e, reqId, aprList, reqList) {
     const sorted = myAprs.sort((a,b)=>(a.fields.ApprovalOrder||0)-(b.fields.ApprovalOrder||0));
     const firstSt = (sorted[0]?.fields?.Status?.Value || sorted[0]?.fields?.Status || '').trim();
     if(firstSt !== '대기') {
-      if(typeof showAlert === 'function') showAlert('철회 불가','이미 결재가 진행된 신청은 철회할 수 없습니다.','⚠️');
-      else alert('이미 결재가 진행된 신청은 철회할 수 없습니다.');
+      alert('철회 불가: 이미 결재가 진행된 신청은 철회할 수 없습니다.');
       return;
     }
     await Promise.all(myAprs.map(i =>
       api('/sites/'+siteId+'/lists/'+aprList+'/items/'+i.id, 'PATCH', {fields:{Status:'철회(잠김)'}})
     ));
     await api('/sites/'+siteId+'/lists/'+reqList+'/items/'+reqId, 'PATCH', {fields:{Status:'철회'}});
-    if(typeof showAlert === 'function') showAlert('철회 완료','신청이 철회되었습니다.','✅');
-    else alert('신청이 철회되었습니다.');
+    alert('철회 완료: 신청이 철회되었습니다.');
     loadMyList && loadMyList(_currentCat);
   } catch(err) {
     alert('오류: ' + err.message);
@@ -1588,7 +1586,7 @@ async function confirmApproval(){
   closeConfirm();document.getElementById('detail-modal').classList.remove('open');loading(true);
   try{
     const _cur=await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items/'+apprId+'?$expand=fields');
-    if(_cur.fields.Status!=='대기'){showAlert('이미 처리된 결재 항목입니다.','다른 창에서 처리되었거나 이미 완료된 항목입니다.','⚠️');loadApprovalQueue(cat);return;}
+    if(_cur.fields.Status!=='대기'){alert('이미 처리된 결재 항목입니다.\n철회되었거나 다른 창에서 이미 처리된 항목입니다.');loadApprovalQueue(cat);return;}
     await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items/'+apprId,'PATCH',{fields:{Status:action==='승인'?'승인':action,ApprovalDate:new Date().toISOString(),Comment:comment}});
     if(action==='반려'){await api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+reqId,'PATCH',{fields:{Status:'반려'}});}
     else{
