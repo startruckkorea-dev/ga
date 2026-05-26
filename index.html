@@ -282,6 +282,22 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <tfoot><tr class="total-row"><td colspan="6" style="text-align:right;padding-right:16px">Total Sum</td><td id="stn-total-sum">0</td><td></td></tr></tfoot>
         </table>
         <div class="section-title" style="margin-top:18px">3. 주문자 정보</div>
+        <div style="display:flex;gap:12px;margin-bottom:10px;align-items:center">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" id="stn-ord-same-as-requester" onchange="stnOrdFillRequester()"> 신청자와 동일
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
+            <input type="checkbox" id="stn-ord-other-employee" onchange="stnOrdToggleOtherEmployee()"> 다른 STK 직원
+          </label>
+        </div>
+        <!-- 다른 직원 검색 (숨김) -->
+        <div id="stn-ord-emp-search" style="display:none;margin-bottom:12px">
+          <div class="appr-grid">
+            <select id="stn-ord-dept-sel" onchange="stnOrdDeptChange()"><option value="">부서</option></select>
+            <select id="stn-ord-team-sel" onchange="stnOrdTeamChange()" disabled><option value="">팀</option></select>
+            <select id="stn-ord-person-sel" onchange="stnOrdPersonChange()" disabled><option value="">직원 선택</option></select>
+          </div>
+        </div>
         <div class="form-row" style="margin-bottom:10px">
           <div class="form-group">
             <label>Name <span class="req-mark">*</span></label>
@@ -292,7 +308,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
             <input type="text" id="stn-ord-phone" placeholder="+82-10-9999-9999">
           </div>
         </div>
-        <div class="section-title" style="margin-top:18px">4. 신청자 정보 및 수령 주소</div>
+        <div class="section-title" style="margin-top:18px">4. 수령자 정보 및 수령 주소</div>
         <!-- 신청자 정보 -->
         <div style="display:flex;gap:12px;margin-bottom:10px;align-items:center">
           <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
@@ -1110,9 +1126,7 @@ function stnFillRequester(){
     document.getElementById('stn-requester-name').readOnly=true;
     document.getElementById('stn-requester-dept').readOnly=true;
   } else {
-    document.getElementById('stn-ord-name').value='';
-  document.getElementById('stn-ord-phone').value='';
-  document.getElementById('stn-requester-name').value='';
+    document.getElementById('stn-requester-name').value='';
     document.getElementById('stn-requester-dept').value='';
     document.getElementById('stn-requester-name').readOnly=false;
     document.getElementById('stn-requester-dept').readOnly=false;
@@ -1124,9 +1138,7 @@ function stnToggleOtherEmployee(){
   const searchDiv=document.getElementById('stn-other-emp-search');
   if(chk.checked){
     if(sameChk) sameChk.checked=false;
-    document.getElementById('stn-ord-name').value='';
-  document.getElementById('stn-ord-phone').value='';
-  document.getElementById('stn-requester-name').value='';
+    document.getElementById('stn-requester-name').value='';
     document.getElementById('stn-requester-dept').value='';
     document.getElementById('stn-requester-name').readOnly=false;
     document.getElementById('stn-requester-dept').readOnly=false;
@@ -1169,6 +1181,82 @@ function stnDrvPersonChange(){
     const p=JSON.parse(pSel.value);
     document.getElementById('stn-requester-name').value=p.name||'';
     document.getElementById('stn-requester-dept').value=p.dept||'';
+  }catch(e){}
+}
+
+// ── 주문자 정보 (섹션 3) ──────────────────────────
+function stnOrdFillRequester(){
+  const chk = document.getElementById('stn-ord-same-as-requester');
+  const otherChk = document.getElementById('stn-ord-other-employee');
+  if(chk.checked){
+    if(otherChk) otherChk.checked = false;
+    document.getElementById('stn-ord-emp-search').style.display = 'none';
+    document.getElementById('stn-ord-name').value = user.name || '';
+    document.getElementById('stn-ord-phone').value = '';
+    document.getElementById('stn-ord-name').readOnly = true;
+  } else {
+    document.getElementById('stn-ord-name').value = '';
+    document.getElementById('stn-ord-phone').value = '';
+    document.getElementById('stn-ord-name').readOnly = false;
+  }
+}
+function stnOrdToggleOtherEmployee(){
+  const chk = document.getElementById('stn-ord-other-employee');
+  const sameChk = document.getElementById('stn-ord-same-as-requester');
+  const searchDiv = document.getElementById('stn-ord-emp-search');
+  if(chk.checked){
+    if(sameChk) sameChk.checked = false;
+    document.getElementById('stn-ord-name').value = '';
+    document.getElementById('stn-ord-phone').value = '';
+    document.getElementById('stn-ord-name').readOnly = false;
+    searchDiv.style.display = 'block';
+    const dSel = document.getElementById('stn-ord-dept-sel');
+    if(dSel && dSel.options.length <= 1){
+      [...new Set(employeeData.map(e=>e.dept))].filter(Boolean).sort().forEach(d=>{
+        const o=document.createElement('option'); o.value=d; o.textContent=d; dSel.appendChild(o);
+      });
+    }
+  } else {
+    searchDiv.style.display = 'none';
+  }
+}
+function stnOrdDeptChange(){
+  const dept = document.getElementById('stn-ord-dept-sel').value;
+  const tSel = document.getElementById('stn-ord-team-sel');
+  const pSel = document.getElementById('stn-ord-person-sel');
+  tSel.innerHTML = '<option value="">팀</option>';
+  pSel.innerHTML = '<option value="">직원 선택</option>';
+  tSel.disabled = !dept; pSel.disabled = true;
+  if(!dept) return;
+  const teams = [...new Set(employeeData.filter(e=>e.dept===dept).map(e=>e.team))].filter(Boolean).sort();
+  if(teams.length){
+    teams.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; tSel.appendChild(o); });
+  } else {
+    tSel.disabled = true;
+    employeeData.filter(e=>e.dept===dept).sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(e=>{
+      const o=document.createElement('option'); o.value=JSON.stringify(e); o.textContent=e.name+(e.position?` (${e.position})`:''); pSel.appendChild(o);
+    });
+    pSel.disabled = false;
+  }
+}
+function stnOrdTeamChange(){
+  const dept = document.getElementById('stn-ord-dept-sel').value;
+  const team = document.getElementById('stn-ord-team-sel').value;
+  const pSel = document.getElementById('stn-ord-person-sel');
+  pSel.innerHTML = '<option value="">직원 선택</option>';
+  pSel.disabled = !team;
+  if(!team) return;
+  employeeData.filter(e=>e.dept===dept&&e.team===team).sort((a,b)=>(a.name||'').localeCompare(b.name||'')).forEach(e=>{
+    const o=document.createElement('option'); o.value=JSON.stringify(e); o.textContent=e.name+(e.position?` (${e.position})`:''); pSel.appendChild(o);
+  });
+}
+function stnOrdPersonChange(){
+  const pSel = document.getElementById('stn-ord-person-sel');
+  if(!pSel.value) return;
+  try{
+    const p = JSON.parse(pSel.value);
+    document.getElementById('stn-ord-name').value = p.name || '';
+    document.getElementById('stn-ord-phone').value = '';
   }catch(e){}
 }
 function stnAddressInitDropdown(){
@@ -1221,6 +1309,10 @@ function stnReset(){
   orderItems=[];renderOrderTable();gaResetA1('stn');
   document.getElementById('stn-ord-name').value='';
   document.getElementById('stn-ord-phone').value='';
+  document.getElementById('stn-ord-same-as-requester').checked=false;
+  document.getElementById('stn-ord-other-employee').checked=false;
+  document.getElementById('stn-ord-emp-search').style.display='none';
+  document.getElementById('stn-ord-name').readOnly=false;
   document.getElementById('stn-requester-name').value='';
   document.getElementById('stn-requester-dept').value='';
   document.getElementById('stn-requester-name').readOnly=false;
