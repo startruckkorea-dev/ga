@@ -668,8 +668,8 @@ window.addEventListener('load',async()=>{
     if(resp){msalApp.setActiveAccount(resp.account);await boot(resp.account);return;}
     const accounts=msalApp.getAllAccounts();
     if(accounts.length){msalApp.setActiveAccount(accounts[0]);await boot(accounts[0]);return;}
-    btn.disabled=false;btn.textContent='Microsoft 계정으로 로그인';
-  }catch(e){setTimeout(()=>{btn.disabled=false;btn.textContent='Microsoft 계정으로 로그인';},5000);}
+    btn.disabled=false;btn.textContent='Hyosung M365 계정으로 로그인';
+  }catch(e){setTimeout(()=>{btn.disabled=false;btn.textContent='Hyosung M365 계정으로 로그인';},5000);}
 });
 async function signIn(){if(!msalApp)return;try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e){alert(e.message);}}
 
