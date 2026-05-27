@@ -242,13 +242,13 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
   <!-- 카테고리 탭 (MC 스타일) -->
   <div class="cat-tabs">
     <button class="cat-tab-btn active" id="cat-stn-btn" onclick="switchCat('stn')">
-      📦 Stationery <span class="cat-tab-count" id="badge-stn"></span>
+      ✏️ Stationery <span class="cat-tab-count" id="badge-stn"></span>
     </button>
     <button class="cat-tab-btn" id="cat-bc-btn" onclick="switchCat('bc')">
-      💳 Business Card <span class="cat-tab-count" id="badge-bc"></span>
+      🪪 Business Card <span class="cat-tab-count" id="badge-bc"></span>
     </button>
     <button class="cat-tab-btn" id="cat-idc-btn" onclick="switchCat('idc')">
-      🪪 ID Card <span class="cat-tab-count" id="badge-idc"></span>
+      🎫 ID Card <span class="cat-tab-count" id="badge-idc"></span>
     </button>
   </div>
 
@@ -598,7 +598,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 <!-- ADD MODAL -->
 <div id="add-modal">
   <div class="add-box">
-    <div class="add-box-header"><span class="add-box-title">📦 Stationery 항목 선택</span><button class="add-close" onclick="closeAddModal()">×</button></div>
+    <div class="add-box-header"><span class="add-box-title">✏️ Stationery 항목 선택</span><button class="add-close" onclick="closeAddModal()">×</button></div>
     <div class="add-search-bar"><input type="text" id="add-search-input" placeholder="상품명 또는 코드로 검색..." oninput="renderAddList()"></div>
     <div class="cat-filter" id="cat-filter"></div>
     <div class="add-list-wrap"><table>
@@ -1053,7 +1053,7 @@ function buildCatFilter(){
 function setCat(c){_activeCat=c;document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',c===''?b.id==='cat-all':b.textContent===c));renderAddList();}
 function openAddModal(){_pendingItems=[];const cntEl=document.getElementById('add-confirm-cnt');const btn=document.getElementById('add-confirm-btn');const info=document.getElementById('add-selected-count');if(cntEl)cntEl.textContent='0';if(btn)btn.style.display='none';if(info)info.textContent='';
   document.getElementById('add-search-input').value='';_activeCat='';
-  if(!stationeryData.length){document.getElementById('add-list-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#605e5c">📦 로딩 중...</td></tr>';document.getElementById('add-modal').classList.add('open');loadStationeryData().then(()=>{document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.id==='cat-all'));renderAddList();});return;}
+  if(!stationeryData.length){document.getElementById('add-list-body').innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:#605e5c">✏️ 로딩 중...</td></tr>';document.getElementById('add-modal').classList.add('open');loadStationeryData().then(()=>{document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.id==='cat-all'));renderAddList();});return;}
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.toggle('active',b.id==='cat-all'));
   renderAddList();document.getElementById('add-modal').classList.add('open');
 }
