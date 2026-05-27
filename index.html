@@ -290,14 +290,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
             <input type="checkbox" id="stn-ord-other-employee" onchange="stnOrdToggleOtherEmployee()"> 다른 STK 직원
           </label>
         </div>
-        <!-- 다른 직원 검색 (숨김) -->
-        <div id="stn-ord-emp-search" style="display:none;margin-bottom:12px">
-          <div class="appr-grid">
-            <select id="stn-ord-dept-sel" onchange="stnOrdDeptChange()"><option value="">부서</option></select>
-            <select id="stn-ord-team-sel" onchange="stnOrdTeamChange()" disabled><option value="">팀</option></select>
-            <select id="stn-ord-person-sel" onchange="stnOrdPersonChange()" disabled><option value="">직원 선택</option></select>
-          </div>
-        </div>
         <div class="form-row" style="margin-bottom:10px">
           <div class="form-group">
             <label>Name <span class="req-mark">*</span></label>
@@ -306,6 +298,14 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <div class="form-group">
             <label>Phone <span class="req-mark">*</span></label>
             <input type="text" id="stn-ord-phone" placeholder="+82-10-9999-9999">
+          </div>
+        </div>
+        <!-- 다른 직원 검색 (숨김) -->
+        <div id="stn-ord-emp-search" style="display:none;margin-bottom:12px">
+          <div class="appr-grid">
+            <select id="stn-ord-dept-sel" onchange="stnOrdDeptChange()"><option value="">부서</option></select>
+            <select id="stn-ord-team-sel" onchange="stnOrdTeamChange()" disabled><option value="">팀</option></select>
+            <select id="stn-ord-person-sel" onchange="stnOrdPersonChange()" disabled><option value="">직원 선택</option></select>
           </div>
         </div>
         <div class="section-title" style="margin-top:18px">4. 수령자 정보 및 수령 주소</div>
