@@ -1537,7 +1537,8 @@ async function loadApprovalQueue(cat){
   if(!siteId)return;
   try{
     const [apprData,reqData]=await Promise.all([apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500'),api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
-    const _gaDedupMap={};apprData.value.filter(i=>i.fields.ApproverEmail===user.email&&(i.fields.Status||'')==='대기').forEach(i=>{const rid=String(i.fields.RequestID);if(!_gaDedupMap[rid]||i.fields.ApprovalOrder<_gaDedupMap[rid].fields.ApprovalOrder)_gaDedupMap[rid]=i;});
+    const _ue2=(user.email||'').toLowerCase(),_uu2=(user.username||'').toLowerCase();
+    const _gaDedupMap={};apprData.value.filter(i=>{const _e=(i.fields.ApproverEmail||'').toLowerCase();return (_e===_ue2||_e===_uu2)&&(i.fields.Status||'')==='대기';}).forEach(i=>{const rid=String(i.fields.RequestID);if(!_gaDedupMap[rid]||i.fields.ApprovalOrder<_gaDedupMap[rid].fields.ApprovalOrder)_gaDedupMap[rid]=i;});
     const mine=Object.values(_gaDedupMap).sort((a,b)=>b.fields.RequestID-a.fields.RequestID);
     const reqMap=Object.fromEntries(reqData.value.map(r=>[r.id,r.fields]));
     const rows=mine.map(i=>{
