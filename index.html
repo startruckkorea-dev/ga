@@ -426,6 +426,10 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <div class="form-group"><label>Name (KO) <span class="req-mark">*</span></label><input type="text" id="bc-name-ko" placeholder="홍길동" oninput="bcUpdatePreview()"></div>
         </div>
         <div class="form-row">
+          <div class="form-group"><label>Job Title</label><input type="text" id="bc-job-title" placeholder="Sales Administrator" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Job Position</label><input type="text" id="bc-job-position" placeholder="매니저" oninput="bcUpdatePreview()"></div>
+        </div>
+        <div class="form-row">
           <div class="form-group"><label>Department <span class="req-mark">*</span></label><input type="text" id="bc-dept" placeholder="Finance &amp; Controlling"></div>
           <div class="form-group"><label>Email</label><input type="email" id="bc-email" placeholder="email@hyosung.com" oninput="bcUpdatePreview()"></div>
         </div>
@@ -1404,16 +1408,24 @@ function bcUpdatePreview(){
   const enInput=document.getElementById('bc-name-en');
   const koInput=document.getElementById('bc-name-ko');
   const emInput=document.getElementById('bc-email');
+  const jtInput=document.getElementById('bc-job-title');
+  const jpInput=document.getElementById('bc-job-position');
   if(!enInput||!koInput||!emInput) return;
   const en=enInput.value||'Name (EN)';
   const ko=koInput.value||'Name(KO)';
   const em=emInput.value||'Email address';
+  const jt=jtInput?jtInput.value||'Job Title':'';
+  const jp=jpInput?jpInput.value||'Job Position':'';
   const enEl=document.getElementById('bc-prev-name-en');
   const koEl=document.getElementById('bc-prev-name-ko');
   const emEl=document.getElementById('bc-prev-email');
+  const jtEl=document.getElementById('bc-prev-job-title');
+  const jpEl=document.getElementById('bc-prev-job-position');
   if(enEl)enEl.textContent=en;
   if(koEl)koEl.textContent=ko;
   if(emEl)emEl.textContent=em;
+  if(jtEl)jtEl.textContent=jt;
+  if(jpEl)jpEl.textContent=jp;
 }
 async function bcSubmit(){
   if(!document.getElementById('bc-a1-email').value){alert('1차 결재자(Department Head)를 지정해주세요.');return;}
@@ -1427,7 +1439,7 @@ async function bcSubmit(){
   loading(true);
   try{
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';
-    const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,Status:'대기',RequestDate:new Date().toISOString()}});
+    const _bcJobTitle=document.getElementById('bc-job-title')?.value.trim()||'';const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,Status:'대기',RequestDate:new Date().toISOString()}});
     const _bcId=parseInt(item.id);
     await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date().toISOString().slice(0,10)+'_ID-'+_bcId}});
     await createApprovals('bc',_bcId);
@@ -1435,7 +1447,7 @@ async function bcSubmit(){
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
 function bcReset(){
-  ['bc-name-en','bc-name-ko','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(function(id){document.getElementById(id).value='';});
+  ['bc-name-en','bc-name-ko','bc-job-title','bc-job-position','bc-dept','bc-email','bc-costcenter','bc-desc','bc-mobile'].forEach(function(id){document.getElementById(id).value='';});
   var _ba=document.getElementById('bc-address');
   if(_ba) _ba.value=BC_ADDRESS_LIST[0].ko;
   var _baE=document.getElementById('bc-address-eng');
@@ -1626,7 +1638,7 @@ async function showDetail(cat,id){
   document.getElementById('modal-content').innerHTML='<div style="text-align:center;padding:30px;color:#a19f9d">로딩 중...</div>';
   document.getElementById('detail-modal').classList.add('open');
   try{
-    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,OrdName,OrdPhone,StnName,StnDept,PhotoFileName,AttachedFiles)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
+    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,JobTitle,JobPosition,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,OrdName,OrdPhone,StnName,StnDept,PhotoFileName,AttachedFiles)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500')]);
     const f=r.fields;
     const apprList=apprData.value.filter(i=>Number(i.fields.RequestID)===Number(id)).sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
@@ -1638,7 +1650,7 @@ async function showDetail(cat,id){
       if(f.ItemsData){try{const _raw=f.ItemsData.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#34;/g,'"').replace(/&#58;/g,':').replace(/&#123;/g,'{').replace(/&#125;/g,'}').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim();const items=JSON.parse(_raw);const tot=items.reduce((s,i)=>s+i.rowTotal,0);ih=`<table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-top:6px"><thead><tr style="background:#4472C4;color:#fff"><th style="padding:7px 10px;text-align:left">상품명</th><th style="padding:7px 8px;text-align:center">코드</th><th style="padding:7px 8px;text-align:center">단위</th><th style="padding:7px 8px;text-align:center">Q'ty</th><th style="padding:7px 8px;text-align:right">단가</th><th style="padding:7px 8px;text-align:right">소계</th></tr></thead><tbody>${items.map(i=>`<tr style="border-bottom:1px solid #edebe9"><td style="padding:6px 10px">${i.name}</td><td style="padding:6px 8px;text-align:center;color:#605e5c">${i.code}</td><td style="padding:6px 8px;text-align:center">${i.unit}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${Number(i.price).toLocaleString()}</td><td style="padding:6px 8px;text-align:right;font-weight:600">${Number(i.rowTotal).toLocaleString()}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#4472C4;color:#fff"><td colspan="5" style="padding:7px 10px;text-align:right;font-weight:700">Total Sum</td><td style="padding:7px 8px;text-align:right;font-weight:700">${tot.toLocaleString()}원</td></tr></tfoot></table>`;}catch(e){}}
       body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Company',f.Company)+row('Cost Center',f.CostCenter)+sec('주문자 정보')+row('주문자',f.OrdName||'-')+row('주문자 연락처',f.OrdPhone||'-')+(f.StnName?row('수령자',f.StnName):'')+( f.StnDept?row('수령자 부서',f.StnDept):'')+( f.Address?row('수령 주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng&&f.Address?row('수령 주소 (영문)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.Description?row('Description',f.Description):'')+row('항목 수',f.ItemCount+'건')+row('Total',fmtAmt(f.TotalAmount))+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+sec('주문 항목')+ih;
     }else if(cat==='bc'){
-      body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?row('주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng?row('Address (EN)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
+      body=sec('기본 정보')+row('번호',id)+row('신청자',f.RequesterEmail)+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+(f.JobTitle?row('Job Title',f.JobTitle):'')+(f.JobPosition?row('Job Position',f.JobPosition):'')+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?row('주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng?row('Address (EN)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+row('상태',`<span style="font-weight:600;color:${sc[f.Status||'대기']}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate));
     }else{
       // IDC 첨부파일 처리
       let _idcFiles = '';
