@@ -285,7 +285,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <div class="section-title">1. 기본 정보</div>
         <div class="form-row">
           <div class="form-group"><label>Company <span class="req-mark">*</span></label><select id="stn-company"><option value="STK">STK</option></select></div>
-          <div class="form-group"><label>Cost Center <span class="req-mark">*</span></label><input type="text" id="stn-costcenter" placeholder="코스트센터 입력"></div>
+          <div class="form-group"><label>Cost Center <span class="req-mark">*</span></label><select id="stn-costcenter"><option value="">코스트센터 선택</option></select></div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div class="section-title" style="margin-bottom:0">2. 주문 항목</div>
@@ -487,7 +487,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>* Cost Center</label><input type="text" id="bc-costcenter" placeholder="코스트센터 입력"></div>
+          <div class="form-group"><label>* Cost Center</label><select id="bc-costcenter"><option value="">코스트센터 선택</option></select></div>
         </div>
         <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea id="bc-desc" rows="3" style="border:1px solid #d2d0ce;border-radius:4px;padding:7px 10px;font-size:.82rem;font-family:inherit;resize:vertical;width:100%" placeholder="추가 요청 사항"></textarea></div>
 
@@ -670,6 +670,7 @@ const A2={name:'',email:'',role:'인사팀장',order:2};
 const A3={name:'',email:'',role:'GA담당자',order:3};
 
 let employeeData=[];
+let COST_CENTERS=[];
 
 let msalApp=null,user=null,siteId=null;
 let stationeryData=[],orderItems=[],_pendingApproval=null;
@@ -847,6 +848,7 @@ async function boot(account){
     loadStationeryData();
     loadApprovalBadge();
     loadEmployees();
+    loadCCTRMaster();
     loadSampleImages();
   }catch(e){alert('SharePoint 연결 오류: '+e.message);}
 
@@ -967,6 +969,48 @@ async function loadEmployees(){
       }
     }
   }catch(e){console.warn('직원 데이터 로드 실패:',e);}
+}
+// Cost Center 마스터 로드 (acc_cctr_list.xlsx — acc_voucher와 동일 파일/시트 공유)
+async function loadCCTRMaster(){
+  try{
+    const t = await token();
+    const searchRes = await api("/sites/"+siteId+"/drive/root/search(q='acc_cctr_list')");
+    const found = (searchRes.value||[]).find(i=>(i.name||'').includes('acc_cctr_list'));
+    if(!found) throw new Error('CCTR 파일 못 찾음');
+    const res = await fetch(GRAPH+'/sites/'+siteId+'/drive/items/'+found.id+'/content',{headers:{Authorization:'Bearer '+t}});
+    if(!res.ok) throw new Error('CCTR 파일 없음: '+res.status);
+    const buf = await res.arrayBuffer();
+    const wb = XLSX.read(buf,{type:'array'});
+    // acc_cctr_list.xlsx: Team 시트, D열(index0)=이름, E열(index1)=코드 (row3부터 데이터)
+    const sheetName = wb.SheetNames.find(s=>s==='Team')||wb.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1});
+    const newCCTR=[];
+    for(let i=3;i<rows.length;i++){
+      const r=rows[i]; if(!r) continue;
+      const name=(r[0]!=null?r[0]:'').toString().trim();
+      const code=(r[1]!=null?r[1]:'').toString().trim();
+      if(!code||!name||!/^\d{8}$/.test(code)) continue;
+      if(!newCCTR.find(c=>c.code===code)) newCCTR.push({code,name});
+    }
+    if(newCCTR.length){
+      COST_CENTERS.length=0;
+      newCCTR.forEach(c=>COST_CENTERS.push(c));
+      console.log('[CCTR] Loaded:', COST_CENTERS.length, 'entries from acc_cctr_list.xlsx');
+    }
+    renderCostCenterSelects();
+  }catch(e){ console.warn('[CCTR] 로드 실패:', e.message); }
+}
+// STN/BC Cost Center 목록(select) 옵션 채우기
+function renderCostCenterSelects(){
+  const opts = '<option value="">코스트센터 선택</option>' +
+    COST_CENTERS.map(c=>`<option value="${c.code} ${c.name}">${c.code} ${c.name}</option>`).join('');
+  ['stn-costcenter','bc-costcenter'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const prevVal = el.value;
+    el.innerHTML = opts;
+    if(prevVal) el.value = prevVal;
+  });
 }
 function gaInitDept(prefix){
   const sel=document.getElementById(prefix+'-a1-dept');
