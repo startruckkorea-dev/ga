@@ -571,7 +571,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <div class="form-group">
             <label>* Cost Center</label>
             <div style="display:flex;align-items:center;gap:8px">
-              <input type="text" id="idc-costcenter" placeholder="코스트센터 입력" style="flex:1">
+              <select id="idc-costcenter" style="flex:1"><option value="">코스트센터 선택</option></select>
               <span id="idc-reissue-label" style="display:none;background:#fde7e9;color:#a4262c;border-radius:4px;padding:3px 8px;font-size:.72rem;font-weight:600">re-issue</span>
             </div>
           </div>
@@ -1004,7 +1004,7 @@ async function loadCCTRMaster(){
 function renderCostCenterSelects(){
   const opts = '<option value="">코스트센터 선택</option>' +
     COST_CENTERS.map(c=>`<option value="${c.code} ${c.name}">${c.code} ${c.name}</option>`).join('');
-  ['stn-costcenter','bc-costcenter'].forEach(id=>{
+  ['stn-costcenter','bc-costcenter','idc-costcenter'].forEach(id=>{
     const el = document.getElementById(id);
     if(!el) return;
     const prevVal = el.value;
