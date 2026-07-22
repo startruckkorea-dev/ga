@@ -713,6 +713,7 @@ async function exportAdminExcel() {
       });
     }
     if(rows.length<=1){alert('내보낼 데이터가 없습니다.');return;}
+    logAction('GA', 'Excel 내보내기', { 건수: rows.length-1, 카테고리: cats.map(c=>c.toUpperCase()) });
     const wb=XLSX.utils.book_new();
     const ws=XLSX.utils.aoa_to_sheet(rows);
     ws['!cols']=[{wch:6},{wch:8},{wch:28},{wch:24},{wch:16},{wch:10},{wch:18},{wch:20},{wch:16},{wch:10},{wch:18}];
@@ -742,6 +743,8 @@ async function token(){
 
 // ── 페이지네이션 전체 조회 헬퍼 (기존 .value 접근 호환) ──
 async function apiAll(path) {
+  // SharePoint 기본 페이지 크기(200건)보다 크게 요청해서 왕복 횟수를 줄임 (데이터 누락 없이 전량은 그대로 다 읽음)
+  if (!/[?&]\$top=/.test(path)) path += (path.includes('?') ? '&' : '?') + '$top=999';
   let items = [], url = path;
   while(url) {
     const d = await api(url);
@@ -749,6 +752,67 @@ async function apiAll(path) {
     url = d['@odata.nextLink'] ? d['@odata.nextLink'].replace('https://graph.microsoft.com/v1.0','') : null;
   }
   return {value: items};
+}
+
+// ══ 감사 로깅 (Excel 내보내기 등) — STK-DB "Logging_data" 폴더에 시스템/날짜별로 개별 JSON 파일 기록 ══
+// fire-and-forget: 호출부를 절대 블로킹하지 않고, 실패해도 원 기능(Excel 내보내기 등)에 영향 없음
+let _logDriveId = null;
+async function _getLogDriveId() {
+  if (_logDriveId) return _logDriveId;
+  try {
+    const drivesRes = await api('/sites/' + siteId + '/drives');
+    let docDrive = (drivesRes.value || []).find(d => ['Documents','문서','Shared Documents'].includes(d.name));
+    if (!docDrive && drivesRes.value && drivesRes.value.length) docDrive = drivesRes.value[0];
+    _logDriveId = docDrive ? docDrive.id : null;
+  } catch(e) { console.warn('[Log] drive 조회 실패:', e.message); }
+  return _logDriveId;
+}
+const _ensuredLogFolders = new Set();
+async function _ensureLogFolder(driveId, folderPath, t) {
+  if (_ensuredLogFolders.has(folderPath)) return true;
+  const parts = folderPath.split('/').filter(Boolean);
+  let cur = '';
+  try {
+    for (const part of parts) {
+      const parentUrl = cur ? `${GRAPH}/drives/${driveId}/root:/${cur}:/children` : `${GRAPH}/drives/${driveId}/root/children`;
+      const res = await fetch(parentUrl, {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: part, folder: {}, '@microsoft.graph.conflictBehavior': 'fail' })
+      });
+      if (!res.ok && res.status !== 409) { console.warn('[Log] 폴더 생성 실패:', cur+'/'+part, res.status); return false; }
+      cur = cur ? cur + '/' + part : part;
+    }
+    _ensuredLogFolders.add(folderPath);
+    return true;
+  } catch(e) { console.warn('[Log] 폴더 생성 오류:', e.message); return false; }
+}
+function logAction(systemName, action, detail) {
+  (async () => {
+    try {
+      const driveId = await _getLogDriveId();
+      if (!driveId) return;
+      const t = await token();
+      const now = new Date(new Date().getTime() + 9*3600*1000); // KST
+      const p = n => String(n).padStart(2,'0');
+      const dateStr = `${now.getUTCFullYear()}-${p(now.getUTCMonth()+1)}-${p(now.getUTCDate())}`;
+      const timeStr = `${p(now.getUTCHours())}${p(now.getUTCMinutes())}${p(now.getUTCSeconds())}`;
+      const rawUser = (user && (user.email || user.username)) || 'unknown';
+      const userTag = rawUser.split('@')[0].replace(/[^a-zA-Z0-9._-]/g, '_');
+      const rand = Math.random().toString(36).slice(2, 6);
+      const folderPath = `Logging_data/${systemName}/${dateStr}`;
+      const folderOk = await _ensureLogFolder(driveId, folderPath, t);
+      if (!folderOk) return;
+      const path = `/${folderPath}/${timeStr}_${userTag}_${rand}.json`;
+      const body = JSON.stringify({
+        timestampKST: `${dateStr} ${p(now.getUTCHours())}:${p(now.getUTCMinutes())}:${p(now.getUTCSeconds())}`,
+        user: rawUser, system: systemName, action, detail: detail || {}
+      });
+      await fetch(GRAPH + '/drives/' + driveId + '/root:' + path + ':/content', {
+        method: 'PUT', headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body
+      });
+    } catch(e) { console.warn('[Log] 기록 실패(무시됨):', e.message); }
+  })();
 }
 async function api(path,method='GET',body=null){
   const t=await token();
@@ -1598,7 +1662,7 @@ async function withdrawRequest(e, reqId, aprList, reqList) {
 async function loadMyList(cat){
   if(!siteId)return;
   try{
-    const data=await api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
+    const data=await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
     const items=data.value.filter(i=>(i.fields.RequesterEmail||'')===user.email).sort((a,b)=>b.id-a.id);
     const r={
       stn:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'STN_Approvals','STN_Requests',f.Status)}</td></tr>`;},
@@ -1612,7 +1676,7 @@ async function loadMyList(cat){
 async function loadApprovalQueue(cat){
   if(!siteId)return;
   try{
-    const [apprData,reqData]=await Promise.all([apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500'),api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
+    const [apprData,reqData]=await Promise.all([apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
     const _ue2=(user.email||'').toLowerCase(),_uu2=(user.username||'').toLowerCase();
     const _gaDedupMap={};apprData.value.filter(i=>{const _e=(i.fields.ApproverEmail||'').toLowerCase();return (_e===_ue2||_e===_uu2)&&(i.fields.Status||'')==='대기';}).forEach(i=>{const rid=String(i.fields.RequestID);if(!_gaDedupMap[rid]||i.fields.ApprovalOrder<_gaDedupMap[rid].fields.ApprovalOrder)_gaDedupMap[rid]=i;});
     const mine=Object.values(_gaDedupMap).sort((a,b)=>b.fields.RequestID-a.fields.RequestID);
@@ -1628,7 +1692,7 @@ async function loadApprovalQueue(cat){
 async function loadAdminList(cat){
   if(!siteId)return;
   try{
-    const data=await api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
+    const data=await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
     const status=document.getElementById(cat+'-admin-status').value;
     const q=(document.getElementById(cat+'-admin-search').value||'').toLowerCase();
     let items=data.value.sort((a,b)=>b.id-a.id);
