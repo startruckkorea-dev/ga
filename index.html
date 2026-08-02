@@ -825,7 +825,7 @@ function logAction(systemName, action, detail) {
 }
 async function api(path,method='GET',body=null){
   const t=await token();
-  const opts={method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'}};
+  const opts={method,headers:{Authorization:'Bearer '+t,'Content-Type':'application/json',Prefer:'HonorNonIndexedQueriesWarningMayFailRandomly'}};
   if(body)opts.body=JSON.stringify(body);
   const r=await fetch(GRAPH+path,opts);
   if(!r.ok){const e=await r.text();throw new Error(r.status+' '+e);}
