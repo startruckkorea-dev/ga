@@ -1676,7 +1676,7 @@ async function withdrawRequest(e, reqId, aprList, reqList) {
   }
 }
 async function loadMyList(cat){
-  if(!siteId)return;
+  if(!siteId){ const s = await api('/sites/'+SITE_PATH); siteId = s.id; }
   try{
     const data=await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500');
     const items=data.value.filter(i=>(i.fields.RequesterEmail||'')===user.email).sort((a,b)=>b.id-a.id);
@@ -1690,7 +1690,7 @@ async function loadMyList(cat){
   }catch(e){console.error(e);}
 }
 async function loadApprovalQueue(cat){
-  if(!siteId)return;
+  if(!siteId){ const s = await api('/sites/'+SITE_PATH); siteId = s.id; }
   try{
     const [apprData,reqData]=await Promise.all([apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+"/items?$expand=fields&$top=500&$filter=fields/Status eq '대기'"),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields&$top=500')]);
     const _ue2=(user.email||'').toLowerCase(),_uu2=(user.username||'').toLowerCase();
