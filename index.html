@@ -434,6 +434,17 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <div class="form-group"><label>Email</label><input type="email" id="bc-email" placeholder="email@hyosung.com" oninput="bcUpdatePreview()"></div>
         </div>
 
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:14px">
+            <label>Mobile Number (명함에 기재될 번호)</label>
+            <input type="text" id="bc-mobile" placeholder="ex) +82-10-9999-9999" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label>세일즈 에이전트 상호명 (사업자등록증에 기재된)</label>
+            <input type="text" id="bc-sales-agent" placeholder="예시) 세일즈 에이전트 상호명 (사업자등록증에 기재된)" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+
         <div class="form-group" style="margin-bottom:10px">
           <label>Address</label>
           <select id="bc-address-select" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;font-family:inherit;margin-bottom:6px;background:#fff" onchange="bcAddressSelect()">
@@ -450,16 +461,6 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
             </div>
           </div>
           <div style="font-size:11px;color:#605e5c;margin-top:2px">위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</div>
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="margin-bottom:14px">
-            <label>Mobile Number (명함에 기재될 번호)</label>
-            <input type="text" id="bc-mobile" placeholder="ex) +82-10-9999-9999" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
-          </div>
-          <div class="form-group" style="margin-bottom:14px">
-            <label>세일즈 에이전트 상호명 (사업자등록증에 기재된)</label>
-            <input type="text" id="bc-sales-agent" placeholder="예시) 세일즈 에이전트 상호명 (사업자등록증에 기재된)" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
-          </div>
         </div>
         <div class="section-title">3. 주문 수량</div>
         <div class="form-row">
