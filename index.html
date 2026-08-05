@@ -1139,7 +1139,7 @@ async function createApprovals(cat,reqId){
     ?[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A3.name,email:A3.email,role:A3.role,order:2}]
     :[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A2.name,email:A2.email,role:A2.role,order:2},{name:A3.name,email:A3.email,role:A3.role,order:3}];
   for(const a of approvers){
-    await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:cat.toUpperCase()+'-'+new Date().toISOString().slice(0,10)+'_ID-'+reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
+    await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:cat.toUpperCase()+'-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
   }
 }
 async function loadApprovalBadge(){
@@ -1446,7 +1446,7 @@ async function stnSubmit(){
     if(!_stnName){alert('수령자 이름을 입력해주세요.');loading(false);return;}
     const item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:{Title:'STN-tmp',Company:'STK',CostCenter:costCenter,ItemCount:orderItems.length,TotalAmount:total,ItemsData:JSON.stringify(orderItems.map(i=>{return{code:i.code,name:i.name,unit:i.unit,price:i.price,qty:i.qty,rowTotal:i.price*i.qty};})),ItemsDataHTML:_itemsHtml,OrdName:document.getElementById('stn-ord-name')?.value.trim()||'',OrdPhone:document.getElementById('stn-ord-phone')?.value.trim()||'',StnName:_stnName,StnDept:_stnDept,Address:_stnAddrKor,AddressEng:_stnAddrEng,Description:_stnDesc,Status:'대기',RequesterEmail:user.email,RequestDate:new Date().toISOString()}});
     const _stnId=parseInt(item.id);
-    await api('/sites/'+siteId+'/lists/STN_Requests/items/'+_stnId,'PATCH',{fields:{Title:'STN-'+new Date().toISOString().slice(0,10)+'_ID-'+_stnId}});
+    await api('/sites/'+siteId+'/lists/STN_Requests/items/'+_stnId,'PATCH',{fields:{Title:'STN-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+_stnId}});
     await createApprovals('stn',_stnId);
     alert('✅ 신청 완료! (번호: '+_stnId+')');stnReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
@@ -1565,7 +1565,7 @@ async function bcSubmit(){
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';const _bcSalesAgent=document.getElementById('bc-sales-agent')?.value.trim()||'';
     const _bcJobTitle=document.getElementById('bc-job-title')?.value.trim()||'';const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,SalesAgentCompany:_bcSalesAgent,Status:'대기',RequestDate:new Date().toISOString()}});
     const _bcId=parseInt(item.id);
-    await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date().toISOString().slice(0,10)+'_ID-'+_bcId}});
+    await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+_bcId}});
     await createApprovals('bc',_bcId);
     alert('✅ 신청 완료! (번호: '+_bcId+')');switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
@@ -1637,7 +1637,7 @@ async function idcSubmit(){
         }
       }catch(fe){console.error('Photo upload error:',fe);}
     }
-    await api('/sites/'+siteId+'/lists/IDC_Requests/items/'+reqId,'PATCH',{fields:{Title:'IDC-'+new Date().toISOString().slice(0,10)+'_ID-'+reqId}});
+    await api('/sites/'+siteId+'/lists/IDC_Requests/items/'+reqId,'PATCH',{fields:{Title:'IDC-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+reqId}});
     await createApprovals('idc',reqId);
     alert('✅ 신청 완료! (번호: '+reqId+')');idcReset();switchTab('list');
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
