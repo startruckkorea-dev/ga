@@ -1278,7 +1278,6 @@ function confirmAddItems(){
   renderOrderTable();
   closeAddModal();
 }
-function addItem(d){const exists=orderItems.find(i=>i.code===d.code);if(exists){exists.qty++;}else{orderItems.push({...d,qty:1});}renderOrderTable();}
 function renderOrderTable(){
   const tbody=document.getElementById('stn-order-body');
   if(!orderItems.length){tbody.innerHTML='<tr><td colspan="8" class="no-data-cell">There is no data.</td></tr>';document.getElementById('stn-total-sum').textContent='0';return;}
@@ -1512,10 +1511,6 @@ function stnReset(){
 }
 
 // KST 기준 자세한 날짜 문자열 (Title용)
-function _nowKST(){
-  const d=new Date(new Date().getTime()+9*60*60*1000);
-  return d.toISOString().replace('T',' ').substring(0,19);
-}
 // ══ BC Address List (BC_Address.xlsx 기준) ══
 const BC_ADDRESS_LIST=[
   {id:1,ko:'서울특별시 중구 한강대로 416 서울스퀘어 (04637)',en:'8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea'},
