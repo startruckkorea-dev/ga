@@ -1076,6 +1076,33 @@ function fmtDate(s){if(!s)return'';const d=new Date(new Date(s).getTime()+9*3600
 function fmtAmt(n){return Number(n||0).toLocaleString()+'원';}
 function loading(on){document.getElementById('loading').className=on?'show':'';}
 function pgSet(id,items,renderer,empty,cols){_pgState[id]={items,page:0,renderer,empty,cols};pgRender(id);}
+// ── 페이지 이동 (APS 공통) ────────────────────────────────────────────
+// 시스템마다 1…234…10 처럼 생략 표시가 달라 지금이 어디쯤인지 가늠하기 어려웠다.
+// 최대 7칸을 이어서 보이는 창으로 통일한다. 창은 끝에 가까워도 7칸을 채워
+// 버튼 위치가 흔들리지 않는다.
+// 처음(«)·마지막(») 버튼을 둔다 — 20쪽이면 › 를 열아홉 번 눌러야 끝에 닿는다.
+function apsPagerHtml(cur, pages, mk) {
+  if (!pages || pages <= 1) return '';
+  cur = Math.max(0, Math.min(cur, pages - 1));
+  const b = (on, act, label, page, title) =>
+    '<button ' + (on ? 'onclick="' + mk(page) + '"' : 'disabled') +
+    (title ? ' title="' + title + '"' : '') +
+    ' style="min-width:30px;padding:4px 9px;border-radius:4px;font-size:.8rem;font-family:inherit;' +
+    'border:1px solid ' + (act ? '#0078d4' : on ? '#d2d0ce' : '#edebe9') + ';' +
+    'background:' + (act ? '#0078d4' : on ? '#fff' : '#f3f2f1') + ';' +
+    'color:' + (act ? '#fff' : on ? '#323130' : '#a19f9d') + ';' +
+    'font-weight:' + (act ? '700' : '400') + ';' +
+    'cursor:' + (on ? 'pointer' : 'default') + '">' + label + '</button>';
+  const start = Math.max(0, Math.min(cur - 3, pages - 7));
+  const end   = Math.min(pages, start + 7);
+  let h = b(cur > 0, false, '&laquo;',  0,        '처음으로')
+        + b(cur > 0, false, '&lsaquo;', cur - 1,  '이전');
+  for (let p = start; p < end; p++) h += b(true, p === cur, String(p + 1), p, '');
+  h += b(cur < pages - 1, false, '&rsaquo;', cur + 1,   '다음')
+     + b(cur < pages - 1, false, '&raquo;',  pages - 1, '마지막으로');
+  return h;
+}
+
 function pgRender(id){
   const st=_pgState[id];if(!st)return;
   const total=st.items.length,pages=Math.ceil(total/PG)||1;
@@ -1084,9 +1111,13 @@ function pgRender(id){
   const tbody=document.getElementById(id+'-body');
   if(!tbody)return;
   tbody.innerHTML=slice.length?slice.map((item,idx)=>st.renderer(item,st.items.length-(st.page*PG+idx)-1)).join(''):`<tr><td colspan="${st.cols}" style="text-align:center;padding:30px;color:#a19f9d">${st.empty}</td></tr>`;
+  // 「◀ 2 / 7 ▶」 로만 보여 원하는 쪽으로 바로 갈 수 없었다.
   const pgDiv=document.getElementById(id+'-pagination');
-  if(!pgDiv||pages<=1){if(pgDiv)pgDiv.innerHTML='';return;}
-  pgDiv.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:12px"><button class="btn-secondary" style="padding:4px 12px;font-size:.78rem" onclick="pgGo('${id}',${st.page-1})" ${st.page===0?'disabled':''}>◀</button><span style="font-size:.78rem;color:#605e5c;padding:0 8px">${st.page+1} / ${pages}</span><button class="btn-secondary" style="padding:4px 12px;font-size:.78rem" onclick="pgGo('${id}',${st.page+1})" ${st.page>=pages-1?'disabled':''}>▶</button></div>`;
+  if(!pgDiv) return;
+  pgDiv.innerHTML = pages<=1 ? '' :
+    '<div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:12px;flex-wrap:wrap">'
+    + apsPagerHtml(st.page, pages, function(p){ return "pgGo('" + id + "'," + p + ")"; })
+    + '</div>';
 }
 function pgGo(id,p){if(_pgState[id]){_pgState[id].page=p;pgRender(id);}}
 
