@@ -111,7 +111,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .btn-secondary{background:#fff;border:1px solid #d2d0ce;border-radius:4px;padding:8px 24px;font-size:.85rem;cursor:pointer;font-family:inherit}
 .btn-secondary:hover{background:#f3f2f1}
 /* List */
-.list-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.list-table{width:100%;border-collapse:collapse;font-size:.76rem}
+/* 09-29: 목록 표가 카드(흰 배경) 밖으로 삐져나오던 것 — 표를 이 상자에 넣어 넘치면 표 안에서 가로 스크롤(APS · IT-Ticket 과 같은 방식) */
+.tbl-scroll{overflow-x:auto;max-width:100%}
 
 
 
@@ -240,8 +242,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .tab-btn{padding:8px 18px;border:none;background:#fff;border-radius:4px 4px 0 0;font-size:14px;cursor:pointer;color:#605e5c;border-bottom:3px solid transparent;white-space:nowrap}
 .tab-btn.active{color:#0078d4;border-bottom:3px solid #0078d4;font-weight:500}
 .tabs{display:flex;gap:2px;margin-bottom:16px;flex-wrap:wrap}
-.list-table th{padding:9px 12px;text-align:left;background:#f3f2f1;border-bottom:1px solid #edebe9;font-weight:600;color:#323130;font-size:.75rem;white-space:nowrap}
-.list-table td{padding:9px 12px;border-bottom:1px solid #edebe9;color:#323130;white-space:nowrap}
+.list-table th{padding:7px 8px;text-align:left;background:#f3f2f1;border-bottom:1px solid #edebe9;font-weight:600;color:#323130;font-size:.75rem;white-space:nowrap}
+.list-table td{padding:7px 8px;border-bottom:1px solid #edebe9;color:#323130;white-space:nowrap}
 .list-table tr:hover td{background:#f9f8f7;cursor:pointer}
 .list-table tbody tr[onclick]:hover td{background:#f0f6ff}
 .badge-type{background:#e1f0ff;color:#0078d4;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:600}
@@ -426,12 +428,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
-      <tbody id="stn-list-body"></tbody></table><div id="stn-list-pagination"></div>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
+      <tbody id="stn-list-body"></tbody></table></div><div id="stn-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
-      <tbody id="stn-appr-body"></tbody></table><div id="stn-appr-pagination"></div>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <tbody id="stn-appr-body"></tbody></table></div><div id="stn-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
       <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -440,7 +442,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table></div>
       <div id="stn-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -546,12 +548,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
-      <tbody id="bc-list-body"></tbody></table><div id="bc-list-pagination"></div>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
+      <tbody id="bc-list-body"></tbody></table></div><div id="bc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
-      <tbody id="bc-appr-body"></tbody></table><div id="bc-appr-pagination"></div>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <tbody id="bc-appr-body"></tbody></table></div><div id="bc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
       <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -560,7 +562,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table></div>
       <div id="bc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -614,7 +616,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           </div>
         </div>
         <div class="form-group" style="margin-bottom:14px">
-          <label>Name (사원증 표기 이름 - 영문/한글 둘 다 입력)</label>
+          <label>Name <span style="font-size:.8em;font-weight:400;color:#605e5c;margin-left:4px">(사원증 표기 이름 - 영문/한글 둘 다 입력)</span></label>
           <input type="text" id="idc-name" placeholder="예) Hong Gil-dong / 홍길동" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
         </div>
         <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea id="idc-desc" rows="3" style="border:1px solid #d2d0ce;border-radius:4px;padding:7px 10px;font-size:.82rem;font-family:inherit;resize:vertical;width:100%" placeholder="추가 요청 사항 (분실 사유 등)"></textarea></div>
@@ -637,12 +639,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
-      <tbody id="idc-list-body"></tbody></table><div id="idc-list-pagination"></div>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
+      <tbody id="idc-list-body"></tbody></table></div><div id="idc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
-      <tbody id="idc-appr-body"></tbody></table><div id="idc-appr-pagination"></div>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <tbody id="idc-appr-body"></tbody></table></div><div id="idc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
       <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -651,7 +653,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table>
+      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table></div>
       <div id="idc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -2121,7 +2123,7 @@ async function showDetail(cat,id){
   document.getElementById('modal-content').innerHTML='<div style="text-align:center;padding:30px;color:#a19f9d">로딩 중...</div>';
   document.getElementById('detail-modal').classList.add('open');
   try{
-    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,JobTitle,JobPosition,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,SalesAgentCompany,OrdName,OrdPhone,StnName,StnDept,PhotoFileName,AttachedFiles)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500&$filter=fields/RequestID eq '+parseInt(id))]);
+    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,JobTitle,JobPosition,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,SalesAgentCompany,OrdName,OrdPhone,StnName,StnDept,Name,PhotoFileName,AttachedFiles)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500&$filter=fields/RequestID eq '+parseInt(id))]);
     const f=r.fields;
     const apprList=apprData.value.sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
@@ -2154,7 +2156,7 @@ async function showDetail(cat,id){
       } else if(f.PhotoFileName){
         _idcFiles = row('첨부파일', `<a href="#" onclick="downloadIDCPhoto('${f.PhotoFileName.replace(/'/g,"\\'")}',${id});return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${f.PhotoFileName}</a>`);
       }
-      body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+row('상태',`<span class="badge-${(function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status)}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Issue Type',f.IssueType)+row('Cost Center',f.CostCenter)+row('Description',f.Description)+_idcFiles;
+      body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+row('상태',`<span class="badge-${(function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status)}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Issue Type',f.IssueType)+row('Cost Center',f.CostCenter)+row('Name <span style="font-size:.78em;font-weight:400;color:#8a8886;margin-left:3px">(사원증 표기 이름)</span>',f.Name)+row('Description',f.Description)+_idcFiles;
     }
     const ah=sec('결재 이력')+'<div style="background:#f9f9f9;border-radius:6px;border:1px solid #edebe9;overflow:hidden">'+(apprList.length?apprList.map(a=>{const af=a.fields;return`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid #edebe9"><div><div style="font-weight:600;font-size:13px">${(()=>{const _r=aacRoleBase(af.ApproverRole),_o=String(af.ApprovalOrder||'');const _n=_r.startsWith(_o+'차')?_r.slice(_o.length+1).trim():_r;const _p=_n.replace(/^결재자\s*/,'');const _q=_p.startsWith('(')?_p:(_p?'('+_p+')':'');return '<b>'+_o+'차</b> 결재자'+_q+aacRolePill(af.ApproverRole, af.Status);})()}</div><div style="font-size:12px;color:#605e5c;margin-top:2px">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>${af.ApprovalDate?`<div style="font-size:11px;color:#a19f9d;margin-top:2px">${fmtDate(af.ApprovalDate)}</div>`:''}${af.Comment?`<div style="margin-top:4px;background:#fff;border:1px solid #edebe9;border-radius:4px;padding:4px 8px;font-size:12px;color:#605e5c;white-space:pre-wrap">💬 ${safeText(af.Comment)}</div>`:''}</div><span style="color:${sc[af.Status]||'#323130'};font-weight:700;font-size:12px;white-space:nowrap;margin-left:8px">${af.Status||''}</span></div>`;}  ).join(''):'<div style="padding:12px;font-size:.82rem;color:#a19f9d">결재 이력이 없습니다.</div>')+'</div>';
     document.getElementById('modal-content').innerHTML=body+ah;
