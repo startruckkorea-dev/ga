@@ -1824,9 +1824,10 @@ function renderAddressSelects(){
       if(prev && !loading) sel.value = prev;
     }
     if(src){
+      const fileLabel = ADDRESS_FILE.replace(/\.xlsx$/i, '');   // 화면에는 확장자 없이(09-29)
       src.textContent = loading ? '지점 목록 불러오는 중...'
-        : ADDRESS_SOURCE.state === 'sp' ? '지점 ' + ADDRESS_SOURCE.count + '곳 · ' + ADDRESS_SOURCE.label
-        : '지점 ' + ADDRESS_SOURCE.count + '곳 · 기본 목록(' + ADDRESS_FILE + ' 없음)';
+        : ADDRESS_SOURCE.state === 'sp' ? '지점 ' + ADDRESS_SOURCE.count + '곳 · ' + fileLabel
+        : '지점 ' + ADDRESS_SOURCE.count + '곳 · 기본 목록(' + fileLabel + ' 없음)';
       src.style.color = loading ? '#a19f9d' : ADDRESS_SOURCE.state === 'sp' ? '#107c10' : '#8a6116';
     }
   });
