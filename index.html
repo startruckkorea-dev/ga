@@ -204,15 +204,15 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .stn-order-wrap{border:1px solid #e1e7ef;border-radius:10px;overflow:hidden;background:#fff}
 .stn-order-scroll{overflow-x:auto}
 .item-table{width:100%;min-width:640px;border-collapse:collapse;table-layout:fixed;font-size:.8rem}
-.item-table th{height:40px;padding:0 10px;background:#f5f8fc;color:#4a5568;font-weight:600;font-size:.72rem;border-bottom:1px solid #e1e7ef;white-space:nowrap;text-align:center}
+.item-table th{height:36px;padding:0 10px;background:#f5f8fc;color:#4a5568;font-weight:600;font-size:.72rem;border-bottom:1px solid #e1e7ef;white-space:nowrap;text-align:center}
 .item-table th.c-l{text-align:left}.item-table th.c-r{text-align:right}
-.item-table td{height:56px;padding:0 10px;border-bottom:1px solid #eef1f5;vertical-align:middle;color:#323130}
+.item-table td{height:46px;padding:0 10px;border-bottom:1px solid #eef1f5;vertical-align:middle;color:#323130}
 .item-table tbody tr:last-child td{border-bottom:none}
 .item-table tbody tr:hover td{background:#fafcff}
 .item-table .c-c{text-align:center}.item-table .c-r{text-align:right}.item-table .num{font-variant-numeric:tabular-nums}
 .oi-name{font-weight:600;color:#1f2937;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:normal;overflow-wrap:anywhere}
 .oi-code{font-size:.74rem;color:#605e5c;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.qty-step{display:inline-flex;align-items:stretch;height:30px;border:1px solid #d2d0ce;border-radius:6px;overflow:hidden;background:#fff;vertical-align:middle}
+.qty-step{display:inline-flex;align-items:stretch;height:28px;border:1px solid #d2d0ce;border-radius:6px;overflow:hidden;background:#fff;vertical-align:middle}
 .qty-step button{width:26px;border:none;background:#f7f8fa;color:#44546a;font-size:.95rem;line-height:1;cursor:pointer;font-family:inherit;padding:0}
 .qty-step button:hover:not(:disabled){background:#e8f1fb;color:#0078d4}
 .qty-step button:disabled{color:#c8c6c4;cursor:default}
@@ -267,7 +267,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 /* Add modal — Stationery 항목 선택(10-06 다시 꾸밈: 팝업 크기 고정 · 모든 행 같은 높이 · 카테고리 칩에 개수 · 선택 요약) */
 #add-modal{display:none;position:fixed;inset:0;background:rgba(15,39,68,.45);z-index:300;align-items:center;justify-content:center;padding:16px}
 #add-modal.open{display:flex}
-.add-box{background:#fff;border-radius:12px;width:900px;max-width:100%;height:min(720px,88vh);height:min(720px,88dvh);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 50px rgba(15,39,68,.28)}
+.add-box{background:#fff;border-radius:12px;width:1000px;max-width:100%;height:min(720px,88vh);height:min(720px,88dvh);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 18px 50px rgba(15,39,68,.28)}
 .add-box-header{padding:14px 16px 12px 20px;border-bottom:1px solid #edebe9;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .add-box-title{font-size:.95rem;font-weight:700;color:#0f2744}
 .add-box-sub{margin-left:8px;font-size:.74rem;font-weight:500;color:#8a94a6}
@@ -279,29 +279,31 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .add-search input{width:100%;height:38px;border:1px solid #d2d0ce;border-radius:8px;padding:0 64px 0 34px;font-size:.84rem;font-family:inherit;background:#fff}
 .add-search input:focus{outline:none;border-color:#0078d4;box-shadow:0 0 0 3px rgba(0,120,212,.12)}
 .add-result-cnt{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.72rem;color:#8a94a6;font-variant-numeric:tabular-nums;pointer-events:none}
-.cat-filter{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.cat-btn{display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 11px;border:1px solid #dfe3e8;border-radius:14px;background:#fff;color:#44546a;font-size:.74rem;font-family:inherit;white-space:nowrap;cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+.cat-filter{display:flex;flex-wrap:nowrap;gap:5px;margin-top:10px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth}
+.cat-filter::-webkit-scrollbar{display:none}
+.cat-filter.more-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+.cat-filter.more-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
+.cat-filter.more-l.more-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+.cat-btn{flex:0 0 auto;display:inline-flex;align-items:center;height:28px;padding:0 10px;border:1px solid #dfe3e8;border-radius:14px;background:#fff;color:#44546a;font-size:.74rem;font-family:inherit;white-space:nowrap;cursor:pointer;transition:background .12s,border-color .12s,color .12s}
 .cat-btn:hover{border-color:#0078d4;color:#0078d4}
-.cat-btn .n{font-size:.66rem;color:#8a94a6;font-variant-numeric:tabular-nums}
 .cat-btn.active{background:#0078d4;border-color:#0078d4;color:#fff}
-.cat-btn.active .n{color:rgba(255,255,255,.85)}
 .add-list-wrap{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
 .add-list-wrap table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:.8rem}
 .add-list-wrap col.c-chk{width:44px}.add-list-wrap col.c-no{width:52px}.add-list-wrap col.c-code{width:92px}.add-list-wrap col.c-cat{width:132px}.add-list-wrap col.c-unit{width:56px}.add-list-wrap col.c-price{width:116px}
-.add-list-wrap thead th{position:sticky;top:0;z-index:1;height:38px;padding:0 10px;background:#f5f8fc;color:#4a5568;font-size:.72rem;font-weight:600;text-align:left;white-space:nowrap;box-shadow:inset 0 -1px 0 #e1e7ef}
-.add-list-wrap tbody tr{height:44px;cursor:pointer;outline:none}
+.add-list-wrap thead th{position:sticky;top:0;z-index:1;height:34px;padding:0 10px;background:#f5f8fc;color:#4a5568;font-size:.72rem;font-weight:600;text-align:left;white-space:nowrap;box-shadow:inset 0 -1px 0 #e1e7ef}
+.add-list-wrap tbody tr{height:36px;cursor:pointer;outline:none}
 .add-list-wrap tbody td{padding:0 10px;border-bottom:1px solid #f0f2f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#323130}
 .add-list-wrap tbody tr:hover td{background:#f5f9ff}
 .add-list-wrap tbody tr.sel td{background:#eaf3fd}
 .add-list-wrap tbody tr.sel td:first-child{box-shadow:inset 3px 0 0 #0078d4}
 .add-list-wrap tbody tr:focus-visible td{background:#f0f6ff;box-shadow:inset 0 1px 0 #0078d4,inset 0 -1px 0 #0078d4}
-.al-chk{width:16px;height:16px;margin:0;accent-color:#0078d4;pointer-events:none;vertical-align:middle}
+.al-chk{width:15px;height:15px;margin:0;accent-color:#0078d4;pointer-events:none;vertical-align:middle}
 .add-list-wrap td.al-no{text-align:center;color:#a19f9d;font-variant-numeric:tabular-nums}
 .add-list-wrap td.al-code{color:#0078d4;font-weight:600;font-variant-numeric:tabular-nums}
 .al-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .add-list-wrap td.al-unit{text-align:center;color:#605e5c}
 .add-list-wrap td.al-price{text-align:right;font-weight:600;color:#1f2937;font-variant-numeric:tabular-nums}
-.cat-tag{display:inline-block;max-width:100%;padding:2px 8px;border-radius:10px;background:#eef5fc;color:#0063b1;font-size:.68rem;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.cat-tag{display:inline-block;max-width:100%;padding:1px 8px;border-radius:10px;background:#eef5fc;color:#0063b1;font-size:.68rem;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 .add-list-wrap tbody tr.add-empty{height:auto;cursor:default}
 .add-list-wrap tbody tr.add-empty td{padding:64px 12px;text-align:center;color:#8a94a6;font-size:.82rem;background:#fff;border-bottom:none;white-space:normal}
 .add-footer{padding:12px 20px;border-top:1px solid #edebe9;background:#fafbfc;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -316,11 +318,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
   .add-box{height:92vh;height:92dvh;border-radius:10px}
   .add-box-header{padding:10px 8px 10px 14px}
   .add-tools{padding:10px 12px}
-  .cat-filter{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-  .cat-filter::-webkit-scrollbar{display:none}
   .add-list-wrap .c-no,.add-list-wrap .c-cat,.add-list-wrap .c-unit{display:none}
   .add-list-wrap col.c-code{width:66px}.add-list-wrap col.c-price{width:78px}.add-list-wrap col.c-chk{width:34px}
-  .add-list-wrap tbody tr{height:52px}
+  .add-list-wrap tbody tr{height:46px}
   .add-list-wrap thead th,.add-list-wrap tbody td{padding:0 6px}
   .al-vat{display:none}
   .al-nm{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35;word-break:normal;overflow-wrap:anywhere}
@@ -768,12 +768,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 </div>
 
 <!-- ADD MODAL -->
-<div id="add-modal">
+<div id="add-modal" onmousedown="_addDownOnBackdrop=(event.target===this)" onclick="if(_addDownOnBackdrop&&event.target===this)closeAddModal();_addDownOnBackdrop=false">
   <div class="add-box" role="dialog" aria-modal="true" aria-labelledby="add-box-title">
     <div class="add-box-header"><div><span class="add-box-title" id="add-box-title">Stationery 항목 선택</span><span class="add-box-sub" id="add-total-cnt"></span></div><button class="add-close" onclick="closeAddModal()" aria-label="닫기">×</button></div>
     <div class="add-tools">
       <div class="add-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="text" id="add-search-input" placeholder="상품명 또는 코드로 검색..." oninput="renderAddList()" autocomplete="off"><span class="add-result-cnt" id="add-result-cnt"></span></div>
-      <div class="cat-filter" id="cat-filter" onclick="const b=event.target.closest('.cat-btn');if(b)setCat(b.dataset.cat||'')"></div>
+      <div class="cat-filter" id="cat-filter" onclick="const b=event.target.closest('.cat-btn');if(b)setCat(b.dataset.cat||'')" onscroll="_catEdge()"></div>
     </div>
     <div class="add-list-wrap"><table role="grid" aria-multiselectable="true" aria-label="Stationery 항목">
       <colgroup><col class="c-chk"><col class="c-no"><col class="c-code"><col><col class="c-cat"><col class="c-unit"><col class="c-price"></colgroup>
@@ -1635,18 +1635,23 @@ let _activeCat='';
    · 행을 누르면 그 행만 선택 표시를 바꾼다(목록 전체를 다시 그리지 않아 스크롤이 튀지 않는다)
    · 품목은 목록 순번(data-idx)으로 찾는다 — 예전처럼 onclick 속성에 JSON 을 넣지 않아 이름에 따옴표가 있어도 깨지지 않고,
      상품코드가 비었거나 겹쳐도 누른 그 품목이 담긴다(선택 여부도 코드가 아니라 품목 자체로 판단)
-   · 키보드: Tab 으로 목록에 들어와 ↑ ↓ 로 이동, Space · Enter 로 선택, Esc 로 닫기 */
+   · 키보드: Tab 으로 목록에 들어와 ↑ ↓ 로 이동, Space · Enter 로 선택, Esc 로 닫기 · 팝업 바깥을 눌러도 닫힌다
+   · 카테고리 칩은 한 줄(10-07) — 두 줄로 꺾이면 지저분해 보여서. 품목 수는 칩에 마우스를 올리면 보이고, 칩이 늘어 넘치면 가로로 밀어 본다 */
 function buildCatFilter(){
   const cnt={};stationeryData.forEach(d=>{if(d.category)cnt[d.category]=(cnt[d.category]||0)+1;});
-  const chip=(c,label,n)=>`<button type="button" class="cat-btn${_activeCat===c?' active':''}" aria-pressed="${_activeCat===c}" data-cat="${escHtml(c)}">${escHtml(label)}<span class="n">${n}</span></button>`;
+  const chip=(c,label,n)=>`<button type="button" class="cat-btn${_activeCat===c?' active':''}" aria-pressed="${_activeCat===c}" data-cat="${escHtml(c)}" title="${escHtml(label)} · ${n}개 품목">${escHtml(label)}</button>`;
   document.getElementById('cat-filter').innerHTML=chip('','전체',stationeryData.length)+Object.keys(cnt).map(c=>chip(c,c,cnt[c])).join('');
   const tc=document.getElementById('add-total-cnt');if(tc)tc.textContent=stationeryData.length?'총 '+stationeryData.length.toLocaleString()+'개 품목':'';
+  _catEdge();
 }
+// 칩 줄이 넘치면(카테고리가 늘어 폭을 넘을 때) 넘친 쪽 끝을 흐리게 — 가로로 밀어 볼 수 있다는 표시
+function _catEdge(){const w=document.getElementById('cat-filter');if(!w)return;const max=w.scrollWidth-w.clientWidth;w.classList.toggle('more-l',w.scrollLeft>2);w.classList.toggle('more-r',max-w.scrollLeft>2);}
 function setCat(c){
   _activeCat=c;
   document.querySelectorAll('#cat-filter .cat-btn').forEach(b=>{const on=(b.dataset.cat||'')===c;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});
   renderAddList();
   const w=document.querySelector('#add-modal .add-list-wrap');if(w)w.scrollTop=0;
+  const a=document.querySelector('#cat-filter .cat-btn.active');if(a&&a.scrollIntoView)a.scrollIntoView({block:'nearest',inline:'nearest'});
 }
 function _addSyncFooter(){
   const cnt=_pendingItems.length,sum=_pendingItems.reduce((s,d)=>s+(Number(d.price)||0),0);
@@ -1665,9 +1670,10 @@ function openAddModal(){
     loadStationeryData().then(()=>setCat(''));
     return;
   }
-  setCat('');
+  setCat('');_catEdge();
   if(window.matchMedia&&window.matchMedia('(min-width:641px)').matches)setTimeout(()=>{const i=document.getElementById('add-search-input');if(i)i.focus();},60);
 }
+let _addDownOnBackdrop=false;
 function closeAddModal(){document.getElementById('add-modal').classList.remove('open');}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=document.getElementById('add-modal');if(m&&m.classList.contains('open'))closeAddModal();}});
 function renderAddList(){
