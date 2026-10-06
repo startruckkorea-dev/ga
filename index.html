@@ -27,7 +27,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 #login-err{color:#e53e3e;font-size:.78rem;margin-top:10px;display:none}
 .login-page-footer{position:fixed;bottom:0;left:0;right:0;padding:10px 24px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.18)}
 
-#app{display:none;max-width:960px;margin:0 auto;padding:24px 16px 48px}
+#app{display:none;max-width:1280px;margin:0 auto;padding:24px 16px 48px}
 
 /* ── 헤더 · BU Admin 연락처 / 계정 정보 (APS 공통) ───────────────────
    연락처는 배경·테두리 없이 라벨과 값만 둔다. 틀을 씌우면 덩어리가 커져
@@ -114,6 +114,19 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .list-table{width:100%;border-collapse:collapse;font-size:.76rem}
 /* 09-29: 목록 표가 카드(흰 배경) 밖으로 삐져나오던 것 — 표를 이 상자에 넣어 넘치면 표 안에서 가로 스크롤(APS · IT-Ticket 과 같은 방식) */
 .tbl-scroll{overflow-x:auto;max-width:100%}
+/* 목록 표 열 고정(10-07) — 쪽을 넘겨도 열 위치가 그대로. 넘치는 칸은 말줄임, 마우스를 올리면 전체(아래 mouseover 처리가 title 을 단다) */
+.list-table.fixed{table-layout:fixed;min-width:1080px}
+.list-table.fixed.noname{min-width:940px}
+.list-table.fixed th,.list-table.fixed td{overflow:hidden;text-overflow:ellipsis}
+/* 형식이 정해진 칸(번호 · 제목 IDC-2026-10-07_ID-1234 · 상태 배지 · 신청일 2026-10-07 14:23 · 버튼)은 px 로, 글 칸(신청자 · Name)은 %, Cost Center 는 남는 폭 전부 */
+.list-table col.c-no{width:52px}.list-table col.c-title{width:164px}.list-table col.c-st{width:80px}.list-table col.c-dt{width:126px}
+.list-table col.c-wd{width:100px}.list-table col.c-act{width:132px}
+.list-table col.c-req{width:19%}.list-table col.c-name{width:19%}.list-table.noname col.c-req{width:28%}
+.list-table td.td-name{color:#201f1e;font-weight:600}
+/* GA 화면 폭 1280px(GW 와 같음) — 목록 · 결재함 · 관리자 표는 넓게 쓰고, 신청서 작성은 예전 폭(카드 896px) 그대로 가운데.
+   탭마다 폭을 바꾸면 머리 · 탭 줄이 좌우로 튀므로 바깥 폭은 한 가지로 둔다 */
+#app div[id^="tab-form-"]>div{max-width:928px!important}
+#app div[id^="tab-list-"]>div,#app div[id^="tab-appr-"]>div,#app div[id^="tab-admin-"]>div{max-width:none!important}
 
 
 
@@ -269,6 +282,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
 .idc-ov-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block}
 .idc-ov-name{position:absolute;display:flex;align-items:center;justify-content:center;transform:translateX(-50%);background:#fff;color:#111;font-weight:600;line-height:1;white-space:nowrap;overflow:hidden;pointer-events:none;font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
 .idc-ov-photo[hidden],.idc-ov-name[hidden]{display:none}
+/* 명함 미리보기 위에 겹치는 입력값(10-07) — 검은 자리표시 띠를 흰 바탕으로 덮고 값만 검은 글자로 */
+.bc-ov-txt{position:absolute;display:flex;align-items:center;justify-content:flex-start;background:#fff;color:#111;line-height:1;white-space:nowrap;overflow:hidden;pointer-events:none;font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
+.bc-ov-txt[hidden]{display:none}
 /* Add modal — Stationery 항목 선택(10-06 다시 꾸밈: 팝업 크기 고정 · 모든 행 같은 높이 · 카테고리 칩에 개수 · 선택 요약) */
 #add-modal{display:none;position:fixed;inset:0;background:rgba(15,39,68,.45);z-index:300;align-items:center;justify-content:center;padding:16px}
 #add-modal.open{display:flex}
@@ -533,11 +549,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-wd"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="text-align:center">Withdraw</th></tr></thead>
       <tbody id="stn-list-body"></tbody></table></div><div id="stn-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-act"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="stn-appr-body"></tbody></table></div><div id="stn-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-stn" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -547,7 +563,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table></div>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="stn-admin-body"></tbody></table></div>
       <div id="stn-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -559,7 +575,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <div class="card-title">Business Card Order 신청서</div>
         <div class="section-title">1. 명함 미리보기</div>
         <!-- BC Preview -->
-        <div style="border:1px solid #d2d0ce;border-radius:4px;overflow:hidden;margin-bottom:14px"><img id="bc-sample-img" src="" alt="Business Card Sample" style="width:100%;display:block;min-height:160px;background:#f3f2f1"></div>
+        <div id="bc-card-stage" style="position:relative;border:1px solid #d2d0ce;border-radius:4px;overflow:hidden;margin-bottom:14px"><img id="bc-sample-img" src="" alt="Business Card Sample" style="width:100%;display:block;min-height:160px;background:#f3f2f1" onload="bcCalibrate()"><div id="bc-ov"></div></div>
 
         <div class="section-title">2. 기본 정보</div>
         <div class="form-row">
@@ -578,7 +594,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <div class="form-row">
           <div class="form-group" style="margin-bottom:14px">
             <label>Mobile Number (명함에 기재될 번호)</label>
-            <input type="text" id="bc-mobile" placeholder="ex) +82-10-9999-9999" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
+            <input type="text" id="bc-mobile" placeholder="ex) +82-10-9999-9999" oninput="bcUpdatePreview()" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
           </div>
           <div class="form-group" style="margin-bottom:14px">
             <label>세일즈 에이전트 상호명 (사업자등록증에 기재된)</label>
@@ -594,11 +610,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           <div style="display:flex;gap:6px;margin-bottom:3px">
             <div style="flex:1">
               <div style="font-size:11px;color:#605e5c;margin-bottom:3px">🇰🇷 국문 주소</div>
-              <textarea id="bc-address" rows="2" placeholder="서울특별시 중구 한강대로 416 서울스퀘어 (04637)" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value=''"></textarea>
+              <textarea id="bc-address" rows="2" placeholder="서울특별시 중구 한강대로 416 서울스퀘어 (04637)" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value='';bcUpdatePreview()"></textarea>
             </div>
             <div style="flex:1">
               <div style="font-size:11px;color:#605e5c;margin-bottom:3px">🇺🇸 English Address</div>
-              <textarea id="bc-address-eng" rows="2" placeholder="8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value=''"></textarea>
+              <textarea id="bc-address-eng" rows="2" placeholder="8th Fl. Seoul Square, 416 Hangang-daero, Jung-gu, Seoul, Korea" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;box-sizing:border-box" oninput="document.getElementById('bc-address-select').value='';bcUpdatePreview()"></textarea>
             </div>
           </div>
           <div style="font-size:11px;color:#605e5c;margin-top:2px;display:flex;gap:10px;flex-wrap:wrap"><span>위 주소가 아닌 경우, 희망하는 주소를 수기로 입력해 주세요.</span><span id="bc-address-src" data-addr-src style="color:#a19f9d;margin-left:auto;white-space:nowrap">지점 목록 불러오는 중...</span></div>
@@ -657,11 +673,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-wd"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="text-align:center">Withdraw</th></tr></thead>
       <tbody id="bc-list-body"></tbody></table></div><div id="bc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-act"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="bc-appr-body"></tbody></table></div><div id="bc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -671,7 +687,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table></div>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table></div>
       <div id="bc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -727,7 +743,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
           </div>
         </div>
         <div class="form-group" style="margin-bottom:14px">
-          <label>Name <span style="font-size:.8em;font-weight:400;color:#605e5c;margin-left:4px">(사원증 표기 이름 - 영문/한글 둘 다 입력)</span></label>
+          <label>* Name <span style="font-size:.8em;font-weight:400;color:#605e5c;margin-left:4px">(사원증 표기 이름 - 영문/한글 둘 다 입력)</span></label>
           <input type="text" id="idc-name" placeholder="예) Hong Gil-dong / 홍길동" oninput="idcPreviewName()" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
         </div>
         <div class="form-group" style="margin-bottom:14px"><label>Description</label><textarea id="idc-desc" rows="3" style="border:1px solid #d2d0ce;border-radius:4px;padding:7px 10px;font-size:.82rem;font-family:inherit;resize:vertical;width:100%" placeholder="추가 요청 사항 (분실 사유 등)"></textarea></div>
@@ -754,21 +770,21 @@ body{font-family:'Segoe UI',sans-serif;background:#f3f2f1;min-height:100vh}
       <div class="btn-row"><button class="btn-secondary" onclick="idcReset()">Reset</button><button class="btn-primary" onclick="idcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="width:90px;text-align:center">Withdraw</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-name"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-wd"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Name</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="text-align:center">Withdraw</th></tr></thead>
       <tbody id="idc-list-body"></tbody></table></div><div id="idc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-name"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-act"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Name</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="idc-appr-body"></tbody></table></div><div id="idc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-idc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
       <div style="display:flex;gap:10px;margin-bottom:12px">
         <select id="idc-admin-status" onchange="loadAdminList('idc')" style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit"><option value="">전체 상태</option><option>대기</option><option>승인완료</option><option>반려</option></select>
-        <input id="idc-admin-search" oninput="loadAdminList('idc')" placeholder="신청자..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
+        <input id="idc-admin-search" oninput="loadAdminList('idc')" placeholder="신청자 · Name..." style="border:1px solid #d2d0ce;border-radius:4px;padding:6px 10px;font-size:.82rem;font-family:inherit;flex:1">
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <div class="tbl-scroll"><table class="list-table"><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table></div>
+      <div class="tbl-scroll"><table class="list-table fixed"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-name"><col class="c-cc"><col class="c-st"><col class="c-dt"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Name</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="idc-admin-body"></tbody></table></div>
       <div id="idc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -958,7 +974,7 @@ async function exportAdminExcel() {
   loading(true, 'Excel 생성 중...');
   try {
     const cats = ['stn','bc','idc'];
-    const rows = [['번호','카테고리','신청자','Title','Cost Center','상태','신청일','1차 역할','1차 결재자','1차 상태','1차 일시']];
+    const rows = [['번호','카테고리','신청자','Title','Name','Cost Center','상태','신청일','1차 역할','1차 결재자','1차 상태','1차 일시']];
     const catCounts = {stn:0, bc:0, idc:0};
     for(const cat of cats) {
       const data = await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields');
@@ -968,7 +984,8 @@ async function exportAdminExcel() {
       (data.value||[]).forEach(item=>{
         const f=item.fields;
         const ap=(aprMap[String(item.id)]||[]).sort((a,b)=>(a.ApprovalOrder||0)-(b.ApprovalOrder||0));
-        const row=[0,cat.toUpperCase(),f.RequesterEmail||'',f.Title||'',f.CostCenter||'',f.Status||'',f.RequestDate?fmtDate(f.RequestDate):''];
+        const _nm=cat==='idc'?(f.Name||''):cat==='bc'?[f.NameEN,f.NameKO].filter(Boolean).join(' / '):'';
+        const row=[0,cat.toUpperCase(),f.RequesterEmail||'',f.Title||'',_nm,f.CostCenter||'',f.Status||'',f.RequestDate?fmtDate(f.RequestDate):''];
         (ap[0]?[ap[0]]:[{}]).forEach(a=>{row.push(a.ApproverRole||'',a.ApproverName||'',a.Status||'',a.ApprovalDate?fmtDate(a.ApprovalDate):'');});
         rows.push(row);
         catCounts[cat]++;
@@ -980,10 +997,10 @@ async function exportAdminExcel() {
       logAction('GA/' + cat.toUpperCase(), 'Excel 내보내기', { 건수: catCounts[cat], 통합내보내기_전체건수: rows.length-1 });
     });
     const wb=XLSX.utils.book_new();
-    // 번호 = 신청 순서(가장 오래된 건이 1). 세 카테고리를 합친 뒤 신청일(7열) 오름차순으로 매긴다(09-10).
-    rows.slice(1).map((r,i)=>({i,d:String(r[6]||'')})).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0).forEach((o,k)=>{ rows[o.i+1][0]=k+1; });
+    // 번호 = 신청 순서(가장 오래된 건이 1). 세 카테고리를 합친 뒤 신청일(8열 — 10-07 Name 열이 들어가 한 칸 밀림) 오름차순으로 매긴다(09-10).
+    rows.slice(1).map((r,i)=>({i,d:String(r[7]||'')})).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0).forEach((o,k)=>{ rows[o.i+1][0]=k+1; });
     const ws=XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols']=[{wch:6},{wch:8},{wch:28},{wch:24},{wch:16},{wch:10},{wch:18},{wch:20},{wch:16},{wch:10},{wch:18}];
+    ws['!cols']=[{wch:6},{wch:8},{wch:28},{wch:24},{wch:24},{wch:16},{wch:10},{wch:18},{wch:20},{wch:16},{wch:10},{wch:18}];
     const range=XLSX.utils.decode_range(ws['!ref']);
     for(let C=range.s.c;C<=range.e.c;C++){const ca=XLSX.utils.encode_cell({r:0,c:C});if(!ws[ca])continue;ws[ca].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F4E79'}},alignment:{horizontal:'center',wrapText:true}};}
     XLSX.utils.book_append_sheet(wb,ws,'GA 신청 목록');
@@ -1444,6 +1461,12 @@ function pgRender(id){
     + '</div>';
 }
 function pgGo(id,p){if(_pgState[id]){_pgState[id].page=p;pgRender(id);}}
+// 열 고정 표(.list-table.fixed)에서 말줄임(…)된 칸은 마우스를 올리면 전체 값을 보여 준다(10-07)
+document.addEventListener('mouseover',e=>{
+  const td=e.target&&e.target.closest?e.target.closest('.list-table.fixed td'):null;
+  if(!td||td.hasAttribute('title')||td.hasAttribute('colspan')||td.querySelector('button,input,select'))return;
+  if(td.scrollWidth>td.clientWidth+1)td.title=td.textContent.trim();
+});
 
 async function loadSampleImages() {
   try {
@@ -2099,6 +2122,7 @@ function renderAddressSelects(){
     if(_ba && !_ba.value && BC_ADDRESS_LIST[0]) _ba.value = BC_ADDRESS_LIST[0].ko;
     if(_baE && !_baE.value && BC_ADDRESS_LIST[0]) _baE.value = BC_ADDRESS_LIST[0].en;
   }
+  try { if (typeof bcUpdatePreview === 'function') bcUpdatePreview(); } catch (e) {}   // 기본 주소를 채운 뒤 명함 미리보기도(스크립트 초기 실행 순서와 무관하게)
 }
 function addressSelectApply(selId, koId, enId){
   const sel = document.getElementById(selId);
@@ -2134,30 +2158,108 @@ const BC_ADDRESS_LIST=[
 ];
 renderAddressSelects();   // 접속 직후: 두 드롭다운을 「불러오는 중」 으로 잠가 둔다(목록은 boot 의 loadAddressList 가 채운다)
 function bcAddressInitDropdown(){ renderAddressSelects(); }
-function bcAddressSelect(){ addressSelectApply('bc-address-select','bc-address','bc-address-eng'); }
+function bcAddressSelect(){ addressSelectApply('bc-address-select','bc-address','bc-address-eng'); bcUpdatePreview(); }
 // ══ BUSINESS CARD ══
-function bcUpdatePreview(){
-  const enInput=document.getElementById('bc-name-en');
-  const koInput=document.getElementById('bc-name-ko');
-  const emInput=document.getElementById('bc-email');
-  const jtInput=document.getElementById('bc-job-title');
-  const jpInput=document.getElementById('bc-job-position');
-  if(!enInput||!koInput||!emInput) return;
-  const en=enInput.value||'Name (EN)';
-  const ko=koInput.value||'Name(KO)';
-  const em=emInput.value||'Email address';
-  const jt=jtInput?jtInput.value||'Job Title':'';
-  const jp=jpInput?jpInput.value||'Job Position':'';
-  const enEl=document.getElementById('bc-prev-name-en');
-  const koEl=document.getElementById('bc-prev-name-ko');
-  const emEl=document.getElementById('bc-prev-email');
-  const jtEl=document.getElementById('bc-prev-job-title');
-  const jpEl=document.getElementById('bc-prev-job-position');
-  if(enEl)enEl.textContent=en;
-  if(koEl)koEl.textContent=ko;
-  if(emEl)emEl.textContent=em;
-  if(jtEl)jtEl.textContent=jt;
-  if(jpEl)jpEl.textContent=jp;
+/* ── 명함 미리보기 겹침(10-07) ──
+   샘플 명함(SharePoint Business_card-sample-image.png)의 검은 자리표시 띠 8개를 찾아 줄(行)별로 묶어 각 입력칸에 짝짓는다:
+     1줄 Name (EN) · Name (KO) / 2줄 Job Title · Job Position / 3줄 Korean address / 4줄 English address / 5줄 Email address · Mobile Number
+   값이 있으면 그 띠를 흰 바탕으로 덮고 값만 검은 글자로(띠 왼쪽에서 시작), 값이 없으면 검은 띠 그대로 둔다.
+   값이 길면 오른쪽 이웃 띠 앞(이웃이 없으면 명함 글자 영역 오른쪽 끝)까지 넓히고, 그래도 넘치면 글자를 줄인다.
+   샘플 그림이 바뀌어 띠 배치가 [2,2,1,1,2] 가 아니면 지금 샘플 기준 비율을 쓴다. 화면 미리보기일 뿐 저장 · 결재에는 영향 없음. */
+const BC_FIELDS = [
+  { key: 'nameEn', input: 'bc-name-en', bold: 1 }, { key: 'nameKo', input: 'bc-name-ko', bold: 1 },
+  { key: 'jobTitle', input: 'bc-job-title' }, { key: 'jobPos', input: 'bc-job-position' },
+  { key: 'addrKo', input: 'bc-address' }, { key: 'addrEn', input: 'bc-address-eng' },
+  { key: 'email', input: 'bc-email' }, { key: 'mobile', input: 'bc-mobile' } ];
+const BC_BOX_DEFAULT = {   // 지금 샘플 이미지에서 찾은 값(0~1 비율) — lim = 값이 넓어질 수 있는 오른쪽 끝
+  nameEn: { x: .5327, y: .4383, w: .1191, h: .0604, lim: .6585 }, nameKo: { x: .6638, y: .4383, w: .1191, h: .0604, lim: .9611 },
+  jobTitle: { x: .5327, y: .5118, w: .1528, h: .0420, lim: .6923 }, jobPos: { x: .6965, y: .5118, w: .1032, h: .0420, lim: .9611 },
+  addrKo: { x: .6891, y: .6772, w: .2645, h: .0420, lim: .9611 }, addrEn: { x: .5327, y: .7297, w: .2508, h: .0394, lim: .9611 },
+  email: { x: .5327, y: .7769, w: .1528, h: .0420, lim: .6875 }, mobile: { x: .7101, y: .7769, w: .1117, h: .0420, lim: .9611 } };
+let _bcBox = BC_BOX_DEFAULT;
+function bcCalibrate() {
+  const img = document.getElementById('bc-sample-img');
+  if (!img || !img.naturalWidth) return;
+  let box = BC_BOX_DEFAULT;
+  try {
+    const { W, H, comps } = gaFindDarkBoxes(img, 1600);
+    const fill = c => c.n / (c.w * c.h);
+    // 자리표시 띠: 명함 오른쪽 면의 납작한 검은 사각형(안의 흰 글자 때문에 채움 비율은 낮을 수 있다) — 낱글자 · 세로줄은 걸러진다
+    const bars = comps.filter(c => c.x0 > W * .4 && c.h >= H * .015 && c.h <= H * .12 && c.w > c.h * 2.5 && c.w > W * .04 && fill(c) > .45)
+                      .sort((a, b) => (a.y0 + a.h / 2) - (b.y0 + b.h / 2));
+    const rows = [];
+    bars.forEach(c => { const yc = c.y0 + c.h / 2, r = rows[rows.length - 1];
+      if (r && Math.abs(yc - r.yc) < Math.max(r.hmax, c.h) * .6) { r.items.push(c); r.hmax = Math.max(r.hmax, c.h); } else rows.push({ yc, hmax: c.h, items: [c] }); });
+    if (rows.length === 5 && rows.map(r => r.items.length).join() === '2,2,1,1,2') {
+      rows.forEach(r => r.items.sort((a, b) => a.x0 - b.x0));
+      const lim = Math.min(.985, Math.max(...bars.map(c => c.x1)) / W + .008);
+      const keys = [['nameEn', 'nameKo'], ['jobTitle', 'jobPos'], ['addrKo'], ['addrEn'], ['email', 'mobile']];
+      box = {};
+      rows.forEach((r, i) => r.items.forEach((c, j) => {
+        const nx = r.items[j + 1];
+        box[keys[i][j]] = { x: c.x0 / W, y: c.y0 / H, w: c.w / W, h: c.h / H,
+                            lim: nx ? (keys[i][j] === 'email' ? (c.x1 + 1) / W : (nx.x0 - 3) / W) : lim };   // 메일 오른쪽엔 그림 속 「| M」 이 있어 띠 끝까지만
+      }));
+    }
+  } catch (e) { console.warn('명함 미리보기 자리 찾기 실패 — 기본 비율 사용:', e && e.message); }
+  _bcBox = box;
+  bcUpdatePreview();
+  if (!window._bcRO && window.ResizeObserver) { window._bcRO = new ResizeObserver(() => bcUpdatePreview()); window._bcRO.observe(document.getElementById('bc-card-stage')); }
+}
+function bcUpdatePreview() {
+  const stage = document.getElementById('bc-card-stage'), host = document.getElementById('bc-ov');
+  if (!stage || !host) return;
+  const sw = stage.clientWidth, sh = stage.clientHeight, B = _bcBox, val = {}, el = {};
+  BC_FIELDS.forEach(f => {
+    let e = document.getElementById('bc-ov-' + f.key);
+    if (!e) { e = document.createElement('div'); e.id = 'bc-ov-' + f.key; e.className = 'bc-ov-txt'; host.appendChild(e); }
+    const inp = document.getElementById(f.input);
+    val[f.key] = ((inp && inp.value) || '').replace(/\s+/g, ' ').trim();
+    e.hidden = true; e.textContent = ''; el[f.key] = e;
+  });
+  if (!sw || !sh) return;
+  const _im = document.getElementById('bc-sample-img');
+  if (!_im || !_im.naturalWidth) return;   // 샘플 이미지를 못 받았으면 겹쳐 쓰지 않는다(빈 회색 칸 위에 흰 상자만 뜨는 것 방지)
+  // 글자 크기: 이름 줄은 이름 띠 높이, 나머지(직함 · 주소 · 메일 · 휴대폰)는 가장 낮은 정보 띠 높이에 맞춰 한 가지로 — 줄마다 크기가 들쭉날쭉하지 않게
+  const FONT = "'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif";
+  const nameFs = B.nameEn.h * sh * .78, infoFs = Math.min(B.jobTitle.h, B.addrKo.h, B.addrEn.h) * sh * .84;
+  const mc = (bcUpdatePreview._c = bcUpdatePreview._c || document.createElement('canvas').getContext('2d'));
+  const tw = (t, fs, bold) => { mc.font = (bold ? '600 ' : '400 ') + fs + 'px ' + FONT; return Math.ceil(mc.measureText(t).width) + 2; };
+  const X = k => B[k].x * sw, R = k => (B[k].x + B[k].w) * sw, LIM = k => B[k].lim * sw;
+  // 한 칸 그리기 — 흰 상자(검은 띠보다 2px 씩 크게)에 값을 왼쪽 정렬, 넘치면 말줄임
+  const put = (k, left, width, fs, bold) => {
+    const e = el[k], b = B[k], sp = document.createElement('span');
+    sp.textContent = val[k]; sp.style.cssText = 'display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+    e.appendChild(sp); e.hidden = false;
+    e.style.left = (left - 2) + 'px'; e.style.width = (width + 4) + 'px'; e.style.padding = '0 2px';
+    e.style.top = 'calc(' + (b.y * 100) + '% - 2px)'; e.style.height = 'calc(' + (b.h * 100) + '% + 4px)';
+    e.style.fontWeight = bold ? '600' : '400'; e.style.fontSize = fs + 'px';
+  };
+  // 혼자 쓰는 칸: 띠 왼쪽에서 시작, 넘치면 lim 까지 넓히고 그래도 넘치면 글자를 줄인다(기본의 55% 까지)
+  const single = (k, base, bold, lim) => {
+    const x = X(k), avail = Math.max(R(k) - x, lim - x);
+    let fs = base, w = tw(val[k], fs, bold);
+    if (w > avail) { fs = Math.max(base * .55, base * avail / w); w = tw(val[k], fs, bold); }
+    put(k, x, Math.max(R(k) - x, Math.min(w, avail)), fs, bold);
+  };
+  // 한 줄에 둘(영문 · 국문 이름, 직함 · 직위): 둘 다 있으면 실제 명함처럼 앞 글자 바로 뒤에 이어 쓴다(띠 사이 간격만큼 띄움)
+  const pair = (a, c, base, bold) => {
+    if (val[a] && val[c]) {
+      const x = X(a), avail = LIM(c) - x, gap = Math.max(X(c) - R(a), base * .5);
+      let fs = base, wa = tw(val[a], fs, bold), wc = tw(val[c], fs, bold);
+      if (wa + gap + wc > avail) { fs = Math.max(base * .55, base * (avail - gap) / (wa + wc)); wa = tw(val[a], fs, bold); wc = tw(val[c], fs, bold); }
+      const cx = x + wa + gap;
+      put(a, x, Math.max(R(a) - x, cx - x), fs, bold);                                // 앞 칸은 다음 글자 시작점까지 덮는다
+      put(c, cx, Math.max(R(c) - cx, Math.min(wc, LIM(c) - cx)), fs, bold);          // 뒤 칸은 자기 띠 끝까지는 꼭 덮는다
+    } else if (val[a]) single(a, base, bold, X(c) - 3);
+    else if (val[c]) single(c, base, bold, LIM(c));
+  };
+  pair('nameEn', 'nameKo', nameFs, 1);
+  pair('jobTitle', 'jobPos', infoFs, 0);
+  if (val.addrKo) single('addrKo', infoFs, 0, LIM('addrKo'));
+  if (val.addrEn) single('addrEn', infoFs, 0, LIM('addrEn'));
+  if (val.email) single('email', infoFs, 0, LIM('email'));      // 메일 오른쪽엔 그림 속 「| M」 이 있어 띠 끝까지만
+  if (val.mobile) single('mobile', infoFs, 0, LIM('mobile'));
 }
 async function bcSubmit(){
   if(!document.getElementById('bc-a1-email').value){alert('1차 결재자(Department Head)를 지정해주세요.');return;}
@@ -2202,6 +2304,28 @@ function idcIssueChange(){
    자리는 샘플 이미지를 캔버스에 그려 가장 큰 검은 칸(사진칸)과 그 바로 아래 검은 띠(이름띠)를 찾아 이미지 크기에 대한 비율로 잡는다 —
    샘플 이미지를 새 디자인으로 바꿔도 따라가고, 찾지 못하면 지금 샘플 기준 기본 비율을 쓴다. 미리보기일 뿐 저장 · 결재에는 영향 없음.
    사진은 칸을 꽉 채우도록 잘라 보여 준다(가로 사진은 양옆, 세로가 긴 사진은 위아래가 잘림 — 얼굴이 조금 위쪽에 오도록 맞춤). */
+// 샘플 이미지(같은 출처 blob)를 캔버스에 그려 검은 점(RGB 모두 45 미만)의 연결 덩어리마다 경계 상자 · 점 수를 돌려준다 — 사원증 · 명함 미리보기 공용
+function gaFindDarkBoxes(img, maxW) {
+  const s = Math.min(1, maxW / img.naturalWidth), W = Math.max(1, Math.round(img.naturalWidth * s)), H = Math.max(1, Math.round(img.naturalHeight * s));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(img, 0, 0, W, H);
+  const d = cx.getImageData(0, 0, W, H).data, N = W * H, dark = new Uint8Array(N), seen = new Uint8Array(N), comps = [], st = [];
+  for (let i = 0; i < N; i++) dark[i] = (d[i * 4] < 45 && d[i * 4 + 1] < 45 && d[i * 4 + 2] < 45) ? 1 : 0;
+  for (let i = 0; i < N; i++) {           // 상하좌우로 이어진 검은 점 덩어리
+    if (!dark[i] || seen[i]) continue;
+    let x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0; seen[i] = 1; st.push(i);
+    while (st.length) {
+      const k = st.pop(), px = k % W, py = (k - px) / W; n++;
+      if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py;
+      if (px > 0 && dark[k - 1] && !seen[k - 1]) { seen[k - 1] = 1; st.push(k - 1); }
+      if (px < W - 1 && dark[k + 1] && !seen[k + 1]) { seen[k + 1] = 1; st.push(k + 1); }
+      if (py > 0 && dark[k - W] && !seen[k - W]) { seen[k - W] = 1; st.push(k - W); }
+      if (py < H - 1 && dark[k + W] && !seen[k + W]) { seen[k + W] = 1; st.push(k + W); }
+    }
+    comps.push({ x0, y0, x1, y1, n, w: x1 - x0 + 1, h: y1 - y0 + 1 });
+  }
+  return { W, H, s, comps };
+}
 const IDC_BOX_DEFAULT = { photo: { x: .1333, y: .3379, w: .2183, h: .3836 }, name: { x: .1667, y: .7397, w: .1483, h: .0388 } };   // 지금 샘플 이미지에서 찾은 값
 let _idcBox = IDC_BOX_DEFAULT;
 function idcCalibrate() {
@@ -2209,24 +2333,7 @@ function idcCalibrate() {
   if (!img || !img.naturalWidth) return;
   let box = IDC_BOX_DEFAULT;
   try {
-    const s = Math.min(1, 1600 / img.naturalWidth), W = Math.max(1, Math.round(img.naturalWidth * s)), H = Math.max(1, Math.round(img.naturalHeight * s));
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-    const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(img, 0, 0, W, H);
-    const d = cx.getImageData(0, 0, W, H).data, N = W * H, dark = new Uint8Array(N), seen = new Uint8Array(N), comps = [], st = [];
-    for (let i = 0; i < N; i++) dark[i] = (d[i * 4] < 45 && d[i * 4 + 1] < 45 && d[i * 4 + 2] < 45) ? 1 : 0;
-    for (let i = 0; i < N; i++) {           // 검은 덩어리(상하좌우 연결)마다 경계 상자 · 점 수
-      if (!dark[i] || seen[i]) continue;
-      let x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0; seen[i] = 1; st.push(i);
-      while (st.length) {
-        const k = st.pop(), px = k % W, py = (k - px) / W; n++;
-        if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py;
-        if (px > 0 && dark[k - 1] && !seen[k - 1]) { seen[k - 1] = 1; st.push(k - 1); }
-        if (px < W - 1 && dark[k + 1] && !seen[k + 1]) { seen[k + 1] = 1; st.push(k + 1); }
-        if (py > 0 && dark[k - W] && !seen[k - W]) { seen[k - W] = 1; st.push(k - W); }
-        if (py < H - 1 && dark[k + W] && !seen[k + W]) { seen[k + W] = 1; st.push(k + W); }
-      }
-      comps.push({ x0, y0, x1, y1, n, w: x1 - x0 + 1, h: y1 - y0 + 1 });
-    }
+    const { W, H, s, comps } = gaFindDarkBoxes(img, 1600);
     const fill = c => c.n / (c.w * c.h);
     // 사진칸: 꽉 찬(안의 「ID photo」 글자 정도만 빈) 세로로 긴 큰 사각형
     const ph = comps.filter(c => fill(c) > .8 && c.w > W * .06 && c.h > H * .12 && c.h > c.w).sort((a, b) => b.n - a.n)[0];
@@ -2294,6 +2401,8 @@ async function idcSubmit(){
   const issue=document.getElementById('idc-issue').value;
   const costCenter=document.getElementById('idc-costcenter').value.trim();
   if(!issue||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
+  const _nmEl=document.getElementById('idc-name');
+  if(!_nmEl||!_nmEl.value.trim()){alert('Name(사원증 표기 이름)을 입력해 주세요.');if(_nmEl)_nmEl.focus();return;}   // 필수(10-07)
   const photoInput=document.getElementById('idc-photo-input');
   const photoFile=photoInput.files&&photoInput.files[0]?photoInput.files[0]:null;
   if(!photoFile){if(!confirm('ID Photo가 첨부되지 않았습니다. 계속 진행하시겠습니까?'))return;}
@@ -2361,9 +2470,9 @@ async function loadMyList(cat){
     const r={
       stn:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'STN_Approvals','STN_Requests',f.Status)}</td></tr>`;},
       bc: (item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'BC_Approvals','BC_Requests',f.Status)}</td></tr>`;},
-      idc:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'IDC_Approvals','IDC_Requests',f.Status)}</td></tr>`;},
+      idc:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${escHtml(f.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(f.Title||'')}</td><td class="td-name" style="font-size:.78rem">${escHtml(f.Name||'')}</td><td style="font-size:.78rem">${escHtml(f.CostCenter||'')}</td><td><span class="badge-${escHtml(f.Status||'대기')}">${escHtml(f.Status||'대기')}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'IDC_Approvals','IDC_Requests',f.Status)}</td></tr>`;},
     };
-    const cols={stn:7,bc:7,idc:7};
+    const cols={stn:7,bc:7,idc:8};
     pgSet(cat+'-list',items,r[cat],'신청 내역이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
@@ -2377,9 +2486,9 @@ async function loadApprovalQueue(cat){
     const reqMap=Object.fromEntries(reqData.value.map(r=>[r.id,r.fields]));
     const rows=mine.map(i=>{
       const rf=reqMap[i.fields.RequestID]||{};
-      return`<tr onclick="showDetail('${cat}',${i.fields.RequestID})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${i.fields.RequestID}</td><td style="font-size:.78rem">${rf.RequesterEmail||''}</td><td style="font-size:.78rem">${rf.Title||''}</td><td style="font-size:.78rem">${rf.CostCenter||''}</td><td><span class="badge-${rf.Status||'대기'}">${rf.Status||''}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
+      return`<tr onclick="showDetail('${cat}',${i.fields.RequestID})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${i.fields.RequestID}</td><td style="font-size:.78rem">${escHtml(rf.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(rf.Title||'')}</td>${cat==='idc'?`<td class="td-name" style="font-size:.78rem">${escHtml(rf.Name||'')}</td>`:''}<td style="font-size:.78rem">${escHtml(rf.CostCenter||'')}</td><td><span class="badge-${escHtml(rf.Status||'대기')}">${escHtml(rf.Status||'')}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
     });
-    const cols={stn:7,bc:7,idc:7};
+    const cols={stn:7,bc:7,idc:8};
     pgSet(cat+'-appr',rows,r=>r,'결재 대기 항목이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
@@ -2391,13 +2500,13 @@ async function loadAdminList(cat){
     const q=(document.getElementById(cat+'-admin-search').value||'').toLowerCase();
     let items=data.value.sort((a,b)=>b.id-a.id);
     if(status)items=items.filter(i=>(i.fields.Status||'')==status);
-    if(q)items=items.filter(i=>((i.fields.RequesterEmail||'')+' '+(i.fields.CostCenter||'')+' '+(i.fields.NameEN||'')+' '+(i.fields.IssueType||'')).toLowerCase().includes(q));
+    if(q)items=items.filter(i=>((i.fields.RequesterEmail||'')+' '+(i.fields.CostCenter||'')+' '+(i.fields.NameEN||'')+' '+(i.fields.Name||'')+' '+(i.fields.IssueType||'')).toLowerCase().includes(q));
     const r={
       stn:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
       bc: (item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      idc:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      idc:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${escHtml(f.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(f.Title||'')}</td><td class="td-name" style="font-size:.78rem">${escHtml(f.Name||'')}</td><td style="font-size:.78rem">${escHtml(f.CostCenter||'')}</td><td><span class="badge-${escHtml(f.Status||'대기')}">${escHtml(f.Status||'')}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
     };
-    const cols={stn:7,bc:7,idc:7};
+    const cols={stn:6,bc:6,idc:7};
     pgSet(cat+'-admin',items,r[cat],'조회 결과가 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
