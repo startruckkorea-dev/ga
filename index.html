@@ -1692,7 +1692,7 @@ async function loadSampleImages() {
       const bcUrl = URL.createObjectURL(bcBlob);
       const bcImg = document.getElementById('bc-sample-img');
       window._bcBaseUrl = bcUrl;
-      if (bcImg && !(document.getElementById('bc-qr-on') || {}).checked) bcImg.src = bcUrl;
+      if (bcImg && !((document.getElementById('bc-qr-on') || {}).checked && _bcQrUrl)) bcImg.src = bcUrl;   // QR 샘플이 실제로 떠 있을 때만 건너뜀
     }
     // IDC 샘플 이미지
     const idcRes = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/Employee_ID_card-sample-image.png:/content',
@@ -2544,6 +2544,7 @@ async function bcQrToggle(){
     }catch(e){
       console.warn('QR 명함 샘플 불러오기 실패:',e&&e.message);
       if(note){note.textContent='QR 명함 샘플 이미지를 불러오지 못해 기본 샘플로 보여 드립니다. (신청에는 영향 없음)';note.hidden=false;}
+      if(window._bcBaseUrl&&img.src!==window._bcBaseUrl)img.src=window._bcBaseUrl;
       return;
     }
   }
@@ -2587,22 +2588,24 @@ function bcHasQr(f){
 }
 function bcSaCell(f){const s=String((f&&f.SalesAgentCompany)||'').replace(/\s+/g,' ').trim();return s?escHtml(s):'<span class="qr-none">–</span>';}   // 넘치면 … (마우스를 올리면 전체 — 표 공통 title)
 function bcQrCell(f){return bcHasQr(f)?'<span class="qr-pill" title="QR 코드 적용">QR</span>':'<span class="qr-none">–</span>';}
-function bcQrDetail(f){if(!bcHasQr(f))return '<span style="color:#8a8886">미적용</span>';const noImg=f.QrCode&&!f.QrFileName&&!/QR 이미지: /.test(String(f.Description||''));return '<span class="qr-pill">QR</span><span style="margin-left:6px">적용 — 명함에 QR 코드 인쇄 '+(noImg?'<span style="color:#8a5a00">(QR 이미지 미첨부)</span>':'(QR 이미지는 아래 첨부파일)')+'</span>';}
+function bcQrDetail(f){if(!bcHasQr(f))return '<span style="color:#8a8886">미적용</span>';const noImg=!f.QrFileName&&!/QR 이미지: /.test(String(f.Description||''));return '<span class="qr-pill">QR</span><span style="margin-left:6px">적용 — 명함에 QR 코드 인쇄 '+(noImg?'<span style="color:#8a5a00">(QR 이미지 미첨부)</span>':'(QR 이미지는 아래 첨부파일)')+'</span>';}
 async function bcAttachDrive(){const d=await api('/sites/'+siteId+'/drives');const v=(d&&d.value)||[];return v.find(x=>x.name==='AttachedFiles')||v[0];}
 async function bcSaveQr(reqId,file,desc){
-  const warn=[],fname=file?'QR_'+file.name:'';
+  const warn=[],fname=file?'QR_'+file.name.replace(/["*:<>?\/\\|#%]/g,'_'):'';   // SharePoint 금지 문자는 _ 로
+  let saved='';   // 실제로 올라간 파일명 — 업로드 실패면 비워 상세에 「미첨부」로 나오게
   if(file)try{
     const drive=await bcAttachDrive();if(!drive)throw new Error('AttachedFiles 드라이브 없음');
     const t=await token();
     const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/BC_Requests_AttachedFiles/'+reqId+'/'+encodeURIComponent(fname)+':/content',
       {method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':file.type||'image/png'},body:await file.arrayBuffer()});
     if(!res.ok)throw new Error('HTTP '+res.status);
+    saved=fname;
   }catch(e){console.error('QR 이미지 업로드 실패:',e);warn.push('⚠️ QR 이미지 업로드에 실패했습니다. 신청은 접수되었으니 GA 담당자에게 QR 이미지를 메일로 보내 주세요.');}
-  try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:fname?{QrCode:true,QrFileName:fname}:{QrCode:true}});}
+  try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:saved?{QrCode:true,QrFileName:saved}:{QrCode:true}});}
   catch(e){
     console.warn('QrCode · QrFileName 열 저장 실패 — Description 끝에 표시로 남김:',e&&e.message);
     const d=String(desc||'').trim();
-    try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{Description:(d?d+'\n':'')+'[QR 코드 적용]'+(fname?' QR 이미지: '+fname:' (QR 이미지 없음)')}});}
+    try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{Description:(d?d+'\n':'')+'[QR 코드 적용]'+(saved?' QR 이미지: '+saved:' (QR 이미지 없음)')}});}
     catch(e2){console.error(e2);warn.push('⚠️ QR 코드 적용 여부를 저장하지 못했습니다. GA 담당자에게 QR 코드 적용을 알려 주세요.');}
   }
   return warn.join('\n');
