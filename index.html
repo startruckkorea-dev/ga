@@ -427,10 +427,16 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
 ::-webkit-scrollbar-thumb:hover { background: #94A3B8; background-clip: padding-box; }
 </style>
 <style id="aps-mobile">
-/* APS 모바일(10-09 · aps-mobile) — 767px 이하 전용. 웹 화면 무변경 */
+/* APS 모바일(10-09 · aps-mobile · 10-10 2차 점검) — 767px 이하 전용. 웹 화면 무변경 */
 /* GA: 본문 끝(body 끝 앞)에 공통 style 블록(헤더 V3 · 결재자 블록 · 목록 행 높이)이 한 번 더 있어 같은 선택자는 그쪽이 이긴다 → 여기서는 #app 등을 붙여 우선순위를 올린다.
    카테고리 탭(.cat-tabs) 넘침 · 서브 탭 줄바꿈 · 3중 패딩 · 관리자 검색칸 눌림 · 명함 QR 상자 · 상세 모달 라벨 160px 정리 */
-@media (max-width: 767px) {
+@media screen and (max-width: 767px) {
+  /* ── 2차 방어 규칙(iPhone Safari · Galaxy): 글자 자동 확대 끔 · 입력칸이 부모보다 넓어지지 않게(GA 는 날짜 입력칸 없음) ── */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  input, select, textarea, button { max-width: 100%; box-sizing: border-box; }
+  #app .item-table button { max-width: none; }   /* 주문 항목 표의 휴지통 · 수량 단추는 칸 폭 그대로 */
+  #app .form-group select, #app .appr-grid select, #app .appr-select-row select { height: 38px; min-height: 38px; }   /* iOS 기본 select 높이가 입력칸(38px)과 같게 — 모양은 그대로 */
+
   /* ── 바깥 틀: 좌우 12px, 탭 안쪽 div 의 인라인 24px 16px 패딩 제거(3중 패딩 → 1중) ── */
   #app { padding: 12px 12px 32px; }
   #app div[id^="tab-form-"] > div, #app div[id^="tab-list-"] > div,
@@ -496,11 +502,16 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
   #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > span { display: none; }   /* 빈 간격용 span(margin-left:auto) */
   #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > button { flex: 0 0 auto; margin-left: auto; }   /* Excel — 선택칸과 한 줄, 자리가 모자라면(명함: 상태 · QR) 다음 줄 오른쪽 */
   #app .ga-admin-q { order: 5; flex: 1 1 100%; width: 100%; max-width: none; }
+  /* 2차: 같은 줄 상태 선택(36px) · Excel 단추(30px) 높이가 달라 어긋나던 것 → 선택 · 검색 · 단추 모두 38px */
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > select,
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > input,
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > button { height: 38px; min-height: 38px; padding-top: 0 !important; padding-bottom: 0 !important; line-height: normal; }
 
   /* ── 상세 모달: 좌우 10px · 높이 90% · 라벨 위/값 아래 ── */
   #detail-modal .modal-box { width: calc(100% - 20px); max-width: none; max-height: 90vh; max-height: 90dvh; padding: 20px 16px 18px; border-radius: 10px; }
   #detail-modal .modal-box { overscroll-behavior: contain; }
   #detail-modal .modal-close { position: sticky; top: 0; float: right; z-index: 2; width: 32px; height: 32px; margin: -8px -6px 0 8px; border-radius: 50%; background: #fff; }   /* 내려 읽어도 닫기 단추가 위에 남는다 */
+  #detail-modal .modal-close { box-shadow: 0 1px 4px rgba(15, 39, 68, .16); }   /* 2차: 내려 읽을 때 글 위에 떠 있는 단추로 보이게 */
   #detail-modal .modal-title { padding-right: 0; }
   #detail-modal .modal-action { position: sticky; bottom: -18px; z-index: 1; margin: 18px -16px -18px; padding: 12px 16px 16px; background: #fff; border-top: 1px solid #f1f5f9; }   /* 승인 · 반려 알약은 아래에 고정 */
   #detail-modal .modal-action .btn-approve, #detail-modal .modal-action .btn-reject { min-height: 46px; }
