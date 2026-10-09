@@ -136,6 +136,8 @@ html.aps-wtx #app{transition:max-width .2s ease}
 .bc-qr-txt{display:flex;flex-direction:column;line-height:1.35;min-width:0}
 .bc-qr-txt b{font-size:.84rem;color:#323130;font-weight:600}
 .bc-qr-txt small{font-size:.74rem;color:#8a8886}
+.bc-qr-tline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bc-qr-tag{display:inline-flex;align-items:center;font-size:.68rem;font-weight:600;color:#8a5a00;background:#fff6e5;border:1px solid #f5ddb0;border-radius:10px;padding:0 8px;line-height:1.6;white-space:nowrap}
 .bc-qr-body{border-top:1px dashed #c7ddf5;padding:12px 14px 14px}
 .bc-qr-rule{font-size:.8rem;color:#605e5c;margin-bottom:8px}
 .bc-qr-pick{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #0078d4;border-radius:6px;padding:9px 16px;cursor:pointer;font-size:.83rem;color:#0078d4;font-weight:600;margin:0;transition:background .15s}
@@ -324,6 +326,9 @@ html.aps-wtx #app{transition:max-width .2s ease}
 /* 명함 미리보기 위에 겹치는 입력값(10-07) — 검은 자리표시 띠를 흰 바탕으로 덮고 값만 검은 글자로 */
 .bc-ov-txt{position:absolute;display:flex;align-items:center;justify-content:flex-start;background:#fff;color:#111;line-height:1;white-space:nowrap;overflow:hidden;pointer-events:none;font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif}
 .bc-ov-txt[hidden]{display:none}
+.bc-ov-qr{position:absolute;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none;box-sizing:border-box}
+.bc-ov-qr img{width:100%;height:100%;object-fit:contain;display:block}
+.bc-ov-qr[hidden]{display:none}
 /* Add modal — Stationery 항목 선택(10-06 다시 꾸밈: 팝업 크기 고정 · 모든 행 같은 높이 · 카테고리 칩에 개수 · 선택 요약) */
 #add-modal{display:none;position:fixed;inset:0;background:rgba(15,39,68,.45);z-index:300;align-items:center;justify-content:center;padding:16px}
 #add-modal.open{display:flex}
@@ -730,7 +735,7 @@ window.apsYear = (function () {
           <label class="bc-qr-head" for="bc-qr-on">
             <input type="checkbox" id="bc-qr-on" onchange="bcQrToggle()">
             <span class="bc-qr-ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 1h5v5H1V1zm1.2 1.2v2.6h2.6V2.2H2.2zM10 1h5v5h-5V1zm1.2 1.2v2.6h2.6V2.2h-2.6zM1 10h5v5H1v-5zm1.2 1.2v2.6h2.6v-2.6H2.2zM3 3h1v1H3V3zm9 0h1v1h-1V3zM3 12h1v1H3v-1zm5-11h1v2H8V1zm0 3h1v2H8V4zM7 7h2v1H7V7zm-6 0h2v1H1V7zm3 0h2v1H4V7zm6 0h2v1h-2V7zm3 0h2v1h-2V7zM8 9h1v2H8V9zm2 0h2v1h-2V9zm3 0h2v2h-1v-1h-1V9zm-5 3h1v3H8v-3zm2 0h1v1h-1v-1zm2 0h1v2h2v1h-3v-3zm-2 2h1v1h-1v-1z"/></svg></span>
-            <span class="bc-qr-txt"><b>QR 코드 적용</b><small>명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small></span>
+            <span class="bc-qr-txt"><span class="bc-qr-tline"><b>QR 코드 적용</b><span class="bc-qr-tag">세일즈 에이전트 용</span></span><small>명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small></span>
           </label>
           <div id="bc-qr-body" class="bc-qr-body" hidden>
             <div class="bc-qr-rule">⚠️ PNG / JPG / JPEG 형식만 가능 · 최대 500KB</div>
@@ -2371,13 +2376,20 @@ const BC_BOX_DEFAULT = {   // 지금 샘플 이미지에서 찾은 값(0~1 비�
   addrKo: { x: .6891, y: .6772, w: .2645, h: .0420, lim: .9611 }, addrEn: { x: .5327, y: .7297, w: .2508, h: .0394, lim: .9611 },
   email: { x: .5327, y: .7769, w: .1528, h: .0420, lim: .6875 }, mobile: { x: .7101, y: .7769, w: .1117, h: .0420, lim: .9611 } };
 let _bcBox = BC_BOX_DEFAULT;
+// QR 자리(10-09) — QR 명함 샘플 오른쪽 면 왼쪽 위 검은 정사각형(안에 흰 「QR」 글자). 못 찾으면 지금 샘플 기준 비율
+const BC_QR_BOX_DEFAULT = { x: .5316, y: .0772, w: .0686, h: .1678 };
+let _bcQrBox = null;
 function bcCalibrate() {
   const img = document.getElementById('bc-sample-img');
   if (!img || !img.naturalWidth) return;
-  let box = BC_BOX_DEFAULT;
+  let box = BC_BOX_DEFAULT, qrBox = null;
   try {
     const { W, H, comps } = gaFindDarkBoxes(img, 1600);
     const fill = c => c.n / (c.w * c.h);
+    // QR 자리: 오른쪽 면 위쪽의 거의 정사각형인 검은 덩어리 중 가장 큰 것(낱글자 · 띠는 크기 · 비율로 걸러진다)
+    const qsq = comps.filter(c => c.x0 > W * .4 && c.y0 < H * .5 && c.w > W * .03 && c.h > H * .06 && c.w / c.h > .75 && c.w / c.h < 1.33 && fill(c) > .5)
+                     .sort((a, b) => b.n - a.n)[0];
+    if (qsq) qrBox = { x: qsq.x0 / W, y: qsq.y0 / H, w: qsq.w / W, h: qsq.h / H };
     // 자리표시 띠: 명함 오른쪽 면의 납작한 검은 사각형(안의 흰 글자 때문에 채움 비율은 낮을 수 있다) — 낱글자 · 세로줄은 걸러진다
     const bars = comps.filter(c => c.x0 > W * .4 && c.h >= H * .015 && c.h <= H * .12 && c.w > c.h * 2.5 && c.w > W * .04 && fill(c) > .45)
                       .sort((a, b) => (a.y0 + a.h / 2) - (b.y0 + b.h / 2));
@@ -2397,7 +2409,9 @@ function bcCalibrate() {
     }
   } catch (e) { console.warn('명함 미리보기 자리 찾기 실패 — 기본 비율 사용:', e && e.message); }
   _bcBox = box;
+  _bcQrBox = qrBox;
   bcUpdatePreview();
+  bcUpdateQrOverlay();
   if (!window._bcRO && window.ResizeObserver) { window._bcRO = new ResizeObserver(() => bcUpdatePreview()); window._bcRO.observe(document.getElementById('bc-card-stage')); }
 }
 function bcUpdatePreview() {
@@ -2468,7 +2482,7 @@ async function bcSubmit(){
   const _qrOn=!!(document.getElementById('bc-qr-on')||{}).checked;
   const _qrIn=document.getElementById('bc-qr-input');
   const _qrFile=_qrOn&&_qrIn&&_qrIn.files&&_qrIn.files[0]?_qrIn.files[0]:null;
-  if(_qrOn&&!_qrFile){alert('QR 코드 적용을 선택했습니다.\n명함에 넣을 QR 이미지를 첨부해 주세요. (PNG / JPG / JPEG · 최대 500KB)');const _qb=document.getElementById('bc-qr-box');if(_qb&&_qb.scrollIntoView)_qb.scrollIntoView({block:'center',behavior:'smooth'});return;}
+  if(_qrOn&&!_qrFile&&!confirm('QR 이미지가 첨부되지 않았습니다. 계속 진행하시겠습니까?\n(QR 코드 적용으로 접수되며, QR 이미지는 GA 담당자와 따로 주고받아야 합니다)')){const _qb=document.getElementById('bc-qr-box');if(_qb&&_qb.scrollIntoView)_qb.scrollIntoView({block:'center',behavior:'smooth'});return;}
   loading(true);
   try{
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';const _bcSalesAgent=document.getElementById('bc-sales-agent')?.value.trim()||'';
@@ -2508,7 +2522,7 @@ async function bcQrToggle(){
   const body=document.getElementById('bc-qr-body');if(body)body.hidden=!on;
   const note=document.getElementById('bc-qr-note');if(note){note.hidden=true;note.textContent='';}
   const img=document.getElementById('bc-sample-img');if(!img)return;
-  if(!on){if(window._bcBaseUrl&&img.src!==window._bcBaseUrl)img.src=window._bcBaseUrl;return;}
+  if(!on){bcUpdateQrOverlay();if(window._bcBaseUrl&&img.src!==window._bcBaseUrl)img.src=window._bcBaseUrl;return;}
   if(!_bcQrUrl){
     try{
       if(!window._gaDocDriveId)throw new Error('문서 라이브러리 정보 없음');
@@ -2524,22 +2538,36 @@ async function bcQrToggle(){
   }
   if((document.getElementById('bc-qr-on')||{}).checked)img.src=_bcQrUrl;   // 받는 사이 체크를 풀었으면 바꾸지 않는다
 }
+function bcUpdateQrOverlay(){
+  const host=document.getElementById('bc-ov');if(!host)return;
+  let e=document.getElementById('bc-ov-qr');
+  if(!e){e=document.createElement('div');e.id='bc-ov-qr';e.className='bc-ov-qr';e.hidden=true;e.innerHTML='<img alt="">';host.appendChild(e);}
+  const img=document.getElementById('bc-sample-img');
+  const on=!!(document.getElementById('bc-qr-on')||{}).checked&&!!_bcQrUrl&&!!img&&img.src===_bcQrUrl&&!!img.naturalWidth&&!!window._bcQrDataUrl;
+  if(!on){e.hidden=true;return;}
+  const b=_bcQrBox||BC_QR_BOX_DEFAULT;   // 검은 자리보다 1px 씩 크게 덮어 테두리가 비치지 않게
+  e.style.left='calc('+(b.x*100)+'% - 1px)';e.style.top='calc('+(b.y*100)+'% - 1px)';
+  e.style.width='calc('+(b.w*100)+'% + 2px)';e.style.height='calc('+(b.h*100)+'% + 2px)';
+  const im=e.querySelector('img');if(im.getAttribute('src')!==window._bcQrDataUrl)im.src=window._bcQrDataUrl;
+  e.hidden=false;
+}
 function bcQrFileChange(input){
   const err=document.getElementById('bc-qr-error'),nm=document.getElementById('bc-qr-name'),pv=document.getElementById('bc-qr-preview'),th=document.getElementById('bc-qr-thumb');
   err.hidden=true;err.textContent='';
-  const fail=m=>{err.textContent=m;err.hidden=false;input.value='';nm.textContent='';pv.hidden=true;};
-  if(!input.files||!input.files[0]){nm.textContent='';pv.hidden=true;return;}
+  const fail=m=>{err.textContent=m;err.hidden=false;input.value='';nm.textContent='';pv.hidden=true;window._bcQrDataUrl='';bcUpdateQrOverlay();};
+  if(!input.files||!input.files[0]){nm.textContent='';pv.hidden=true;window._bcQrDataUrl='';bcUpdateQrOverlay();return;}
   const file=input.files[0],ext=file.name.split('.').pop().toLowerCase();
   if(!['png','jpg','jpeg'].includes(ext))return fail('⚠️ PNG / JPG / JPEG 파일만 업로드 가능합니다.');
   if(file.size>500*1024)return fail('⚠️ 파일 크기가 500KB를 초과합니다. (현재: '+Math.round(file.size/1024)+'KB)');
   nm.textContent=file.name+' ('+Math.max(1,Math.round(file.size/1024))+'KB)';
-  const rd=new FileReader();rd.onload=e=>{th.src=e.target.result;pv.hidden=false;};rd.readAsDataURL(file);
+  const rd=new FileReader();rd.onload=e=>{th.src=e.target.result;pv.hidden=false;window._bcQrDataUrl=e.target.result;bcUpdateQrOverlay();};rd.readAsDataURL(file);   // 미리보기 「QR」 자리에도 겹쳐 보여 준다
 }
 function bcQrClear(){
   const i=document.getElementById('bc-qr-input');if(i)i.value='';
   const nm=document.getElementById('bc-qr-name');if(nm)nm.textContent='';
   const pv=document.getElementById('bc-qr-preview');if(pv)pv.hidden=true;
   const er=document.getElementById('bc-qr-error');if(er){er.hidden=true;er.textContent='';}
+  window._bcQrDataUrl='';bcUpdateQrOverlay();
 }
 function bcHasQr(f){
   if(!f)return false;
@@ -2548,22 +2576,22 @@ function bcHasQr(f){
 }
 function bcSaCell(f){const s=String((f&&f.SalesAgentCompany)||'').replace(/\s+/g,' ').trim();return s?escHtml(s):'<span class="qr-none">–</span>';}   // 넘치면 … (마우스를 올리면 전체 — 표 공통 title)
 function bcQrCell(f){return bcHasQr(f)?'<span class="qr-pill" title="QR 코드 적용">QR</span>':'<span class="qr-none">–</span>';}
-function bcQrDetail(f){return bcHasQr(f)?'<span class="qr-pill">QR</span><span style="margin-left:6px">적용 — 명함에 QR 코드 인쇄 (QR 이미지는 아래 첨부파일)</span>':'<span style="color:#8a8886">미적용</span>';}
+function bcQrDetail(f){if(!bcHasQr(f))return '<span style="color:#8a8886">미적용</span>';const noImg=f.QrCode&&!f.QrFileName&&!/QR 이미지: /.test(String(f.Description||''));return '<span class="qr-pill">QR</span><span style="margin-left:6px">적용 — 명함에 QR 코드 인쇄 '+(noImg?'<span style="color:#8a5a00">(QR 이미지 미첨부)</span>':'(QR 이미지는 아래 첨부파일)')+'</span>';}
 async function bcAttachDrive(){const d=await api('/sites/'+siteId+'/drives');const v=(d&&d.value)||[];return v.find(x=>x.name==='AttachedFiles')||v[0];}
 async function bcSaveQr(reqId,file,desc){
-  const warn=[],fname='QR_'+file.name;
-  try{
+  const warn=[],fname=file?'QR_'+file.name:'';
+  if(file)try{
     const drive=await bcAttachDrive();if(!drive)throw new Error('AttachedFiles 드라이브 없음');
     const t=await token();
     const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/BC_Requests_AttachedFiles/'+reqId+'/'+encodeURIComponent(fname)+':/content',
       {method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':file.type||'image/png'},body:await file.arrayBuffer()});
     if(!res.ok)throw new Error('HTTP '+res.status);
   }catch(e){console.error('QR 이미지 업로드 실패:',e);warn.push('⚠️ QR 이미지 업로드에 실패했습니다. 신청은 접수되었으니 GA 담당자에게 QR 이미지를 메일로 보내 주세요.');}
-  try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{QrCode:true,QrFileName:fname}});}
+  try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:fname?{QrCode:true,QrFileName:fname}:{QrCode:true}});}
   catch(e){
     console.warn('QrCode · QrFileName 열 저장 실패 — Description 끝에 표시로 남김:',e&&e.message);
     const d=String(desc||'').trim();
-    try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{Description:(d?d+'\n':'')+'[QR 코드 적용] QR 이미지: '+fname}});}
+    try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{Description:(d?d+'\n':'')+'[QR 코드 적용]'+(fname?' QR 이미지: '+fname:' (QR 이미지 없음)')}});}
     catch(e2){console.error(e2);warn.push('⚠️ QR 코드 적용 여부를 저장하지 못했습니다. GA 담당자에게 QR 코드 적용을 알려 주세요.');}
   }
   return warn.join('\n');
