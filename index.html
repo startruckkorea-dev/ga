@@ -426,6 +426,111 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
 ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
 ::-webkit-scrollbar-thumb:hover { background: #94A3B8; background-clip: padding-box; }
 </style>
+<style id="aps-mobile">
+/* APS 모바일(10-09 · aps-mobile) — 767px 이하 전용. 웹 화면 무변경 */
+/* GA: 본문 끝(body 끝 앞)에 공통 style 블록(헤더 V3 · 결재자 블록 · 목록 행 높이)이 한 번 더 있어 같은 선택자는 그쪽이 이긴다 → 여기서는 #app 등을 붙여 우선순위를 올린다.
+   카테고리 탭(.cat-tabs) 넘침 · 서브 탭 줄바꿈 · 3중 패딩 · 관리자 검색칸 눌림 · 명함 QR 상자 · 상세 모달 라벨 160px 정리 */
+@media (max-width: 767px) {
+  /* ── 바깥 틀: 좌우 12px, 탭 안쪽 div 의 인라인 24px 16px 패딩 제거(3중 패딩 → 1중) ── */
+  #app { padding: 12px 12px 32px; }
+  #app div[id^="tab-form-"] > div, #app div[id^="tab-list-"] > div,
+  #app div[id^="tab-appr-"] > div, #app div[id^="tab-admin-"] > div { padding: 0 0 8px !important; max-width: none !important; }
+  #app .card { padding: 16px 14px; margin-bottom: 12px; }
+  #app .card-title { margin-bottom: 14px; }
+  #app .section-title { margin: 16px 0 10px; }
+
+  /* ── 헤더 V3: 띠 한 줄 · 글자 한 단계 작게 · BU Admin 줄바꿈 허용 ── */
+  #app .aps-hdr { padding: 0 14px 12px; margin-bottom: 12px; }
+  #app .aps-band { margin: 0 -14px 10px; padding: 0 14px; }
+  @media (min-width: 641px) { #app .aps-band { flex-basis: calc(100% + 28px); } }   /* 641~767px 은 가로 배치 — 띠 폭을 줄어든 좌우 패딩(14px)에 맞춤 */
+  #app .aps-band-crumb { flex: 1 1 auto; }
+  #app .header .title { font-size: 1rem; line-height: 1.35; }
+  #app .aps-sub { font-size: 11.5px; }
+  #app .aps-hdr .hdr-contact { display: grid; font-size: 11px; }
+  #app .aps-hdr .hdr-contact-mail { overflow-wrap: anywhere; min-width: 0; }
+  #app .aps-acct-nm { max-width: 140px; }
+
+  /* ── 카테고리 탭(Stationery · Business Card · ID Card): 한 줄 가로 스크롤 · 줄바꿈 없음 · 높이 44px ── */
+  #app .cat-tabs { padding: 0 4px; overflow-x: auto; overflow-y: hidden; flex-wrap: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; border-radius: 8px 8px 0 0; }
+  #app .cat-tabs::-webkit-scrollbar { display: none; }
+  #app .cat-tab-btn { flex: 1 0 auto; justify-content: center; white-space: nowrap; padding: 0 12px; min-height: 44px; font-size: .84rem; gap: 6px; }
+
+  /* ── 서브 탭(신청서 작성 · 내 신청 목록 · 결재함 · 관리자): 한 줄 가로 스크롤 · 높이 40px ── */
+  #app .tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin-bottom: 12px; }
+  #app .tab-btn { flex: 1 0 auto; min-height: 40px; padding: 0 12px; font-size: 13.5px; white-space: nowrap; }
+
+  /* ── 폼: 1열 · 입력 글자 16px(iOS 자동 확대 방지) ── */
+  #app .form-row { grid-template-columns: 1fr; gap: 12px; }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
+  select, textarea { font-size: 16px !important; }
+  #app .form-group input, #app .form-group select, #app .form-group textarea { width: 100%; min-width: 0; }
+  #app .appr-grid { grid-template-columns: 1fr; gap: 8px; }
+  #app .appr-select-row, #app .appr-info { grid-template-columns: 1fr; }
+  #app .appr-block { padding: 12px 14px; }
+  /* 국문 · 영문 주소 칸(인라인 flex 로 나란히) → 위아래로 */
+  #app .form-group > div[style*="display:flex;gap:6px"] { flex-direction: column; gap: 10px !important; }
+  #app .form-group > div[style*="flex-wrap:wrap"] > span[data-addr-src] { margin-left: 0 !important; }
+  /* Reset · Submit — 폭을 나눠 꽉 채움 */
+  #app .btn-row { gap: 10px; }
+  #app .btn-row > button { flex: 1 1 0; padding: 11px 12px; }
+
+  /* 명함 「QR 코드 적용」 상자 */
+  #app .bc-qr-head { padding: 12px; gap: 10px; align-items: flex-start; }
+  #app .bc-qr-head input { width: 18px; height: 18px; margin-top: 6px; }
+  #app .bc-qr-txt small { margin-top: 2px; }
+  #app .bc-qr-body { padding: 12px; }
+  #app .bc-qr-guide { padding: 10px 12px; row-gap: 8px; }
+  #app .bc-qr-guide-txt { min-width: 0; flex: 1 1 200px; }
+  #app .bc-qr-pick { display: flex; justify-content: center; width: 100%; padding: 11px 16px; }
+  #app .bc-qr-name { display: block; margin: 8px 0 0; }
+  #app .bc-qr-preview img { width: 104px; height: 104px; }
+  /* 사원증 사진 선택 단추 · 파일명 */
+  #app #idc-photo-label { display: flex !important; justify-content: center; width: 100%; }
+  #app #idc-photo-name { display: block; margin: 8px 0 0 !important; overflow-wrap: anywhere; }
+  #app #idc-photo-thumb { max-width: 100%; height: auto !important; max-height: 220px; }
+
+  /* ── 표: 표 상자(.tbl-scroll)만 가로 스크롤. 관리자 필터 줄은 줄바꿈 · 검색칸 한 줄 꽉 채움 ── */
+  #app .tbl-scroll { -webkit-overflow-scrolling: touch; }
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child { flex-wrap: wrap; gap: 8px !important; align-items: center; }
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > select { flex: 1 1 auto; min-width: 0; }
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > span { display: none; }   /* 빈 간격용 span(margin-left:auto) */
+  #app div[id^="tab-admin-"] .card > div[style*="display:flex"]:first-child > button { flex: 0 0 auto; margin-left: auto; }   /* Excel — 선택칸과 한 줄, 자리가 모자라면(명함: 상태 · QR) 다음 줄 오른쪽 */
+  #app .ga-admin-q { order: 5; flex: 1 1 100%; width: 100%; max-width: none; }
+
+  /* ── 상세 모달: 좌우 10px · 높이 90% · 라벨 위/값 아래 ── */
+  #detail-modal .modal-box { width: calc(100% - 20px); max-width: none; max-height: 90vh; max-height: 90dvh; padding: 20px 16px 18px; border-radius: 10px; }
+  #detail-modal .modal-box { overscroll-behavior: contain; }
+  #detail-modal .modal-close { position: sticky; top: 0; float: right; z-index: 2; width: 32px; height: 32px; margin: -8px -6px 0 8px; border-radius: 50%; background: #fff; }   /* 내려 읽어도 닫기 단추가 위에 남는다 */
+  #detail-modal .modal-title { padding-right: 0; }
+  #detail-modal .modal-action { position: sticky; bottom: -18px; z-index: 1; margin: 18px -16px -18px; padding: 12px 16px 16px; background: #fff; border-top: 1px solid #f1f5f9; }   /* 승인 · 반려 알약은 아래에 고정 */
+  #detail-modal .modal-action .btn-approve, #detail-modal .modal-action .btn-reject { min-height: 46px; }
+  #detail-modal .modal-row { flex-direction: column; gap: 2px; padding: 7px 0; }
+  #detail-modal .modal-label { width: auto; font-size: .72rem; }
+  #detail-modal .modal-value { overflow-wrap: anywhere; }
+  #modal-content table { display: block; overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+  #modal-content table th, #modal-content table td { white-space: nowrap; }
+  #detail-modal .qr-file { max-width: 100%; }
+  #detail-modal .qr-file a { overflow-wrap: anywhere; }
+  /* 확인 팝업 · 권한 없음 팝업 */
+  #confirm-modal .confirm-box { width: calc(100% - 20px); max-width: 420px; padding: 22px 18px 16px; }
+  #confirm-modal .confirm-box > div[style*="justify-content:flex-end"] > button { flex: 1 1 0; padding: 10px 12px !important; }
+  #no-auth-modal > div { width: calc(100% - 20px) !important; padding: 28px 20px 22px !important; }
+  #uni-detail-inner, .unified-box { max-width: calc(100vw - 20px) !important; }
+
+  /* Stationery 항목 선택 팝업 — 폰(≤640) 규칙의 상품코드 칸(66px)에서 「ST-1001」 이 「ST-10…」 로 잘리던 것 */
+  @media (max-width: 640px) { .add-list-wrap col.c-code { width: 76px; } }
+
+  /* ── 로그인: 카드가 화면 폭에 맞고 하단 안내 띠와 겹치지 않게 ── */
+  #login-screen { padding: 16px 12px 84px; }
+  .login-card { padding: 40px 24px 28px; border-radius: 16px; }
+  .login-page-footer { flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; text-align: center; font-size: 10px; line-height: 1.45; }
+
+  /* ── 페이지 꼬리말 ── */
+  body > footer { margin-top: 24px !important; padding: 14px 12px !important; }
+  body > footer > div { justify-content: center !important; text-align: center; }
+  body > footer > div > div { text-align: center !important; }
+}
+</style>
 </head>
 <body>
 
