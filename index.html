@@ -139,6 +139,12 @@ html.aps-wtx #app{transition:max-width .2s ease}
 .bc-qr-tline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .bc-qr-tag{display:inline-flex;align-items:center;font-size:.68rem;font-weight:600;color:#8a5a00;background:#fff6e5;border:1px solid #f5ddb0;border-radius:10px;padding:0 8px;line-height:1.6;white-space:nowrap}
 .bc-qr-body{border-top:1px dashed #c7ddf5;padding:12px 14px 14px}
+.bc-qr-guide{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#eef5fd;border:1px solid #cfe2f7;border-radius:6px;padding:8px 10px 8px 12px;margin-bottom:10px;color:#0b5cad;font-size:.8rem;line-height:1.45}
+.bc-qr-guide svg{flex-shrink:0}
+.bc-qr-guide-txt{flex:1;min-width:180px;color:#1f3b5c}
+.bc-qr-guide-txt b{color:#0b5cad;font-weight:700}
+.bc-qr-guide-link{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #b9d5f2;color:#0b5cad;font-size:.75rem;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .15s,border-color .15s}
+.bc-qr-guide-link:hover{background:#0078d4;border-color:#0078d4;color:#fff}
 .bc-qr-rule{font-size:.8rem;color:#605e5c;margin-bottom:8px}
 .bc-qr-pick{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #0078d4;border-radius:6px;padding:9px 16px;cursor:pointer;font-size:.83rem;color:#0078d4;font-weight:600;margin:0;transition:background .15s}
 .bc-qr-pick:hover{background:#eef6fd}
@@ -738,6 +744,11 @@ window.apsYear = (function () {
             <span class="bc-qr-txt"><span class="bc-qr-tline"><b>QR 코드 적용</b><span class="bc-qr-tag">세일즈 에이전트 용</span></span><small>명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small></span>
           </label>
           <div id="bc-qr-body" class="bc-qr-body" hidden>
+            <div class="bc-qr-guide" role="note">
+              <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>
+              <span class="bc-qr-guide-txt"><b>MKQR 시스템</b>을 통해 QR 을 생성한 후, 이미지를 첨부하세요.</span>
+              <a class="bc-qr-guide-link" href="https://mkqr.startruckkorea.com/" target="_blank" rel="noopener">MKQR 바로가기<svg width="11" height="11" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3h7v7M13 3 5.5 10.5M11 9.5V13H3V5h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            </div>
             <div class="bc-qr-rule">⚠️ PNG / JPG / JPEG 형식만 가능 · 최대 500KB</div>
             <div>
               <label for="bc-qr-input" class="bc-qr-pick">
