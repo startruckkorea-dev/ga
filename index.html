@@ -125,6 +125,35 @@ html.aps-wtx #app{transition:max-width .2s ease}
 /* 형식이 정해진 칸(번호 · 제목 IDC-2026-10-07_ID-1234 · 상태 배지 · 신청일 2026-10-07 14:23 · 버튼)은 px 로, 글 칸(신청자 · Name)은 %, Cost Center 는 남는 폭 전부 */
 .list-table col.c-no{width:52px}.list-table col.c-title{width:164px}.list-table col.c-st{width:80px}.list-table col.c-dt{width:126px}
 .list-table col.c-wd{width:100px}.list-table col.c-act{width:132px}
+/* 명함 QR 코드(10-09 · ga-bc-qr) — 신청서 체크박스 · QR 이미지 첨부, 목록 QR 열, 상세 첨부 미리보기 */
+.bc-qr-box{border:1px solid #d2d0ce;border-radius:6px;background:#fff;margin:2px 0 14px;transition:border-color .15s,background .15s}
+.bc-qr-box.on{border-color:#0078d4;background:#f7fbff}
+.bc-qr-box [hidden]{display:none!important}
+.bc-qr-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;margin:0;user-select:none}
+.bc-qr-head input{width:16px;height:16px;margin:0;accent-color:#0078d4;cursor:pointer;flex-shrink:0}
+.bc-qr-ico{width:30px;height:30px;border-radius:6px;background:#eef4fb;color:#0078d4;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bc-qr-box.on .bc-qr-ico{background:#0078d4;color:#fff}
+.bc-qr-txt{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+.bc-qr-txt b{font-size:.84rem;color:#323130;font-weight:600}
+.bc-qr-txt small{font-size:.74rem;color:#8a8886}
+.bc-qr-body{border-top:1px dashed #c7ddf5;padding:12px 14px 14px}
+.bc-qr-rule{font-size:.8rem;color:#605e5c;margin-bottom:8px}
+.bc-qr-pick{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #0078d4;border-radius:6px;padding:9px 16px;cursor:pointer;font-size:.83rem;color:#0078d4;font-weight:600;margin:0;transition:background .15s}
+.bc-qr-pick:hover{background:#eef6fd}
+.bc-qr-name{margin-left:10px;font-size:.8rem;color:#605e5c;overflow-wrap:anywhere}
+@media(max-width:600px){.bc-qr-name{display:block;margin:8px 0 0}}
+.bc-qr-preview{margin-top:10px;display:flex;align-items:center;gap:10px}
+.bc-qr-preview img{width:120px;height:120px;object-fit:contain;background:#fff;border:1px solid #d2d0ce;border-radius:6px;padding:6px;box-sizing:border-box}
+.bc-qr-del{background:none;border:none;color:#a4262c;cursor:pointer;font-size:.8rem;font-family:inherit}
+.bc-qr-err{margin-top:6px;font-size:.78rem;color:#a4262c}
+.bc-qr-note{margin-top:6px;font-size:.76rem;color:#8a5a00}
+.list-table col.c-qr{width:64px}
+.list-table.noname:has(col.c-qr) col.c-req{width:22%}   /* QR 열 자리만큼 신청자 열을 줄여 Cost Center 폭은 그대로 */
+.qr-pill{display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:.68rem;font-weight:700;background:#e8f1fb;color:#0b5cad;letter-spacing:.03em;line-height:1.5}
+.qr-none{color:#c8c6c4}
+.qr-files{display:flex;flex-wrap:wrap;gap:10px}
+.qr-file{display:flex;align-items:center;gap:10px;border:1px solid #edebe9;border-radius:6px;padding:6px 12px 6px 6px;background:#fff}
+.qr-file img{width:72px;height:72px;object-fit:contain;border:1px solid #edebe9;border-radius:4px;background:#fff;padding:3px;box-sizing:border-box}
 .list-table col.c-req{width:19%}.list-table col.c-name{width:19%}.list-table.noname col.c-req{width:28%}
 /* 화면 폭(10-07) — 신청서 작성은 예전 그대로 960px. 표가 있는 목록 · 결재함 · 관리자 탭만 1280px(GW 와 같은 폭)로 넓혀
    열을 고정해도 가로 스크롤 없이 들어가게 한다. 탭을 바꿀 때 폭이 부드럽게 바뀐다(html.aps-wtx — #app 규칙 바로 뒤 「탭 전환 폭 애니메이션」 참고). */
@@ -692,6 +721,32 @@ window.apsYear = (function () {
           </div>
         </div>
 
+        <!-- QR 코드 적용(10-09 · ga-bc-qr) — 체크하면 미리보기가 QR 명함 샘플(Business_card-sample-image_QR.png)로 바뀌고 QR 이미지 첨부 칸이 열린다 -->
+        <div id="bc-qr-box" class="bc-qr-box">
+          <label class="bc-qr-head" for="bc-qr-on">
+            <input type="checkbox" id="bc-qr-on" onchange="bcQrToggle()">
+            <span class="bc-qr-ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 1h5v5H1V1zm1.2 1.2v2.6h2.6V2.2H2.2zM10 1h5v5h-5V1zm1.2 1.2v2.6h2.6V2.2h-2.6zM1 10h5v5H1v-5zm1.2 1.2v2.6h2.6v-2.6H2.2zM3 3h1v1H3V3zm9 0h1v1h-1V3zM3 12h1v1H3v-1zm5-11h1v2H8V1zm0 3h1v2H8V4zM7 7h2v1H7V7zm-6 0h2v1H1V7zm3 0h2v1H4V7zm6 0h2v1h-2V7zm3 0h2v1h-2V7zM8 9h1v2H8V9zm2 0h2v1h-2V9zm3 0h2v2h-1v-1h-1V9zm-5 3h1v3H8v-3zm2 0h1v1h-1v-1zm2 0h1v2h2v1h-3v-3zm-2 2h1v1h-1v-1z"/></svg></span>
+            <span class="bc-qr-txt"><b>QR 코드 적용</b><small>명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small></span>
+          </label>
+          <div id="bc-qr-body" class="bc-qr-body" hidden>
+            <div class="bc-qr-rule">⚠️ PNG / JPG / JPEG 형식만 가능 · 최대 500KB</div>
+            <div>
+              <label for="bc-qr-input" class="bc-qr-pick">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 8a4 4 0 1 1 8 0A4 4 0 0 1 4 8zm4-2.5a.5.5 0 0 0-.5.5v1.5H6a.5.5 0 0 0 0 1h1.5V10a.5.5 0 0 0 1 0V8.5H10a.5.5 0 0 0 0-1H8.5V6a.5.5 0 0 0-.5-.5z"/></svg>
+                QR 이미지 선택
+              </label>
+              <input type="file" id="bc-qr-input" accept=".png,.jpg,.jpeg,image/png,image/jpeg" style="display:none" onchange="bcQrFileChange(this)">
+              <span id="bc-qr-name" class="bc-qr-name"></span>
+            </div>
+            <div id="bc-qr-preview" class="bc-qr-preview" hidden>
+              <img id="bc-qr-thumb" alt="QR 이미지 미리보기">
+              <button type="button" class="bc-qr-del" onclick="bcQrClear()">✕ 삭제</button>
+            </div>
+            <div id="bc-qr-error" class="bc-qr-err" hidden></div>
+            <div id="bc-qr-note" class="bc-qr-note" hidden></div>
+          </div>
+        </div>
+
         <div class="form-group" style="margin-bottom:10px">
           <label>Address</label>
           <select id="bc-address-select" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;font-family:inherit;margin-bottom:6px;background:#fff" onchange="bcAddressSelect()">
@@ -763,11 +818,11 @@ window.apsYear = (function () {
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
     <div id="tab-list-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-wd"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th style="text-align:center">Withdraw</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-qr"><col class="c-st"><col class="c-dt"><col class="c-wd"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th style="text-align:center">QR</th><th>상태</th><th>신청일</th><th style="text-align:center">Withdraw</th></tr></thead>
       <tbody id="bc-list-body"></tbody></table></div><div id="bc-list-pagination"></div>
     </div></div></div>
     <div id="tab-appr-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
-      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"><col class="c-act"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-qr"><col class="c-st"><col class="c-dt"><col class="c-act"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th style="text-align:center">QR</th><th>상태</th><th>신청일</th><th>처리</th></tr></thead>
       <tbody id="bc-appr-body"></tbody></table></div><div id="bc-appr-pagination"></div>
     </div></div></div>
     <div id="tab-admin-bc" style="display:none"><div style="max-width:960px;margin:0 auto;padding:24px 16px"><div class="card">
@@ -777,7 +832,7 @@ window.apsYear = (function () {
         <span style="margin-left:auto"></span>
         <button onclick="exportAdminExcel()" style="padding:6px 14px;background:#107c10;color:#fff;border:none;border-radius:4px;font-size:.82rem;cursor:pointer;white-space:nowrap">📊 Excel 내보내기</button>
       </div>
-      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-st"><col class="c-dt"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table></div>
+      <div class="tbl-scroll"><table class="list-table fixed noname"><colgroup><col class="c-no"><col class="c-req"><col class="c-title"><col class="c-cc"><col class="c-qr"><col class="c-st"><col class="c-dt"></colgroup><thead><tr><th>번호</th><th>신청자</th><th>제목</th><th>Cost Center</th><th style="text-align:center">QR</th><th>상태</th><th>신청일</th></tr></thead><tbody id="bc-admin-body"></tbody></table></div>
       <div id="bc-admin-pagination"></div>
     </div></div></div>
   </div>
@@ -1065,7 +1120,7 @@ async function exportAdminExcel() {
   loading(true, 'Excel 생성 중...');
   try {
     const cats = ['stn','bc','idc'];
-    const rows = [['번호','카테고리','신청자','Title','Name','Cost Center','상태','신청일','1차 역할','1차 결재자','1차 상태','1차 일시']];
+    const rows = [['번호','카테고리','신청자','Title','Name','Cost Center','QR','상태','신청일','1차 역할','1차 결재자','1차 상태','1차 일시']];
     const catCounts = {stn:0, bc:0, idc:0};
     for(const cat of cats) {
       const data = await apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items?$expand=fields');
@@ -1076,7 +1131,7 @@ async function exportAdminExcel() {
         const f=item.fields;
         const ap=(aprMap[String(item.id)]||[]).sort((a,b)=>(a.ApprovalOrder||0)-(b.ApprovalOrder||0));
         const _nm=cat==='idc'?(f.Name||''):cat==='bc'?[f.NameEN,f.NameKO].filter(Boolean).join(' / '):'';
-        const row=[0,cat.toUpperCase(),f.RequesterEmail||'',f.Title||'',_nm,f.CostCenter||'',f.Status||'',f.RequestDate?fmtDate(f.RequestDate):''];
+        const row=[0,cat.toUpperCase(),f.RequesterEmail||'',f.Title||'',_nm,f.CostCenter||'',cat==='bc'?(bcHasQr(f)?'Y':'N'):'',f.Status||'',f.RequestDate?fmtDate(f.RequestDate):''];
         (ap[0]?[ap[0]]:[{}]).forEach(a=>{row.push(a.ApproverRole||'',a.ApproverName||'',a.Status||'',a.ApprovalDate?fmtDate(a.ApprovalDate):'');});
         rows.push(row);
         catCounts[cat]++;
@@ -1088,10 +1143,10 @@ async function exportAdminExcel() {
       logAction('GA/' + cat.toUpperCase(), 'Excel 내보내기', { 건수: catCounts[cat], 통합내보내기_전체건수: rows.length-1 });
     });
     const wb=XLSX.utils.book_new();
-    // 번호 = 신청 순서(가장 오래된 건이 1). 세 카테고리를 합친 뒤 신청일(8열 — 10-07 Name 열이 들어가 한 칸 밀림) 오름차순으로 매긴다(09-10).
-    rows.slice(1).map((r,i)=>({i,d:String(r[7]||'')})).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0).forEach((o,k)=>{ rows[o.i+1][0]=k+1; });
+    // 번호 = 신청 순서(가장 오래된 건이 1). 세 카테고리를 합친 뒤 신청일(9열 — 10-07 Name, 10-09 QR 열이 들어가 두 칸 밀림) 오름차순으로 매긴다(09-10).
+    rows.slice(1).map((r,i)=>({i,d:String(r[8]||'')})).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0).forEach((o,k)=>{ rows[o.i+1][0]=k+1; });
     const ws=XLSX.utils.aoa_to_sheet(rows);
-    ws['!cols']=[{wch:6},{wch:8},{wch:28},{wch:24},{wch:24},{wch:16},{wch:10},{wch:18},{wch:20},{wch:16},{wch:10},{wch:18}];
+    ws['!cols']=[{wch:6},{wch:8},{wch:28},{wch:24},{wch:24},{wch:16},{wch:5},{wch:10},{wch:18},{wch:20},{wch:16},{wch:10},{wch:18}];
     const range=XLSX.utils.decode_range(ws['!ref']);
     for(let C=range.s.c;C<=range.e.c;C++){const ca=XLSX.utils.encode_cell({r:0,c:C});if(!ws[ca])continue;ws[ca].s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1F4E79'}},alignment:{horizontal:'center',wrapText:true}};}
     XLSX.utils.book_append_sheet(wb,ws,'GA 신청 목록');
@@ -1607,6 +1662,7 @@ async function loadSampleImages() {
     let docDrive = (drivesRes.value || []).find(d => ['Documents','문서','Shared Documents'].includes(d.name));
     if (!docDrive && drivesRes.value) docDrive = drivesRes.value[0];
     if (!docDrive) return;
+    window._gaDocDriveId = docDrive.id;   // QR 명함 샘플을 나중에(체크할 때) 받기 위해(10-09)
     // BC 샘플 이미지
     const bcRes = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/Business_card-sample-image.png:/content',
       { headers: { Authorization: 'Bearer ' + t } });
@@ -1614,7 +1670,8 @@ async function loadSampleImages() {
       const bcBlob = await bcRes.blob();
       const bcUrl = URL.createObjectURL(bcBlob);
       const bcImg = document.getElementById('bc-sample-img');
-      if (bcImg) bcImg.src = bcUrl;
+      window._bcBaseUrl = bcUrl;
+      if (bcImg && !(document.getElementById('bc-qr-on') || {}).checked) bcImg.src = bcUrl;
     }
     // IDC 샘플 이미지
     const idcRes = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/Employee_ID_card-sample-image.png:/content',
@@ -2402,14 +2459,20 @@ async function bcSubmit(){
   const stickerQty=document.getElementById('bc-sticker-qty').value;
   const costCenter=document.getElementById('bc-costcenter').value.trim();
   if(!nameEN||!nameKO||!dept||!qty||!stickerQty||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
+  // QR 코드 적용(10-09) — 체크했으면 QR 이미지가 꼭 있어야 한다(인쇄할 그림이 없으면 GA 가 만들 수 없음)
+  const _qrOn=!!(document.getElementById('bc-qr-on')||{}).checked;
+  const _qrIn=document.getElementById('bc-qr-input');
+  const _qrFile=_qrOn&&_qrIn&&_qrIn.files&&_qrIn.files[0]?_qrIn.files[0]:null;
+  if(_qrOn&&!_qrFile){alert('QR 코드 적용을 선택했습니다.\n명함에 넣을 QR 이미지를 첨부해 주세요. (PNG / JPG / JPEG · 최대 500KB)');const _qb=document.getElementById('bc-qr-box');if(_qb&&_qb.scrollIntoView)_qb.scrollIntoView({block:'center',behavior:'smooth'});return;}
   loading(true);
   try{
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';const _bcSalesAgent=document.getElementById('bc-sales-agent')?.value.trim()||'';
     const _bcJobTitle=document.getElementById('bc-job-title')?.value.trim()||'';const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,SalesAgentCompany:_bcSalesAgent,Status:'대기',RequestDate:new Date().toISOString()}});
     const _bcId=parseInt(item.id);
+    const _qrWarn=_qrOn?await bcSaveQr(_bcId,_qrFile,document.getElementById('bc-desc').value):'';
     await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+_bcId}});
     await createApprovals('bc',_bcId);
-    alert('✅ 신청 완료! (번호: '+_bcId+')');switchTab('list');bcReset();
+    alert('✅ 신청 완료! (번호: '+_bcId+')'+(_qrWarn?'\n\n'+_qrWarn:''));switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
 }
 function bcReset(){
@@ -2422,8 +2485,103 @@ function bcReset(){
   if(_bs) _bs.value='';
   document.getElementById('bc-qty').selectedIndex=0;
   document.getElementById('bc-sticker-qty').selectedIndex=0;
+  var _qo=document.getElementById('bc-qr-on');
+  if(_qo&&_qo.checked){_qo.checked=false;bcQrToggle();}
+  bcQrClear();
   bcUpdatePreview();
   gaResetA1('bc');
+}
+
+// ══ 명함 QR 코드(10-09 · ga-bc-qr) ══
+// 저장: BC_Requests 의 QrCode(예/아니요) · QrFileName(한 줄 텍스트) 열, 그림은 AttachedFiles/BC_Requests_AttachedFiles/{번호}/QR_파일명.
+// 두 열이 아직 없으면 Description 끝에 「[QR 코드 적용]」 표시를 남겨 QR 여부가 사라지지 않게 한다(목록 · 상세 · Excel 모두 이 표시도 읽음).
+const BC_QR_SAMPLE='Business_card-sample-image_QR.png';
+let _bcQrUrl=null;
+async function bcQrToggle(){
+  const on=!!(document.getElementById('bc-qr-on')||{}).checked;
+  const box=document.getElementById('bc-qr-box');if(box)box.classList.toggle('on',on);
+  const body=document.getElementById('bc-qr-body');if(body)body.hidden=!on;
+  const note=document.getElementById('bc-qr-note');if(note){note.hidden=true;note.textContent='';}
+  const img=document.getElementById('bc-sample-img');if(!img)return;
+  if(!on){if(window._bcBaseUrl&&img.src!==window._bcBaseUrl)img.src=window._bcBaseUrl;return;}
+  if(!_bcQrUrl){
+    try{
+      if(!window._gaDocDriveId)throw new Error('문서 라이브러리 정보 없음');
+      const t=await token();
+      const res=await fetch(GRAPH+'/drives/'+window._gaDocDriveId+'/root:/'+BC_QR_SAMPLE+':/content',{headers:{Authorization:'Bearer '+t}});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      _bcQrUrl=URL.createObjectURL(await res.blob());
+    }catch(e){
+      console.warn('QR 명함 샘플 불러오기 실패:',e&&e.message);
+      if(note){note.textContent='QR 명함 샘플 이미지를 불러오지 못해 기본 샘플로 보여 드립니다. (신청에는 영향 없음)';note.hidden=false;}
+      return;
+    }
+  }
+  if((document.getElementById('bc-qr-on')||{}).checked)img.src=_bcQrUrl;   // 받는 사이 체크를 풀었으면 바꾸지 않는다
+}
+function bcQrFileChange(input){
+  const err=document.getElementById('bc-qr-error'),nm=document.getElementById('bc-qr-name'),pv=document.getElementById('bc-qr-preview'),th=document.getElementById('bc-qr-thumb');
+  err.hidden=true;err.textContent='';
+  const fail=m=>{err.textContent=m;err.hidden=false;input.value='';nm.textContent='';pv.hidden=true;};
+  if(!input.files||!input.files[0]){nm.textContent='';pv.hidden=true;return;}
+  const file=input.files[0],ext=file.name.split('.').pop().toLowerCase();
+  if(!['png','jpg','jpeg'].includes(ext))return fail('⚠️ PNG / JPG / JPEG 파일만 업로드 가능합니다.');
+  if(file.size>500*1024)return fail('⚠️ 파일 크기가 500KB를 초과합니다. (현재: '+Math.round(file.size/1024)+'KB)');
+  nm.textContent=file.name+' ('+Math.max(1,Math.round(file.size/1024))+'KB)';
+  const rd=new FileReader();rd.onload=e=>{th.src=e.target.result;pv.hidden=false;};rd.readAsDataURL(file);
+}
+function bcQrClear(){
+  const i=document.getElementById('bc-qr-input');if(i)i.value='';
+  const nm=document.getElementById('bc-qr-name');if(nm)nm.textContent='';
+  const pv=document.getElementById('bc-qr-preview');if(pv)pv.hidden=true;
+  const er=document.getElementById('bc-qr-error');if(er){er.hidden=true;er.textContent='';}
+}
+function bcHasQr(f){
+  if(!f)return false;
+  const v=f.QrCode;
+  return v===true||v==='true'||v==='Yes'||v===1||!!f.QrFileName||/\[QR 코드 적용\]/.test(String(f.Description||''));
+}
+function bcQrCell(f){return bcHasQr(f)?'<span class="qr-pill" title="QR 코드 적용">QR</span>':'<span class="qr-none">–</span>';}
+function bcQrDetail(f){return bcHasQr(f)?'<span class="qr-pill">QR</span><span style="margin-left:6px">적용 — 명함에 QR 코드 인쇄 (QR 이미지는 아래 첨부파일)</span>':'<span style="color:#8a8886">미적용</span>';}
+async function bcAttachDrive(){const d=await api('/sites/'+siteId+'/drives');const v=(d&&d.value)||[];return v.find(x=>x.name==='AttachedFiles')||v[0];}
+async function bcSaveQr(reqId,file,desc){
+  const warn=[],fname='QR_'+file.name;
+  try{
+    const drive=await bcAttachDrive();if(!drive)throw new Error('AttachedFiles 드라이브 없음');
+    const t=await token();
+    const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/BC_Requests_AttachedFiles/'+reqId+'/'+encodeURIComponent(fname)+':/content',
+      {method:'PUT',headers:{Authorization:'Bearer '+t,'Content-Type':file.type||'image/png'},body:await file.arrayBuffer()});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+  }catch(e){console.error('QR 이미지 업로드 실패:',e);warn.push('⚠️ QR 이미지 업로드에 실패했습니다. 신청은 접수되었으니 GA 담당자에게 QR 이미지를 메일로 보내 주세요.');}
+  try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{QrCode:true,QrFileName:fname}});}
+  catch(e){
+    console.warn('QrCode · QrFileName 열 저장 실패 — Description 끝에 표시로 남김:',e&&e.message);
+    const d=String(desc||'').trim();
+    try{await api('/sites/'+siteId+'/lists/BC_Requests/items/'+reqId,'PATCH',{fields:{Description:(d?d+'\n':'')+'[QR 코드 적용] QR 이미지: '+fname}});}
+    catch(e2){console.error(e2);warn.push('⚠️ QR 코드 적용 여부를 저장하지 못했습니다. GA 담당자에게 QR 코드 적용을 알려 주세요.');}
+  }
+  return warn.join('\n');
+}
+function bcQrDl(a){downloadAttachment(a.dataset.drive,a.dataset.id,a.dataset.name);}
+async function bcFillQrFiles(reqId){
+  // 상세 창은 결재 단추를 붙이며 innerHTML 을 다시 쓰므로, 자리는 매번 새로 찾는다
+  const host={set innerHTML(v){const el=document.getElementById('bc-qr-files-'+reqId);if(el)el.innerHTML=v;}};
+  if(!document.getElementById('bc-qr-files-'+reqId))return;
+  const none='<span style="color:#a19f9d">첨부파일 없음</span>';
+  try{
+    const drive=await bcAttachDrive();if(!drive){host.innerHTML=none;return;}
+    const t=await token();
+    const res=await fetch(GRAPH+'/drives/'+drive.id+'/root:/BC_Requests_AttachedFiles/'+reqId+':/children',{headers:{Authorization:'Bearer '+t}});
+    if(res.status===404){host.innerHTML=none;return;}
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const files=((await res.json()).value||[]).filter(x=>x.file);
+    if(!files.length){host.innerHTML=none;return;}
+    host.innerHTML='<div class="qr-files">'+files.map(x=>{
+      const nm=escHtml(x.name),u=x['@microsoft.graph.downloadUrl']||'',img=/\.(png|jpe?g)$/i.test(x.name)&&u;
+      return '<div class="qr-file">'+(img?'<img src="'+escHtml(u)+'" alt="'+nm+'">':'')+'<div><a href="#" data-drive="'+escHtml(drive.id)+'" data-id="'+escHtml(x.id)+'" data-name="'+nm+'" onclick="bcQrDl(this);return false;" style="color:#0078d4;font-size:.82rem">'+nm+'</a>'
+        +'<div style="font-size:.72rem;color:#a19f9d;margin-top:2px">'+(/^QR_/i.test(x.name)?'QR 이미지 · ':'')+Math.max(1,Math.round((x.size||0)/1024))+'KB</div></div></div>';
+    }).join('')+'</div>';
+  }catch(e){host.innerHTML='<span style="color:#a4262c">첨부파일을 불러오지 못했습니다 ('+escHtml(e.message||'')+')</span>';}
 }
 
 // ══ ID CARD ══
@@ -2601,10 +2759,10 @@ async function loadMyList(cat){
     const items=data.value.filter(i=>(i.fields.RequesterEmail||'')===user.email).sort((a,b)=>b.id-a.id);
     const r={
       stn:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'STN_Approvals','STN_Requests',f.Status)}</td></tr>`;},
-      bc: (item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'BC_Approvals','BC_Requests',f.Status)}</td></tr>`;},
+      bc: (item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td style="text-align:center">${bcQrCell(f)}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||'대기'}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'BC_Approvals','BC_Requests',f.Status)}</td></tr>`;},
       idc:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${escHtml(f.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(f.Title||'')}</td><td class="td-name" style="font-size:.78rem">${escHtml(f.Name||'')}</td><td style="font-size:.78rem">${escHtml(f.CostCenter||'')}</td><td><span class="badge-${escHtml(f.Status||'대기')}">${escHtml(f.Status||'대기')}</span></td><td>${fmtDate(f.RequestDate)}</td><td style="text-align:center;vertical-align:middle;padding:4px 6px">${_wdBtn(item.id,'IDC_Approvals','IDC_Requests',f.Status)}</td></tr>`;},
     };
-    const cols={stn:7,bc:7,idc:8};
+    const cols={stn:7,bc:8,idc:8};
     pgSet(cat+'-list',items,r[cat],'신청 내역이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
@@ -2618,9 +2776,9 @@ async function loadApprovalQueue(cat){
     const reqMap=Object.fromEntries(reqData.value.map(r=>[r.id,r.fields]));
     const rows=mine.map(i=>{
       const rf=reqMap[i.fields.RequestID]||{};
-      return`<tr onclick="showDetail('${cat}',${i.fields.RequestID})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${i.fields.RequestID}</td><td style="font-size:.78rem">${escHtml(rf.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(rf.Title||'')}</td>${cat==='idc'?`<td class="td-name" style="font-size:.78rem">${escHtml(rf.Name||'')}</td>`:''}<td style="font-size:.78rem">${escHtml(rf.CostCenter||'')}</td><td><span class="badge-${escHtml(rf.Status||'대기')}">${escHtml(rf.Status||'')}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
+      return`<tr onclick="showDetail('${cat}',${i.fields.RequestID})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${i.fields.RequestID}</td><td style="font-size:.78rem">${escHtml(rf.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(rf.Title||'')}</td>${cat==='idc'?`<td class="td-name" style="font-size:.78rem">${escHtml(rf.Name||'')}</td>`:''}<td style="font-size:.78rem">${escHtml(rf.CostCenter||'')}</td>${cat==='bc'?`<td style="text-align:center">${bcQrCell(rf)}</td>`:''}<td><span class="badge-${escHtml(rf.Status||'대기')}">${escHtml(rf.Status||'')}</span></td><td>${fmtDate(rf.RequestDate)}</td><td onclick="event.stopPropagation()"><button class="btn-approve" onclick="showConfirm(${i.id},'승인',${i.fields.RequestID},'${cat}')">승인</button> <button class="btn-reject" onclick="showConfirm(${i.id},'반려',${i.fields.RequestID},'${cat}')">반려</button></td></tr>`;
     });
-    const cols={stn:7,bc:7,idc:8};
+    const cols={stn:7,bc:8,idc:8};
     pgSet(cat+'-appr',rows,r=>r,'결재 대기 항목이 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
@@ -2635,10 +2793,10 @@ async function loadAdminList(cat){
     if(q)items=items.filter(i=>((i.fields.RequesterEmail||'')+' '+(i.fields.CostCenter||'')+' '+(i.fields.NameEN||'')+' '+(i.fields.Name||'')+' '+(i.fields.IssueType||'')).toLowerCase().includes(q));
     const r={
       stn:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('stn',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
-      bc: (item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
+      bc: (item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('bc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${f.RequesterEmail||''}</td><td style="font-size:.78rem">${f.Title||''}</td><td style="font-size:.78rem">${f.CostCenter||''}</td><td style="text-align:center">${bcQrCell(f)}</td><td><span class="badge-${f.Status||'대기'}">${f.Status||''}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
       idc:(item,idx)=>{const f=item.fields;return`<tr onclick="showDetail('idc',${item.id})" style="cursor:pointer"><td style="color:#0078d4;font-weight:600">${idx+1}</td><td style="font-size:.78rem">${escHtml(f.RequesterEmail||'')}</td><td style="font-size:.78rem">${escHtml(f.Title||'')}</td><td class="td-name" style="font-size:.78rem">${escHtml(f.Name||'')}</td><td style="font-size:.78rem">${escHtml(f.CostCenter||'')}</td><td><span class="badge-${escHtml(f.Status||'대기')}">${escHtml(f.Status||'')}</span></td><td>${fmtDate(f.RequestDate)}</td></tr>`;},
     };
-    const cols={stn:6,bc:6,idc:7};
+    const cols={stn:6,bc:7,idc:7};
     pgSet(cat+'-admin',items,r[cat],'조회 결과가 없습니다.',cols[cat]);
   }catch(e){console.error(e);}
 }
@@ -2694,7 +2852,7 @@ async function showDetail(cat,id){
   document.getElementById('modal-content').innerHTML='<div style="text-align:center;padding:30px;color:#a19f9d">로딩 중...</div>';
   document.getElementById('detail-modal').classList.add('open');
   try{
-    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,JobTitle,JobPosition,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,SalesAgentCompany,OrdName,OrdPhone,StnName,StnDept,Name,PhotoFileName,AttachedFiles)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500&$filter=fields/RequestID eq '+parseInt(id))]);
+    const [r,apprData]=await Promise.all([api('/sites/'+siteId+'/lists/'+LISTS[cat].req+'/items/'+id+'?$expand=fields($select=Title,Company,CostCenter,ItemCount,TotalAmount,ItemsData,Status,RequesterEmail,RequestDate,NameEN,NameKO,JobTitle,JobPosition,Department,Email,Quantity,StickerQty,IssueType,Description,Address,AddressEng,MobileNumber,SalesAgentCompany,OrdName,OrdPhone,StnName,StnDept,Name,PhotoFileName,AttachedFiles,QrCode,QrFileName)'),apiAll('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items?$expand=fields&$top=500&$filter=fields/RequestID eq '+parseInt(id))]);
     const f=r.fields;
     const apprList=apprData.value.sort((a,b)=>a.fields.ApprovalOrder-b.fields.ApprovalOrder);
     const sc={'대기':'#7d5700','승인':'#107c10','반려':'#a4262c','대기(잠김)':'#605e5c','승인완료':'#107c10'};
@@ -2706,7 +2864,7 @@ async function showDetail(cat,id){
       if(f.ItemsData){try{const _raw=f.ItemsData.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#34;/g,'"').replace(/&#58;/g,':').replace(/&#123;/g,'{').replace(/&#125;/g,'}').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim();const items=JSON.parse(_raw);const tot=items.reduce((s,i)=>s+i.rowTotal,0);ih=`<table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-top:6px"><thead><tr style="background:#4472C4;color:#fff"><th style="padding:7px 10px;text-align:left">상품명</th><th style="padding:7px 8px;text-align:center">코드</th><th style="padding:7px 8px;text-align:center">단위</th><th style="padding:7px 8px;text-align:center">Q'ty</th><th style="padding:7px 8px;text-align:right">단가</th><th style="padding:7px 8px;text-align:right">소계</th></tr></thead><tbody>${items.map(i=>`<tr style="border-bottom:1px solid #edebe9"><td style="padding:6px 10px">${i.name}</td><td style="padding:6px 8px;text-align:center;color:#605e5c">${i.code}</td><td style="padding:6px 8px;text-align:center">${i.unit}</td><td style="padding:6px 8px;text-align:center">${i.qty}</td><td style="padding:6px 8px;text-align:right">${Number(i.price).toLocaleString()}</td><td style="padding:6px 8px;text-align:right;font-weight:600">${Number(i.rowTotal).toLocaleString()}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#4472C4;color:#fff"><td colspan="5" style="padding:7px 10px;text-align:right;font-weight:700">Total Sum</td><td style="padding:7px 8px;text-align:right;font-weight:700">${tot.toLocaleString()}원</td></tr></tfoot></table>`;}catch(e){}}
       body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+row('상태',`<span class="badge-${(function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status)}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Company',f.Company)+row('Cost Center',f.CostCenter)+sec('주문자 정보')+row('주문자',f.OrdName||'-')+row('주문자 연락처',f.OrdPhone||'-')+(f.StnName?row('수령자',f.StnName):'')+( f.StnDept?row('수령자 부서',f.StnDept):'')+( f.Address?row('수령 주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng&&f.Address?row('수령 주소 (영문)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.Description?row('Description',f.Description):'')+row('항목 수',f.ItemCount+'건')+row('Total',fmtAmt(f.TotalAmount))+sec('주문 항목')+ih;
     }else if(cat==='bc'){
-      body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+row('상태',`<span class="badge-${(function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status)}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+(f.JobTitle?row('Job Title',f.JobTitle):'')+(f.JobPosition?row('Job Position',f.JobPosition):'')+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?row('주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng?row('Address (EN)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+( f.SalesAgentCompany?row('세일즈 에이전트 상호명<br><span style="font-size:.88em;opacity:.72;white-space:nowrap">(사업자등록증에 기재된)</span>',f.SalesAgentCompany):'');
+      body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+row('상태',`<span class="badge-${(function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status)}">${f.Status||'대기'}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+(f.JobTitle?row('Job Title',f.JobTitle):'')+(f.JobPosition?row('Job Position',f.JobPosition):'')+row('Department',f.Department)+row('Email',f.Email)+row('QR 코드',bcQrDetail(f))+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?row('주소 (국문)',f.Address.replace(/\r\n|\n/g,'<br>')):'')+( f.AddressEng?row('Address (EN)',f.AddressEng.replace(/\r\n|\n/g,'<br>')):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+( f.SalesAgentCompany?row('세일즈 에이전트 상호명<br><span style="font-size:.88em;opacity:.72;white-space:nowrap">(사업자등록증에 기재된)</span>',f.SalesAgentCompany):'')+row('첨부파일','<div id="bc-qr-files-'+parseInt(id)+'" style="color:#a19f9d">불러오는 중…</div>');
     }else{
       // IDC 첨부파일 처리
       let _idcFiles = '';
@@ -2731,6 +2889,7 @@ async function showDetail(cat,id){
     }
     const ah=sec('결재 이력')+'<div style="background:#f9f9f9;border-radius:6px;border:1px solid #edebe9;overflow:hidden">'+(apprList.length?apprList.map(a=>{const af=a.fields;return`<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 12px;border-bottom:1px solid #edebe9"><div><div style="font-weight:600;font-size:13px">${(()=>{const _r=aacRoleBase(af.ApproverRole),_o=String(af.ApprovalOrder||'');const _n=_r.startsWith(_o+'차')?_r.slice(_o.length+1).trim():_r;const _p=_n.replace(/^결재자\s*/,'');const _q=_p.startsWith('(')?_p:(_p?'('+_p+')':'');return '<b>'+_o+'차</b> 결재자'+_q+aacRolePill(af.ApproverRole, af.Status);})()}</div><div style="font-size:12px;color:#605e5c;margin-top:2px">${af.ApproverName||''} · ${af.ApproverEmail||''}</div>${af.ApprovalDate?`<div style="font-size:11px;color:#a19f9d;margin-top:2px">${fmtDate(af.ApprovalDate)}</div>`:''}${af.Comment?`<div style="margin-top:4px;background:#fff;border:1px solid #edebe9;border-radius:4px;padding:4px 8px;font-size:12px;color:#605e5c;white-space:pre-wrap">💬 ${safeText(af.Comment)}</div>`:''}</div><span style="color:${sc[af.Status]||'#323130'};font-weight:700;font-size:12px;white-space:nowrap;margin-left:8px">${af.Status||''}</span></div>`;}  ).join(''):'<div style="padding:12px;font-size:.82rem;color:#a19f9d">결재 이력이 없습니다.</div>')+'</div>';
     document.getElementById('modal-content').innerHTML=body+ah;
+    if(cat==='bc')bcFillQrFiles(parseInt(id));   // QR 이미지 등 첨부 — 폴더를 읽어 미리보기와 함께(10-09)
     const myAppr=apprList.find(a=>(a.fields.ApproverEmail||'')===user.email&&a.fields.Status==='대기');
     if(myAppr)document.getElementById('modal-content').innerHTML+=`<div class="modal-action"><button class="btn-approve" onclick="showConfirm(${myAppr.id},'승인',${id},'${cat}')">✅ 승인</button><button class="btn-reject" onclick="showConfirm(${myAppr.id},'반려',${id},'${cat}')">❌ 반려</button></div>`;
   }catch(e){document.getElementById('modal-content').innerHTML='<div style="color:#a4262c;padding:20px">로드 오류: '+e.message+'</div>';}
