@@ -180,6 +180,11 @@ html.aps-wtx #app{transition:max-width .2s ease}
 .bc-type-txt small{font-size:.72rem;line-height:16px;color:#8a8886;font-weight:400}
 .bc-type-opt.on .bc-type-txt small{color:#5b7fa6}
 #tab-form-bc:not(.bc-agent) .bc-ag-only,#tab-form-bc.bc-agent .bc-st-only{display:none!important}
+/* 구분에 따라 쓰지 않는 칸(10-11) — 회색 · 입력 불가. iOS 기본 반투명 · 글자색 대신 같은 회색으로 */
+#tab-form-bc .form-group input:disabled{background:#f3f2f1;color:#a19f9d;-webkit-text-fill-color:#a19f9d;opacity:1;border-color:#e1dfdd!important;cursor:not-allowed}
+#tab-form-bc .form-group input:disabled::placeholder{color:#a19f9d;-webkit-text-fill-color:#a19f9d;opacity:1}
+#tab-form-bc .form-group:has(input:disabled)>label{color:#a19f9d}
+#tab-form-bc .bc-qr-head:has(input:disabled){cursor:default}
 .ct-pill{display:inline-flex;align-items:center;padding:1px 8px;border-radius:10px;font-size:.68rem;font-weight:700;line-height:1.5;white-space:nowrap;background:#eef1f4;color:#4a5462}
 .ct-pill.ag{background:#fff6e5;color:#8a5a00;box-shadow:inset 0 0 0 1px #f5ddb0}
 .list-table col.c-ct{width:64px}
@@ -876,26 +881,26 @@ window.apsYear = (function () {
 
         <div class="section-title">2. 기본 정보</div>
         <div class="form-row">
-          <div class="form-group"><label>Name (EN) <span class="req-mark">*</span></label><input type="text" id="bc-name-en" placeholder="Hong Gil-dong" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Name (EN)<span class="bc-st-only"> <span class="req-mark">*</span></span></label><input type="text" id="bc-name-en" placeholder="Hong Gil-dong" oninput="bcUpdatePreview()"></div>
           <div class="form-group"><label>Name (KO) <span class="req-mark">*</span></label><input type="text" id="bc-name-ko" placeholder="홍길동" oninput="bcUpdatePreview()"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Job Title</label><input type="text" id="bc-job-title" placeholder="Sales Administrator" oninput="bcUpdatePreview()"></div>
-          <div class="form-group"><label>Job Position</label><input type="text" id="bc-job-position" placeholder="매니저" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Job Title<span class="bc-st-only"> <span class="req-mark">*</span></span></label><input type="text" id="bc-job-title" placeholder="Sales Administrator" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Job Position<span class="bc-st-only"> <span class="req-mark">*</span></span></label><input type="text" id="bc-job-position" placeholder="매니저" oninput="bcUpdatePreview()"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>Department <span class="req-mark">*</span></label><input type="text" id="bc-dept" placeholder="Finance &amp; Controlling" oninput="bcUpdatePreview()"></div>
-          <div class="form-group"><label>Email</label><input type="email" id="bc-email" placeholder="email@hyosung.com" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Email<span class="bc-st-only"> <span class="req-mark">*</span></span></label><input type="email" id="bc-email" placeholder="email@hyosung.com" oninput="bcUpdatePreview()"></div>
         </div>
 
         <div class="form-row">
           <div class="form-group" style="margin-bottom:14px">
-            <label>Mobile Number (명함에 기재될 번호)</label>
+            <label>Mobile Number (명함에 기재될 번호) <span class="req-mark">*</span></label>
             <input type="text" id="bc-mobile" placeholder="ex) +82-10-9999-9999" oninput="bcUpdatePreview()" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
           </div>
           <div class="form-group" style="margin-bottom:14px">
             <label>세일즈 에이전트 상호명 (사업자등록증에 기재된)<span class="bc-ag-only"> <span class="req-mark">*</span></span></label>
-            <input type="text" id="bc-sales-agent" placeholder="예시) 세일즈 에이전트 상호명 (사업자등록증에 기재된)" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
+            <input type="text" id="bc-sales-agent" disabled aria-disabled="true" data-ph="예시) 세일즈 에이전트 상호명 (사업자등록증에 기재된)" placeholder="STK Agent 명함에서만 입력합니다" style="width:100%;padding:7px 10px;border:1px solid #d2d0ce;border-radius:4px;font-size:13px;box-sizing:border-box">
           </div>
         </div>
 
@@ -904,7 +909,7 @@ window.apsYear = (function () {
           <label class="bc-qr-head" for="bc-qr-on">
             <input type="checkbox" id="bc-qr-on" onchange="bcQrToggle()">
             <span class="bc-qr-ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 1h5v5H1V1zm1.2 1.2v2.6h2.6V2.2H2.2zM10 1h5v5h-5V1zm1.2 1.2v2.6h2.6V2.2h-2.6zM1 10h5v5H1v-5zm1.2 1.2v2.6h2.6v-2.6H2.2zM3 3h1v1H3V3zm9 0h1v1h-1V3zM3 12h1v1H3v-1zm5-11h1v2H8V1zm0 3h1v2H8V4zM7 7h2v1H7V7zm-6 0h2v1H1V7zm3 0h2v1H4V7zm6 0h2v1h-2V7zm3 0h2v1h-2V7zM8 9h1v2H8V9zm2 0h2v1h-2V9zm3 0h2v2h-1v-1h-1V9zm-5 3h1v3H8v-3zm2 0h1v1h-1v-1zm2 0h1v2h2v1h-3v-3zm-2 2h1v1h-1v-1z"/></svg></span>
-            <span class="bc-qr-txt"><span class="bc-qr-tline"><b>QR 코드 적용</b><span class="bc-qr-tag bc-ag-only">세일즈 에이전트 용</span><span class="bc-qr-tag bc-st-only">STK HR 사전 확인 필요</span></span><small class="bc-st-only">명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small><small class="bc-ag-only">명함에 QR 코드를 넣습니다 · 첨부한 QR 이미지가 위 미리보기의 QR 자리에 보입니다</small></span>
+            <span class="bc-qr-txt"><span class="bc-qr-tline"><b>QR 코드 적용<span class="bc-ag-only req-mark">*</span></b><span class="bc-qr-tag bc-ag-only">세일즈 에이전트 용</span><span class="bc-qr-tag bc-st-only">STK HR 사전 확인 필요</span></span><small class="bc-st-only">명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small><small class="bc-ag-only">STK Agent 명함은 QR 코드 필수 · 첨부한 QR 이미지가 위 미리보기의 QR 자리에 보입니다</small></span>
           </label>
           <div id="bc-qr-body" class="bc-qr-body" hidden>
             <div class="bc-qr-guide bc-st-only" role="note">
@@ -2661,19 +2666,28 @@ async function bcSubmit(){
   const qty=document.getElementById('bc-qty').value;
   const stickerQty=document.getElementById('bc-sticker-qty').value;
   const costCenter=document.getElementById('bc-costcenter').value.trim();
-  if(!nameEN||!nameKO||!dept||!qty||!stickerQty||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
-  // STK Agent 명함(10-10) — 세일즈 에이전트 상호명(사업자등록증에 기재된) 필수
+  // 명함 구분별 필수(10-11) — Agent: Name (KO) · Department · Mobile · 상호명 / 내부직원: Name (EN·KO) · Job Title · Job Position · Department · Email · Mobile
   const _bcAgent=_bcType==='agent';
-  if(_bcAgent&&!(document.getElementById('bc-sales-agent').value||'').trim()){alert('STK Agent 명함 신청은 「세일즈 에이전트 상호명 (사업자등록증에 기재된)」을 꼭 입력해 주세요.');const _sa=document.getElementById('bc-sales-agent');if(_sa){if(_sa.scrollIntoView)_sa.scrollIntoView({block:'center',behavior:'smooth'});_sa.focus({preventScroll:true});}return;}
+  const _bv=id=>((document.getElementById(id)||{}).value||'').trim();
+  const _need=_bcAgent
+    ?[['bc-name-ko','Name (KO)'],['bc-dept','Department'],['bc-mobile','Mobile Number (명함에 기재될 번호)'],['bc-sales-agent','세일즈 에이전트 상호명 (사업자등록증에 기재된)']]
+    :[['bc-name-en','Name (EN)'],['bc-name-ko','Name (KO)'],['bc-job-title','Job Title'],['bc-job-position','Job Position'],['bc-dept','Department'],['bc-email','Email'],['bc-mobile','Mobile Number (명함에 기재될 번호)']];
+  const _miss=_need.filter(x=>!_bv(x[0]));
+  if(_miss.length){alert((_bcAgent?'STK Agent':'STK 내부직원')+' 명함 신청 — 아래 필수 항목을 입력해 주세요.\n\n· '+_miss.map(x=>x[1]).join('\n· '));bcFocus(_miss[0][0]);return;}
+  if(!_bcAgent&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(_bv('bc-email'))){alert('Email 형식이 올바르지 않습니다. (예: name@hyosung.com)');bcFocus('bc-email');return;}
+  if(!qty||!stickerQty||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
   // QR 코드 적용(10-09) — 체크했으면 QR 이미지가 꼭 있어야 한다(인쇄할 그림이 없으면 GA 가 만들 수 없음)
-  const _qrOn=!!(document.getElementById('bc-qr-on')||{}).checked;
+  const _qrOn=_bcAgent||!!(document.getElementById('bc-qr-on')||{}).checked;   // STK Agent 는 QR 필수(10-11)
   const _qrIn=document.getElementById('bc-qr-input');
   const _qrFile=_qrOn&&_qrIn&&_qrIn.files&&_qrIn.files[0]?_qrIn.files[0]:null;
+  if(_bcAgent&&!_qrFile){alert('STK Agent 명함은 QR 코드가 필수입니다.\nMKQR 시스템에서 만든 QR 이미지를 첨부해 주세요. (PNG / JPG / JPEG · 최대 500KB)');const _qb=document.getElementById('bc-qr-box');if(_qb&&_qb.scrollIntoView)_qb.scrollIntoView({block:'center',behavior:'smooth'});return;}
   if(_qrOn&&!_qrFile&&!confirm('QR 이미지가 첨부되지 않았습니다. 계속 진행하시겠습니까?\n(QR 코드 적용으로 접수되며, QR 이미지는 GA 담당자와 따로 주고받아야 합니다)')){const _qb=document.getElementById('bc-qr-box');if(_qb&&_qb.scrollIntoView)_qb.scrollIntoView({block:'center',behavior:'smooth'});return;}
   loading(true);
   try{
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';const _bcSalesAgent=document.getElementById('bc-sales-agent')?.value.trim()||'';
-    const _bcJobTitle=document.getElementById('bc-job-title')?.value.trim()||'';const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:{Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,SalesAgentCompany:_bcSalesAgent,Status:'대기',RequestDate:new Date().toISOString()}});
+    const _bcJobTitle=document.getElementById('bc-job-title')?.value.trim()||'';const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const _bcF={Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,SalesAgentCompany:_bcSalesAgent,Status:'대기',RequestDate:new Date().toISOString()};
+    if(_bcAgent){delete _bcF.NameEN;delete _bcF.JobPosition;}else delete _bcF.SalesAgentCompany;   // 비활성 칸은 보내지 않는다(10-11)
+    const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:_bcF});
     const _bcId=parseInt(item.id);
     const _ct=await bcSaveCardType(_bcId,_bcAgent,document.getElementById('bc-desc').value);   // 명함 구분(10-10) — 표시를 남겼으면 QR 표시는 그 뒤에 붙는다
     const _qrWarn=_qrOn?await bcSaveQr(_bcId,_qrFile,_ct.desc):'';
@@ -2696,6 +2710,7 @@ function bcReset(){
   var _qo=document.getElementById('bc-qr-on');
   if(_qo&&_qo.checked){_qo.checked=false;bcQrToggle();}
   bcQrClear();
+  _bcKeep={};bcApplyTypeFields();   // 구분별 비활성 · Agent QR 고정 다시(10-11)
   bcUpdatePreview();
   gaResetA1('bc');
 }
@@ -2833,8 +2848,34 @@ function bcSetType(t){
   const form=document.getElementById('tab-form-bc');if(form)form.classList.toggle('bc-agent',t==='agent');
   [['staff','bc-type-staff'],['agent','bc-type-agent']].forEach(function(p){const b=document.getElementById(p[1]);if(!b)return;const on=p[0]===t;b.classList.toggle('on',on);b.setAttribute('aria-checked',on?'true':'false');b.tabIndex=on?0:-1;});
   const sa=document.getElementById('bc-sales-agent');if(sa){if(t==='agent')sa.setAttribute('aria-required','true');else sa.removeAttribute('aria-required');}
+  bcApplyTypeFields();
   if(prev!==t)bcTypeImage();
 }
+// 구분별 칸 상태(10-11) — Agent: Name (EN) · Job Position 비활성, QR 체크 고정 / 내부직원: 상호명 비활성.
+// 비활성으로 바꿀 때 값을 비우고(저장 안 함) 기억해 두었다가, 다시 쓰는 칸이 되면 되살린다. QR 체크도 내부직원일 때 상태로 되돌린다.
+var _bcKeep={};
+const BC_TYPE_OFF={agent:['bc-name-en','bc-job-position'],staff:['bc-sales-agent']};
+function bcApplyTypeFields(){
+  const ag=_bcType==='agent',off=BC_TYPE_OFF[ag?'agent':'staff'];
+  ['bc-name-en','bc-job-position','bc-sales-agent'].forEach(function(id){
+    const e=document.getElementById(id);if(!e)return;
+    if(off.indexOf(id)>=0){
+      if(!e.disabled){if(e.value)_bcKeep[id]=e.value;e.value='';e.disabled=true;e.setAttribute('aria-disabled','true');if(!e.dataset.ph)e.dataset.ph=e.placeholder;}
+      e.placeholder=ag?'STK Agent 명함에는 입력하지 않습니다':'STK Agent 명함에서만 입력합니다';
+    }else if(e.disabled){
+      e.disabled=false;e.removeAttribute('aria-disabled');if(e.dataset.ph)e.placeholder=e.dataset.ph;
+      if(!e.value&&_bcKeep[id])e.value=_bcKeep[id];delete _bcKeep[id];
+    }
+  });
+  const m=document.getElementById('bc-mobile');if(m){if(!m.dataset.ph)m.dataset.ph=m.placeholder;m.placeholder=ag?'010-0000-0000':m.dataset.ph;}
+  const q=document.getElementById('bc-qr-on');
+  if(q){
+    if(ag){if(!q.disabled){_bcKeep.qr=q.checked;q.disabled=true;q.setAttribute('aria-disabled','true');}if(!q.checked){q.checked=true;bcQrToggle();}}
+    else if(q.disabled){q.disabled=false;q.removeAttribute('aria-disabled');const was=!!_bcKeep.qr;delete _bcKeep.qr;if(q.checked!==was){q.checked=was;bcQrToggle();}}
+  }
+  bcUpdatePreview();
+}
+function bcFocus(id){const e=document.getElementById(id);if(!e)return;if(e.scrollIntoView)e.scrollIntoView({block:'center',behavior:'smooth'});try{e.focus({preventScroll:true});}catch(_){}}
 function bcTypeKey(e){
   if(!/^Arrow(Left|Right|Up|Down)$/.test(e.key))return;
   e.preventDefault();const t=_bcType==='agent'?'staff':'agent';bcSetType(t);const b=document.getElementById('bc-type-'+t);if(b)b.focus();
