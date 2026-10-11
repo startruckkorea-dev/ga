@@ -185,6 +185,10 @@ html.aps-wtx #app{transition:max-width .2s ease}
 #tab-form-bc .form-group input:disabled::placeholder{color:#a19f9d;-webkit-text-fill-color:#a19f9d;opacity:1}
 #tab-form-bc .form-group:has(input:disabled)>label{color:#a19f9d}
 #tab-form-bc .bc-qr-head:has(input:disabled){cursor:default}
+/* 고정값 칸(10-11 · Agent Job Title) — 비활성(회색)과 달리 값이 들어 있는 파란 칸 */
+#tab-form-bc .form-group input.bc-fixed{background:#f0f6ff;border-color:#c7e0f4;color:#0b5cad;-webkit-text-fill-color:#0b5cad;font-weight:600;cursor:default}
+#tab-form-bc .form-group input.bc-fixed:focus{border-color:#c7e0f4}
+.bc-fixed-tag{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:0 7px;border-radius:10px;background:#e8f1fb;color:#0b5cad;font-size:.66rem;font-weight:600;line-height:1.6;vertical-align:1px}
 /* Agent 샘플 받는 중 · 실패(10-11) — 내부직원 샘플을 보이지 않고 Agent 명함 비율(1750×645) 빈 틀에 안내 */
 .bc-ag-wait-box{display:none}
 #bc-card-stage.bc-ag-wait,#bc-card-stage.bc-ag-fail{min-height:160px;background:#fafaf9}
@@ -907,7 +911,7 @@ window.apsYear = (function () {
           <div class="form-group"><label>Name (KO) <span class="req-mark">*</span></label><input type="text" id="bc-name-ko" placeholder="홍길동" oninput="bcUpdatePreview()"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Job Title<span class="bc-st-only"> <span class="req-mark">*</span></span></label><input type="text" id="bc-job-title" placeholder="Sales Administrator" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Job Title<span> <span class="req-mark">*</span></span><span class="bc-fixed-tag bc-ag-only"><svg width="9" height="9" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="8" rx="1.5" fill="currentColor"/><path d="M5.2 7V5a2.8 2.8 0 0 1 5.6 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>고정값</span></label><input type="text" id="bc-job-title" placeholder="Sales Administrator" oninput="bcUpdatePreview()"></div>
           <div class="form-group"><label>Job Position<span class="bc-st-only"> <span class="req-mark">*</span></span></label><input type="text" id="bc-job-position" placeholder="매니저" oninput="bcUpdatePreview()"></div>
         </div>
         <div class="form-row">
@@ -2698,7 +2702,7 @@ async function bcSubmit(){
   const _bcAgent=_bcType==='agent';
   const _bv=id=>((document.getElementById(id)||{}).value||'').trim();
   const _need=_bcAgent
-    ?[['bc-name-ko','Name (KO)'],['bc-dept','Department'],['bc-mobile','Mobile Number (명함에 기재될 번호)'],['bc-sales-agent','세일즈 에이전트 상호명 (사업자등록증에 기재된)']]
+    ?[['bc-name-ko','Name (KO)'],['bc-job-title','Job Title'],['bc-dept','Department'],['bc-mobile','Mobile Number (명함에 기재될 번호)'],['bc-sales-agent','세일즈 에이전트 상호명 (사업자등록증에 기재된)']]
     :[['bc-name-en','Name (EN)'],['bc-name-ko','Name (KO)'],['bc-job-title','Job Title'],['bc-job-position','Job Position'],['bc-dept','Department'],['bc-email','Email'],['bc-mobile','Mobile Number (명함에 기재될 번호)']];
   const _miss=_need.filter(x=>!_bv(x[0]));
   if(_miss.length){alert((_bcAgent?'STK Agent':'STK 내부직원')+' 명함 신청 — 아래 필수 항목을 입력해 주세요.\n\n· '+_miss.map(x=>x[1]).join('\n· '));bcFocus(_miss[0][0]);return;}
@@ -2713,7 +2717,7 @@ async function bcSubmit(){
   loading(true);
   try{
     const _bcAddr=(document.getElementById('bc-address')?.value||'').trim();const _bcAddrEng=(document.getElementById('bc-address-eng')?.value||'').trim();const _bcMobile=document.getElementById('bc-mobile')?.value.trim()||'';const _bcSalesAgent=document.getElementById('bc-sales-agent')?.value.trim()||'';
-    const _bcJobTitle=document.getElementById('bc-job-title')?.value.trim()||'';const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const _bcF={Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,SalesAgentCompany:_bcSalesAgent,Status:'대기',RequestDate:new Date().toISOString()};
+    const _bcJobTitle=_bcAgent?BC_AG_JOB:(document.getElementById('bc-job-title')?.value.trim()||'');const _bcJobPosition=document.getElementById('bc-job-position')?.value.trim()||'';const _bcF={Title:'BC-tmp',RequesterEmail:user.email,Company:'STK',NameEN:nameEN,NameKO:nameKO,JobTitle:_bcJobTitle,JobPosition:_bcJobPosition,Department:dept,Email:document.getElementById('bc-email').value,Quantity:parseInt(qty),StickerQty:parseInt(stickerQty),CostCenter:costCenter,Description:document.getElementById('bc-desc').value,Address:_bcAddr,AddressEng:_bcAddrEng,MobileNumber:_bcMobile,SalesAgentCompany:_bcSalesAgent,Status:'대기',RequestDate:new Date().toISOString()};
     if(_bcAgent){delete _bcF.NameEN;delete _bcF.JobPosition;}else delete _bcF.SalesAgentCompany;   // 비활성 칸은 보내지 않는다(10-11)
     const item=await api('/sites/'+siteId+'/lists/BC_Requests/items','POST',{fields:_bcF});
     const _bcId=parseInt(item.id);
@@ -2884,6 +2888,7 @@ function bcSetType(t){
 // 구분별 칸 상태(10-11) — Agent: Name (EN) · Job Position 비활성, QR 체크 고정 / 내부직원: 상호명 비활성.
 // 비활성으로 바꿀 때 값을 비우고(저장 안 함) 기억해 두었다가, 다시 쓰는 칸이 되면 되살린다. QR 체크도 내부직원일 때 상태로 되돌린다.
 var _bcKeep={};
+const BC_AG_JOB='세일즈 에이전트';   // STK Agent 명함 Job Title 고정값(10-11)
 const BC_TYPE_OFF={agent:['bc-name-en','bc-job-position'],staff:['bc-sales-agent']};
 function bcApplyTypeFields(){
   const ag=_bcType==='agent',off=BC_TYPE_OFF[ag?'agent':'staff'];
@@ -2897,6 +2902,12 @@ function bcApplyTypeFields(){
       if(!e.value&&_bcKeep[id])e.value=_bcKeep[id];delete _bcKeep[id];
     }
   });
+  // Job Title(10-11) — Agent: 고정값 「세일즈 에이전트」(읽기 전용, 그전 값은 기억) / 내부직원: 그전 값을 되살려 다시 입력
+  const jt=document.getElementById('bc-job-title');
+  if(jt){
+    if(ag){if(!jt.readOnly){_bcKeep['bc-job-title']=jt.value;jt.readOnly=true;jt.classList.add('bc-fixed');jt.setAttribute('aria-readonly','true');jt.title='STK Agent 명함은 고정값';}jt.value=BC_AG_JOB;}
+    else if(jt.readOnly){jt.readOnly=false;jt.classList.remove('bc-fixed');jt.removeAttribute('aria-readonly');jt.removeAttribute('title');jt.value=_bcKeep['bc-job-title']||'';delete _bcKeep['bc-job-title'];}
+  }
   [['bc-mobile','010-0000-0000'],['bc-job-title','세일즈 에이전트'],['bc-dept','서울&중부지역 본부']].forEach(function(p){const m=document.getElementById(p[0]);if(!m)return;if(!m.dataset.ph)m.dataset.ph=m.placeholder;m.placeholder=ag?p[1]:m.dataset.ph;});   // Agent 예시(10-11)
   const q=document.getElementById('bc-qr-on');
   if(q){
