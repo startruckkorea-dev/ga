@@ -1021,7 +1021,7 @@ window.apsYear = (function () {
 
         <div class="section-title">4. 결재자 지정 (Approvers)</div>
         <!-- 결재 라인 미리보기 · 결재자 블록 — ACC Voucher 와 같은 모양(09-30) -->
-        <div class="appr-line-preview">
+        <div class="appr-line-preview" id="bc-line-preview">
         <div class="appr-line-title">📋 결재 라인 (Business Card 신청 기준 자동 구성)</div>
         <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge">1차</span><span class="line-step-label">Department Head (부서장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">2차</span><span class="line-step-label">HR Head (인사팀장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">3차</span><span class="line-step-label">GA Specialist</span></span></div>
       </div>
@@ -1035,8 +1035,10 @@ window.apsYear = (function () {
           <input type="text" id="bc-a1-name" readonly placeholder="이름">
           <input type="email" id="bc-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-block-title">2차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— HR Head (인사팀장)</span></div><div class="appr-info"><input type="text" id="cfg-a2-bc-name" value="" readonly placeholder="이름"><input type="email" id="cfg-a2-bc-email" value="" readonly placeholder="이메일"></div></div>
-        <div class="appr-block appr-fixed"><div class="appr-block-title">3차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— GA Specialist</span></div><div class="appr-info"><input type="text" id="cfg-a3-bc-name" value="" readonly placeholder="이름"><input type="email" id="cfg-a3-bc-email" value="" readonly placeholder="이메일"></div></div>
+        <!-- 추가 결재자(10-11) — 1차와 HR Head 사이에만, 최대 3명. bcExRender 가 그린다 -->
+        <div id="bc-extra-area"></div>
+        <div class="appr-block appr-fixed"><div class="appr-block-title"><span id="bc-hr-step">2</span>차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— HR Head (인사팀장)</span></div><div class="appr-info"><input type="text" id="cfg-a2-bc-name" value="" readonly placeholder="이름"><input type="email" id="cfg-a2-bc-email" value="" readonly placeholder="이메일"></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-block-title"><span id="bc-ga-step">3</span>차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— GA Specialist</span></div><div class="appr-info"><input type="text" id="cfg-a3-bc-name" value="" readonly placeholder="이름"><input type="email" id="cfg-a3-bc-email" value="" readonly placeholder="이메일"></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="bcReset()">Reset</button><button class="btn-primary" onclick="bcSubmit()">Submit</button></div>
     </div></div>
@@ -1923,6 +1925,7 @@ async function loadEmployees(){
     employeeData=rows.map(r=>({dept:r['Department']||'',team:r['Team']||'',name:r['EngName']||'',email:(r['EMail']||r['email']||''),boss:String(r['Boss']||'').trim(),boss2:String(r['Boss of Boss']||'').trim()})).filter(r=>r.email&&r.name);   // boss = G열 팀장 · boss2 = H열 부서장 (Flex 연동 결재자, 10-01)
     // 로드 후 부서 드롭다운 초기화
     for(const prefix of ['stn','bc','idc']) gaInitDept(prefix);
+    try{bcExRender();}catch(e){console.warn(e);}   // 명함 추가 결재자 부서 목록(10-11)
     applyFlexApprovers();   // 1차 Department Head — Flex 연동(10-01)
     // 로드 완료 후: 이미 체크된 경우 부서 자동 채우기 (타이밍 문제 해결)
     const _myEmp=employeeData.find(e=>(e.email||'').toLowerCase()===(user.email||'').toLowerCase());
@@ -2013,15 +2016,97 @@ function gaResetA1(prefix){
   gaInitDept(prefix);
   applyFlexApprovers();   // Flex 연동 결재자는 비운 뒤 다시 채운다(10-01)
 }
-async function createApprovals(cat,reqId){
+/* ══ 명함 추가 결재자 (10-11 · IT Ticket · ACC Voucher 「Adding an Additional Approver」 와 같은 방식) ══
+   1차(Department Head)와 HR Head 사이에 결재자를 최대 3명까지 끼워 넣는다 — 내부직원 · Agent 공통.
+   · 값은 DOM 이 아니라 bcExtra 배열에 둔다 — 다시 그려도 고른 부서 · 팀 · 직원이 유지된다.
+   · 결재행 역할은 'Extra Approver'(APS · 메일에서 별도 매핑 없이 읽힘), 차수는 2차부터 차례로, HR Head · GA Specialist 는 그만큼 뒤로.
+   · 결재 진행은 그대로(다음 「대기(잠김)」 을 차수 순으로 풀고, 없으면 신청 승인완료). */
+const BC_MAX_EXTRA=3;
+const BC_EXTRA_ROLE='Extra Approver';
+let bcExtra=[];
+let _bcHelpOpen=false,_bcExSeq=0;
+function bcExRender(){
+  const list=bcExtra,n=list.length;
+  const prev=document.getElementById('bc-line-preview');
+  if(prev){
+    const steps=[{label:'Department Head (부서장)',cls:''}]
+      .concat(list.map(x=>({label:x.name?escHtml(x.name)+' (추가)':'추가 결재자 (미지정)',cls:'extra'})))
+      .concat([{label:'HR Head (인사팀장)',cls:'fixed'},{label:'GA Specialist',cls:'fixed'}]);
+    prev.innerHTML='<div class="appr-line-title">📋 결재 라인 (Business Card 신청 기준 자동 구성)</div>'+
+      '<div class="appr-line-steps">'+steps.map((st,i)=>'<span class="line-step"><span class="line-step-badge '+st.cls+'">'+(i+1)+'차</span><span class="line-step-label">'+st.label+'</span>'+(i<steps.length-1?'<span class="line-arrow">→</span>':'')+'</span>').join('')+'</div>'+
+      '<details class="appr-help"'+(_bcHelpOpen?' open':'')+' ontoggle="_bcHelpOpen=this.open">'+
+        '<summary><span class="chev">▶</span>Adding an Additional Approver<span class="used">'+n+' of '+BC_MAX_EXTRA+' used</span></summary>'+
+        '<div class="appr-help-body">'+
+          '<div style="margin-bottom:5px">Some business card requests may need separate or additional approval (e.g. a sales region head or a designated contact). '+
+          'In that case, click the dashed <span style="color:#0078d4;font-weight:700">＋ 결재자 추가</span> line below to add an approver before the HR step.</div>'+
+          '<table>'+
+            '<tr><td class="k">Where</td><td>Between the Department Head (1st step) and the HR Head only. The GA Specialist always stays last.</td></tr>'+
+            '<tr><td class="k">How</td><td>Select Department → Team → Employee.</td></tr>'+
+            '<tr><td class="k">Order</td><td>Approval runs top to bottom. The HR and GA steps move down by one for each approver added, and each approver is notified only after the previous step is approved.</td></tr>'+
+            '<tr><td class="k">Scope</td><td>Applies to this request only. Use <span style="color:#a4262c;font-weight:700">✕ 삭제</span> to remove it before submitting.</td></tr>'+
+            '<tr><td class="k">Limit</td><td>Up to <b>'+BC_MAX_EXTRA+'</b> additional approvers per request. Once the limit is reached, the dashed line is disabled until you remove one.</td></tr>'+
+          '</table>'+
+        '</div>'+
+      '</details>';
+  }
+  const area=document.getElementById('bc-extra-area');
+  if(area){
+    const depts=[...new Set((employeeData||[]).map(e=>e.dept))].filter(Boolean).sort();
+    const deptOpts=depts.map(d=>'<option value="'+escHtml(d)+'">'+escHtml(d)+'</option>').join('');
+    const full=n>=BC_MAX_EXTRA;
+    area.innerHTML=list.map((x,i)=>
+      '<div class="appr-block appr-extra">'+
+        '<div class="appr-block-title">'+(i+2)+'차 결재자 <span class="req-mark">*</span><span class="appr-tag extra">추가 지정</span> <span class="hint">— 추가 승인</span>'+
+          '<button type="button" class="btn-exdel" onclick="bcExDel(\''+x.uid+'\')">✕ 삭제</button></div>'+
+        '<div class="appr-select-row">'+
+          '<select id="'+x.uid+'-dept" onchange="bcExDept(\''+x.uid+'\')"><option value="">부서</option>'+deptOpts+'</select>'+
+          '<select id="'+x.uid+'-team" onchange="bcExTeam(\''+x.uid+'\')" disabled><option value="">팀</option></select>'+
+          '<select id="'+x.uid+'-person" onchange="bcExPerson(\''+x.uid+'\')" disabled><option value="">직원 선택</option></select>'+
+        '</div>'+
+        '<div class="appr-info">'+
+          '<input type="text" id="'+x.uid+'-name" value="'+escHtml(x.name)+'" readonly placeholder="이름">'+
+          '<input type="email" id="'+x.uid+'-email" value="'+escHtml(x.email)+'" readonly placeholder="이메일">'+
+        '</div></div>').join('')+
+      (full
+        ?'<div class="appr-insert is-full" title="추가 결재자는 최대 '+BC_MAX_EXTRA+'명까지 지정할 수 있습니다"><span class="appr-insert-line"></span><span class="appr-insert-btn">Maximum '+BC_MAX_EXTRA+' reached</span><span class="appr-insert-line"></span></div>'
+        :'<div class="appr-insert" role="button" tabindex="0" onclick="bcExAdd()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bcExAdd();}" title="HR Head 앞에 결재자 추가"><span class="appr-insert-line"></span><span class="appr-insert-btn"><span class="appr-insert-plus">+</span> 결재자 추가</span><span class="appr-insert-line"></span></div>');
+    list.forEach(x=>{   // 다시 그린 뒤 보관해 둔 부서 → 팀 → 직원 선택을 되살린다
+      const d=document.getElementById(x.uid+'-dept'),t=document.getElementById(x.uid+'-team'),pe=document.getElementById(x.uid+'-person');
+      if(!d||!t||!pe||!x.dept)return;
+      d.value=x.dept;_bcExTeams(x.dept,t);t.disabled=false;
+      if(!x.team)return;
+      t.value=x.team;_bcExPeople(x.dept,x.team,pe);pe.disabled=false;
+      if(x.email)pe.value=x.email;
+    });
+  }
+  const hs=document.getElementById('bc-hr-step');if(hs)hs.textContent=String(2+n);
+  const gs=document.getElementById('bc-ga-step');if(gs)gs.textContent=String(3+n);
+}
+document.addEventListener('DOMContentLoaded',()=>{try{bcExRender();}catch(e){}});
+if(document.readyState!=='loading'){try{setTimeout(bcExRender,0);}catch(e){}}
+function _bcExTeams(dept,sel){const teams=[...new Set(employeeData.filter(e=>e.dept===dept).map(e=>e.team))].filter(Boolean).sort();sel.innerHTML='<option value="">팀</option>'+teams.map(t=>'<option value="'+escHtml(t)+'">'+escHtml(t)+'</option>').join('');}
+function _bcExPeople(dept,team,sel){const people=employeeData.filter(e=>e.dept===dept&&e.team===team);sel.innerHTML='<option value="">직원 선택</option>'+people.map(e=>'<option value="'+escHtml(e.email)+'">'+escHtml(e.name)+'</option>').join('');}
+function _bcEx(uid){return bcExtra.find(x=>x.uid===uid);}
+function bcExAdd(){if(bcExtra.length>=BC_MAX_EXTRA)return;bcExtra.push({uid:'bcex'+(++_bcExSeq),dept:'',team:'',name:'',email:''});bcExRender();}
+function bcExDel(uid){bcExtra=bcExtra.filter(x=>x.uid!==uid);bcExRender();}
+function bcExDept(uid){const x=_bcEx(uid);if(!x)return;x.dept=document.getElementById(uid+'-dept').value;x.team='';x.name='';x.email='';bcExRender();}
+function bcExTeam(uid){const x=_bcEx(uid);if(!x)return;x.team=document.getElementById(uid+'-team').value;x.name='';x.email='';bcExRender();}
+function bcExPerson(uid){const x=_bcEx(uid);if(!x)return;const email=document.getElementById(uid+'-person').value;const e=employeeData.find(r=>r.email===email);x.email=e?e.email:'';x.name=e?e.name:'';bcExRender();}
+async function createApprovals(cat,reqId,extra){
   const a1name=document.getElementById(cat+'-a1-name').value;
   const a1email=document.getElementById(cat+'-a1-email').value;
   if(!a1email){throw new Error('1차 결재자(Department Head)를 선택해주세요.');}
   // STN: 1차 Dept.Head → 2차 GA담당자 (인사팀장 없음)
   // BC/IDC: 1차 Dept.Head → 2차 인사팀장 → 3차 GA담당자
-  const approvers=cat==='stn'
+  let approvers=cat==='stn'
     ?[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A3.name,email:A3.email,role:A3.role,order:2}]
     :[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A2.name,email:A2.email,role:A2.role,order:2},{name:A3.name,email:A3.email,role:A3.role,order:3}];
+  // 명함 추가 결재자(10-11) — 1차 다음부터 차례로, HR Head · GA Specialist 는 그만큼 뒤로(없으면 지금과 똑같은 3건)
+  if(cat==='bc'&&extra&&extra.length){
+    const n=extra.length;
+    approvers=[approvers[0]].concat(extra.map((x,i)=>({name:x.name,email:x.email,role:BC_EXTRA_ROLE,order:2+i})),
+      [{name:A2.name,email:A2.email,role:A2.role,order:2+n},{name:A3.name,email:A3.email,role:A3.role,order:3+n}]);
+  }
   for(const a of approvers){
     await api('/sites/'+siteId+'/lists/'+LISTS[cat].apr+'/items','POST',{fields:{Title:cat.toUpperCase()+'-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+reqId+'-'+a.order,RequestID:reqId,ApproverEmail:a.email,ApproverName:a.name,ApproverRole:a.role,ApprovalOrder:a.order,Status:a.order===1?'대기':'대기(잠김)'}});
   }
@@ -2709,6 +2794,10 @@ async function bcSubmit(){
   if(!_bcAgent&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(_bv('bc-email'))){alert('Email 형식이 올바르지 않습니다. (예: name@hyosung.com)');bcFocus('bc-email');return;}
   if(!qty||!stickerQty||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
   // QR 코드 적용(10-09) — 체크했으면 QR 이미지가 꼭 있어야 한다(인쇄할 그림이 없으면 GA 가 만들 수 없음)
+  // 추가 결재자(10-11) — 칸을 만들었으면 직원까지 골라야 한다(IT 와 같은 안내)
+  const _bcEx=bcExtra.map(x=>({name:x.name,email:x.email}));
+  const _bcExMiss=bcExtra.findIndex(x=>!x.email);
+  if(_bcExMiss>=0){alert((_bcExMiss+2)+'차 추가 결재자를 지정하거나 「✕ 삭제」로 지워 주세요.');const _ea=document.getElementById('bc-extra-area');if(_ea&&_ea.scrollIntoView)_ea.scrollIntoView({block:'center',behavior:'smooth'});return;}
   const _qrOn=_bcAgent||!!(document.getElementById('bc-qr-on')||{}).checked;   // STK Agent 는 QR 필수(10-11)
   const _qrIn=document.getElementById('bc-qr-input');
   const _qrFile=_qrOn&&_qrIn&&_qrIn.files&&_qrIn.files[0]?_qrIn.files[0]:null;
@@ -2726,7 +2815,7 @@ async function bcSubmit(){
     const _fx=_bcFax?await bcSaveFax(_bcId,_bcFax,_ct.desc):{desc:_ct.desc,warn:''};
     const _qrWarn=_qrOn?await bcSaveQr(_bcId,_qrFile,_fx.desc):'';
     await api('/sites/'+siteId+'/lists/BC_Requests/items/'+_bcId,'PATCH',{fields:{Title:'BC-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+_bcId}});
-    await createApprovals('bc',_bcId);
+    await createApprovals('bc',_bcId,_bcEx);
     const _bcWarn=[_ct.warn,_fx.warn,_qrWarn].filter(Boolean).join('\n');
     alert('✅ 신청 완료! (번호: '+_bcId+')'+(_bcWarn?'\n\n'+_bcWarn:''));switchTab('list');bcReset();
   }catch(e){alert('오류: '+e.message);}finally{loading(false);}
@@ -2745,6 +2834,7 @@ function bcReset(){
   if(_qo&&_qo.checked){_qo.checked=false;bcQrToggle();}
   bcQrClear();
   _bcKeep={};bcApplyTypeFields();   // 구분별 비활성 · Agent QR 고정 다시(10-11)
+  bcExtra=[];bcExRender();   // 추가 결재자도 비운다(10-11)
   bcUpdatePreview();
   gaResetA1('bc');
 }
@@ -3565,6 +3655,39 @@ document.getElementById('btn-login').addEventListener('click',signIn);
 .appr-tag.flex{color:#0b5fa5;background:#e1f0ff}
 .appr-block.appr-flex .appr-block-title .req-mark{display:none}   /* Flex 연동으로 채워진 칸은 고를 게 없으니 필수(*) 표시를 뺀다 — 직접 선택으로 되돌아오면 다시 보인다(10-01) */
 .flex-note{font-size:11px;color:#a4262c;background:#fdf0f1;border:1px solid #f1c0c4;border-radius:6px;padding:6px 10px;margin:0 0 8px;line-height:1.5}
+/* 추가 결재자(10-11 · 명함) — IT Ticket · ACC Voucher 와 같은 삽입선 · 접이식 안내 · 노란 블록 */
+.appr-insert{display:flex;align-items:center;gap:10px;margin:2px 0 6px;padding:5px 2px;cursor:pointer;border-radius:6px;transition:background .12s ease}
+.appr-insert-line{flex:1;height:0;border-top:2px dashed #b9c6d6;transition:border-color .12s ease}
+.appr-insert-btn{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;background:#fff;color:#0078d4;border:1.5px dashed #7fb4e0;border-radius:14px;padding:3px 12px;font-size:11px;font-weight:700;letter-spacing:.2px;transition:all .12s ease}
+.appr-insert-plus{font-size:14px;line-height:1;font-weight:800}
+.appr-insert:not(.is-full):hover{background:#f0f6ff}
+.appr-insert:not(.is-full):hover .appr-insert-line{border-top-color:#0078d4}
+.appr-insert:not(.is-full):hover .appr-insert-btn{background:#0078d4;color:#fff;border-color:#0078d4;border-style:solid}
+.appr-insert.is-full{cursor:default}
+.appr-insert.is-full .appr-insert-line{border-top-color:#e1e1e1}
+.appr-insert.is-full .appr-insert-btn{color:#a19f9d;border-color:#dcdcdc;border-style:solid;font-weight:600}
+.appr-help{margin-top:9px;padding-top:8px;border-top:1px dashed #c7e0f4}
+.appr-help>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#0b5fa5;user-select:none;padding:1px 0}
+.appr-help>summary::-webkit-details-marker{display:none}
+.appr-help>summary:hover{text-decoration:underline}
+.appr-help .chev{font-size:9px;line-height:1;transition:transform .15s ease;display:inline-block}
+.appr-help[open] .chev{transform:rotate(90deg)}
+.appr-help .used{margin-left:auto;font-weight:600;color:#8a6116;background:#fdf6e3;border:1px solid #f0d9a0;border-radius:9px;padding:1px 8px;font-size:10px}
+.appr-help-body{margin-top:7px;font-size:11px;line-height:1.55;color:#605e5c}
+.appr-help-body table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.5}
+.appr-help-body td{padding:4px 8px;border-bottom:1px solid #dbe7f3;vertical-align:top}
+.appr-help-body td.k{padding:4px 10px 4px 0;white-space:nowrap;font-weight:700;color:#0b5fa5}
+.appr-help-body tr:last-child td{border-bottom:none}
+.appr-block.appr-extra{background:#fffdf5;border-color:#e8cf8f;border-left:3px solid #d9a41a}
+.btn-exdel{float:right;background:#fff;color:#a4262c;border:1px solid #e6b3b3;border-radius:5px;padding:3px 16px;font-size:10px;font-weight:600;cursor:pointer;line-height:1.4;font-family:inherit}
+.btn-exdel:hover{background:#a4262c;color:#fff;border-color:#a4262c}
+@media screen and (max-width:767px){
+  #app .appr-block.appr-extra .appr-block-title{display:flow-root}   /* 「✕ 삭제」 가 두 줄 제목 아래로 흘러 선택칸을 좁히지 않게(IT 10-10 과 같음) */
+  #app .appr-block.appr-extra .btn-exdel{margin-left:8px;padding:5px 14px}
+  #app .appr-help:not([open])>.appr-help-body{display:none}
+  #app .appr-insert{min-height:40px}
+  #app .appr-help-body td.k{white-space:normal}
+}
 /* 빈 안내 줄(APS 공통 · 10-07 · aps-empty-row) — 「신청 내역이 없습니다.」 「결재 대기 항목이 없습니다.」 「조회 결과가 없습니다.」 등
    목록 표의 한 칸짜리 안내 줄은 시스템 어디서나 같은 모양: 가운데 · 위아래 32px · 회색(#605e5c) · 13px. 인라인 style 보다 우선. */
 .list-table tbody > tr > td[colspan]:only-child, table.lst tbody > tr > td[colspan]:only-child, .tbl-wrap > .voucher-table tbody > tr > td[colspan]:only-child, tbody#list-body > tr > td[colspan]:only-child, tbody#appr-body > tr > td[colspan]:only-child, tbody#admin-body > tr > td[colspan]:only-child{text-align:center!important;padding:32px 12px!important;color:#605e5c!important;font-size:13px!important;font-weight:400!important;line-height:1.5!important;white-space:normal!important;height:auto!important}
