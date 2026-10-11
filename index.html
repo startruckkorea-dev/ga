@@ -137,6 +137,7 @@ html.aps-wtx #app{transition:max-width .2s ease}
 .bc-qr-txt b{font-size:.84rem;color:#323130;font-weight:600}
 .bc-qr-txt small{font-size:.74rem;color:#8a8886}
 .bc-qr-tline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bc-qr-tag.soft{color:#4a5462;background:#f1f3f6;border-color:#dfe3e8;font-weight:500}   /* 내부직원 「필요 시 · HR 사전 확인」(10-11) — 경고가 아닌 차분한 안내 */
 .bc-qr-tag{display:inline-flex;align-items:center;font-size:.68rem;font-weight:600;color:#8a5a00;background:#fff6e5;border:1px solid #f5ddb0;border-radius:10px;padding:0 8px;line-height:1.6;white-space:nowrap}
 .bc-qr-body{border-top:1px dashed #c7ddf5;padding:12px 14px 14px}
 .bc-qr-guide{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#eef5fd;border:1px solid #cfe2f7;border-radius:6px;padding:8px 10px 8px 12px;margin-bottom:10px;color:#0b5cad;font-size:.8rem;line-height:1.45}
@@ -196,6 +197,12 @@ html.aps-wtx #app{transition:max-width .2s ease}
 #bc-card-stage.bc-ag-wait #bc-sample-img,#bc-card-stage.bc-ag-fail #bc-sample-img,#bc-card-stage.bc-ag-wait #bc-ov,#bc-card-stage.bc-ag-fail #bc-ov{display:none!important}   /* 그림 칸은 인라인 display:block */
 #bc-card-stage.bc-ag-wait .bc-ag-wait-box,#bc-card-stage.bc-ag-fail .bc-ag-wait-box{display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center;font-size:.8rem;color:#605e5c}
 #bc-card-stage.bc-ag-wait .bc-ag-wait-box{background:linear-gradient(100deg,#f6f5f4 30%,#fdfdfc 50%,#f6f5f4 70%);background-size:300% 100%;animation:bcAgShim 1.4s ease-in-out infinite}
+/* 내부직원 샘플 받는 중 · 실패(10-11) — 같은 틀, 내부직원 샘플 비율(949×381) */
+#bc-card-stage.bc-st.bc-ag-wait::before,#bc-card-stage.bc-st.bc-ag-fail::before{padding-top:40.148%}
+/* 다 받으면 부드럽게(두 구분 공통) */
+@keyframes bcPvIn{from{opacity:0}to{opacity:1}}
+#bc-card-stage.bc-pv-in>#bc-sample-img,#bc-card-stage.bc-pv-in>#bc-ov{animation:bcPvIn .32s ease-out}
+@media (prefers-reduced-motion:reduce){#bc-card-stage.bc-pv-in>#bc-sample-img,#bc-card-stage.bc-pv-in>#bc-ov{animation:none}}
 @keyframes bcAgShim{0%{background-position:100% 0}100%{background-position:0 0}}
 @keyframes bcAgSpin{to{transform:rotate(360deg)}}
 .bc-ag-spin{width:22px;height:22px;border-radius:50%;border:2.5px solid #d6e6f6;border-top-color:#0078d4;animation:bcAgSpin .8s linear infinite}
@@ -901,7 +908,7 @@ window.apsYear = (function () {
         </div>
         <div class="section-title">1. 명함 미리보기</div>
         <!-- BC Preview -->
-        <div id="bc-card-stage" style="position:relative;border:1px solid #d2d0ce;border-radius:4px;overflow:hidden"><img id="bc-sample-img" src="" alt="Business Card Sample" style="width:100%;display:block;min-height:160px;background:#f3f2f1" onload="bcCalibrate()"><div id="bc-ov"></div><div class="bc-ag-wait-box" role="status" aria-live="polite"><span class="bc-ag-spin" aria-hidden="true"></span><svg class="bc-ag-fail-ico" width="22" height="22" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.6v4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11.2" r=".95" fill="currentColor"/></svg><span class="t-wait">Agent 명함 샘플 불러오는 중…</span><span class="t-fail">STK Agent 명함 샘플 이미지를 불러오지 못했습니다.<br>미리보기 없이도 신청할 수 있습니다. (신청에는 영향 없음)<br><button type="button" class="bc-ag-retry" onclick="bcAgRetry()">다시 시도</button></span></div></div>
+        <div id="bc-card-stage" class="bc-st bc-ag-wait" style="position:relative;border:1px solid #d2d0ce;border-radius:4px;overflow:hidden"><img id="bc-sample-img" src="" alt="Business Card Sample" style="width:100%;display:block;min-height:160px;background:#f3f2f1" onload="bcCalibrate()" onerror="bcImgErr(this)"><div id="bc-ov"></div><div class="bc-ag-wait-box" role="status" aria-live="polite"><span class="bc-ag-spin" aria-hidden="true"></span><svg class="bc-ag-fail-ico" width="22" height="22" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.6v4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11.2" r=".95" fill="currentColor"/></svg><span class="t-wait">명함 샘플 불러오는 중…</span><span class="t-fail"><span class="t-fail-msg">명함 샘플 이미지를 불러오지 못했습니다.</span><br>미리보기 없이도 신청할 수 있습니다. (신청에는 영향 없음)<br><button type="button" class="bc-ag-retry" onclick="bcAgRetry()">다시 시도</button></span></div></div>
         <div id="bc-type-note" class="bc-qr-note" hidden></div>
         <div class="ga-pv-note" role="note"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg><span>미리보기는 참고용이며, 실제 인쇄되는 명함과 글꼴 · 크기 · 위치가 다를 수 있습니다.</span></div>
 
@@ -940,12 +947,12 @@ window.apsYear = (function () {
           <label class="bc-qr-head" for="bc-qr-on">
             <input type="checkbox" id="bc-qr-on" onchange="bcQrToggle()">
             <span class="bc-qr-ico"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M1 1h5v5H1V1zm1.2 1.2v2.6h2.6V2.2H2.2zM10 1h5v5h-5V1zm1.2 1.2v2.6h2.6V2.2h-2.6zM1 10h5v5H1v-5zm1.2 1.2v2.6h2.6v-2.6H2.2zM3 3h1v1H3V3zm9 0h1v1h-1V3zM3 12h1v1H3v-1zm5-11h1v2H8V1zm0 3h1v2H8V4zM7 7h2v1H7V7zm-6 0h2v1H1V7zm3 0h2v1H4V7zm6 0h2v1h-2V7zm3 0h2v1h-2V7zM8 9h1v2H8V9zm2 0h2v1h-2V9zm3 0h2v2h-1v-1h-1V9zm-5 3h1v3H8v-3zm2 0h1v1h-1v-1zm2 0h1v2h2v1h-3v-3zm-2 2h1v1h-1v-1z"/></svg></span>
-            <span class="bc-qr-txt"><span class="bc-qr-tline"><b>QR 코드 적용<span class="bc-ag-only req-mark">*</span></b><span class="bc-qr-tag bc-ag-only">세일즈 에이전트 용</span><span class="bc-qr-tag bc-st-only">STK HR 사전 확인 필요</span></span><small class="bc-st-only">명함에 QR 코드를 넣습니다 · 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다</small><small class="bc-ag-only">STK Agent 명함은 QR 코드 필수 · 첨부한 QR 이미지가 위 미리보기의 QR 자리에 보입니다</small></span>
+            <span class="bc-qr-txt"><span class="bc-qr-tline"><b>QR 코드 적용<span class="bc-ag-only req-mark">*</span></b><span class="bc-qr-tag bc-ag-only">세일즈 에이전트 용</span><span class="bc-qr-tag soft bc-st-only">필요 시 · HR 사전 확인</span></span><small class="bc-st-only">필요한 경우 HR 에서 QR 코드를 받아 이미지로 첨부해 주세요</small><small class="bc-ag-only">STK Agent 명함은 QR 코드 필수 · 첨부한 QR 이미지가 위 미리보기의 QR 자리에 보입니다</small></span>
           </label>
           <div id="bc-qr-body" class="bc-qr-body" hidden>
             <div class="bc-qr-guide bc-st-only" role="note">
               <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>
-              <span class="bc-qr-guide-txt">내부직원 명함의 QR 코드는 <b>STK HR 사전 확인</b>이 필요합니다. HR 과 확인을 마친 QR 이미지를 첨부하세요.</span>
+              <span class="bc-qr-guide-txt"><b>HR 에서 받은 QR 이미지</b>를 첨부해 주세요. 체크하면 위 미리보기가 QR 명함 샘플로 바뀝니다.</span>
             </div>
             <div class="bc-qr-guide bc-ag-only" role="note">
               <svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>
@@ -1899,8 +1906,11 @@ async function loadSampleImages() {
       const bcUrl = URL.createObjectURL(bcBlob);
       const bcImg = document.getElementById('bc-sample-img');
       window._bcBaseUrl = bcUrl;
+      _bcBaseFail = false;
       if (bcImg && _bcType !== 'agent' && !((document.getElementById('bc-qr-on') || {}).checked && _bcQrUrl)) bcImg.src = bcUrl;   // Agent 이거나 QR 샘플이 떠 있으면 넣지 않는다(10-11)
     }
+    else { console.warn('명함 샘플 불러오기 실패: HTTP ' + bcRes.status); _bcBaseFail = true; }
+    bcAgPaint();
     // IDC 샘플 이미지
     const idcRes = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/Employee_ID_card-sample-image.png:/content',
       { headers: { Authorization: 'Bearer ' + t } });
@@ -1910,7 +1920,7 @@ async function loadSampleImages() {
       const idcImg = document.getElementById('idc-sample-img');
       if (idcImg) idcImg.src = idcUrl;
     }
-  } catch(e) { console.warn('샘플 이미지 로드 실패:', e.message); if (!_bcAgUrl && !_bcAgPromise) { _bcAgFail = true; bcAgPaint(); } }
+  } catch(e) { console.warn('샘플 이미지 로드 실패:', e.message); if (!_bcAgUrl && !_bcAgPromise) _bcAgFail = true; if (!window._bcBaseUrl) _bcBaseFail = true; bcAgPaint(); }
 }
 async function loadEmployees(){
   try{
@@ -2683,6 +2693,7 @@ let _bcQrBox = null;
 function bcCalibrate() {
   const img = document.getElementById('bc-sample-img');
   if (!img || !img.naturalWidth) return;
+  bcAgPaint();   // 10-11 — 받은 그림이 지금 구분의 샘플이면 「불러오는 중」 을 풀고 부드럽게
   if (bcAgShown()) { bcAgCalibrate(img); return; }   // STK Agent 샘플(10-10) — 자리표시 띠가 없는 다른 디자인
   let box = BC_BOX_DEFAULT, qrBox = null;
   try {
@@ -2998,7 +3009,7 @@ function bcApplyTypeFields(){
     if(ag){if(!jt.readOnly){_bcKeep['bc-job-title']=jt.value;jt.readOnly=true;jt.classList.add('bc-fixed');jt.setAttribute('aria-readonly','true');jt.title='STK Agent 명함은 고정값';}jt.value=BC_AG_JOB;}
     else if(jt.readOnly){jt.readOnly=false;jt.classList.remove('bc-fixed');jt.removeAttribute('aria-readonly');jt.removeAttribute('title');jt.value=_bcKeep['bc-job-title']||'';delete _bcKeep['bc-job-title'];}
   }
-  [['bc-mobile','010-0000-0000'],['bc-job-title','세일즈 에이전트'],['bc-dept','서울&중부지역 본부']].forEach(function(p){const m=document.getElementById(p[0]);if(!m)return;if(!m.dataset.ph)m.dataset.ph=m.placeholder;m.placeholder=ag?p[1]:m.dataset.ph;});   // Agent 예시(10-11)
+  [['bc-mobile','010-0000-0000'],['bc-job-title','세일즈 에이전트'],['bc-dept','서울&중부지역 본부'],['bc-email','email@gmail.com']].forEach(function(p){const m=document.getElementById(p[0]);if(!m)return;if(!m.dataset.ph)m.dataset.ph=m.placeholder;m.placeholder=ag?p[1]:m.dataset.ph;});   // Agent 예시(10-11)
   const q=document.getElementById('bc-qr-on');
   if(q){
     if(ag){if(!q.disabled){_bcKeep.qr=q.checked;q.disabled=true;q.setAttribute('aria-disabled','true');}if(!q.checked){q.checked=true;bcQrToggle();}}
@@ -3051,13 +3062,37 @@ function bcAgShowNow(){   // 지금 Agent 이고 샘플이 있으면 넣는다(�
   if(img&&_bcType==='agent'&&_bcAgUrl&&img.src!==_bcAgUrl)img.src=_bcAgUrl;
   bcAgPaint();
 }
-function bcAgPaint(){   // 미리보기 틀 상태: '' | 받는 중 | 실패
+// 미리보기 틀 상태(10-11 · 두 구분 공통): '' | 받는 중 | 실패 — 지금 구분의 샘플이 다 그려지기 전에는 그림(alt 글자 · 깨진 그림 포함)을 숨긴다
+var _bcBaseFail=false,_bcImgErrSrc='';
+function bcAgPaint(){
   const stg=document.getElementById('bc-card-stage'),img=document.getElementById('bc-sample-img');if(!stg||!img)return;
+  const ag=_bcType==='agent',src=img.getAttribute('src')?img.src:'';
+  const ready=u=>!!u&&src===u&&img.complete&&img.naturalWidth>0;
   let m='';
-  if(_bcType==='agent'&&!(_bcAgUrl&&img.src===_bcAgUrl&&img.naturalWidth))m=(!_bcAgUrl&&_bcAgFail&&!_bcAgPromise)?'fail':'wait';
+  if(ag){if(!ready(_bcAgUrl))m=(!_bcAgUrl&&_bcAgFail&&!_bcAgPromise)||(_bcAgUrl&&_bcImgErrSrc===_bcAgUrl&&src===_bcAgUrl)?'fail':'wait';}
+  else{
+    const want=((document.getElementById('bc-qr-on')||{}).checked&&_bcQrUrl&&src===_bcQrUrl)?_bcQrUrl:window._bcBaseUrl;
+    if(!ready(want))m=(!window._bcBaseUrl&&_bcBaseFail)||(want&&_bcImgErrSrc===want&&src===want)?'fail':'wait';
+  }
+  const prev=stg.dataset.pv||'wait';
+  stg.classList.toggle('bc-st',!ag);
   stg.classList.toggle('bc-ag-wait',m==='wait');stg.classList.toggle('bc-ag-fail',m==='fail');
+  const tw=stg.querySelector('.t-wait');if(tw)tw.textContent=ag?'STK Agent 명함 샘플 불러오는 중…':'명함 샘플 불러오는 중…';
+  const tf=stg.querySelector('.t-fail-msg');if(tf)tf.textContent=ag?'STK Agent 명함 샘플 이미지를 불러오지 못했습니다.':'명함 샘플 이미지를 불러오지 못했습니다.';
+  if(!m&&prev!==''){stg.classList.remove('bc-pv-in');void stg.offsetWidth;stg.classList.add('bc-pv-in');clearTimeout(bcAgPaint._t);bcAgPaint._t=setTimeout(()=>stg.classList.remove('bc-pv-in'),450);}
+  stg.dataset.pv=m;
 }
-function bcAgRetry(){_bcAgFail=false;bcAgPreload();bcAgPaint();}
+function bcImgErr(img){_bcImgErrSrc=img.src;bcAgPaint();}
+function bcAgRetry(){
+  _bcImgErrSrc='';
+  if(_bcType==='agent'){_bcAgFail=false;bcAgPreload();bcAgPaint();return;}
+  _bcBaseFail=false;bcAgPaint();
+  if(window._bcBaseUrl){const img=document.getElementById('bc-sample-img');if(img){img.removeAttribute('src');img.src=window._bcBaseUrl;}return;}
+  loadSampleImages();   // 문서 라이브러리 · 기본 샘플을 다시 받는다
+}
+// 그림 주소가 바뀌는 순간(기본 · QR · Agent 샘플 교체) 바로 틀 상태를 다시 본다 — 새 그림이 다 그려지기 전 빈 그림(alt)이 비치지 않게.
+// MutationObserver 는 화면을 그리기 전에 돌아, 주소를 바꾸는 여러 곳을 하나하나 고치지 않아도 된다.
+document.addEventListener('DOMContentLoaded',()=>{try{const im=document.getElementById('bc-sample-img');if(im&&window.MutationObserver)new MutationObserver(()=>bcAgPaint()).observe(im,{attributes:true,attributeFilter:['src']});bcAgPaint();}catch(e){}});
 /* Agent 샘플 자리(그림 1750×645 기준 px — 비율로 써서 그림 크기가 달라도 따라간다).
    글자 칸: 값이 있으면 그 줄의 샘플 글자를 명함 바탕색 상자로 덮고 값을 같은 굵기 · 크기(샘플 글자 높이에 맞춤)로 쓴다. 값이 없으면 샘플 글자 그대로.
    top/bot = 샘플 한글(전화번호는 숫자) 글자의 위 · 아래 끝, x = 글자 시작, c0/c1 · y0/y1 = 덮는 상자 */
