@@ -213,6 +213,17 @@ html.aps-wtx #app{transition:max-width .2s ease}
 .bc-ag-wait-box .t-fail{color:#8a5a00;line-height:1.5}
 .bc-ag-wait-box>span{max-width:100%;word-break:keep-all;overflow-wrap:anywhere}
 @media (max-width:600px){#bc-card-stage.bc-ag-wait .bc-ag-wait-box,#bc-card-stage.bc-ag-fail .bc-ag-wait-box{gap:6px;padding:10px 12px;font-size:.74rem}.bc-ag-retry{margin-top:4px}}
+/* ID Card 샘플 받는 중 · 실패(10-12) — 명함과 같은 틀 · 같은 안내. 비율은 지난번 받은 샘플 비율(--idc-r, 처음이면 추정값) */
+#idc-card-stage.idc-wait,#idc-card-stage.idc-fail{min-height:160px;background:#fafaf9}
+#idc-card-stage.idc-wait::before,#idc-card-stage.idc-fail::before{content:'';display:block;padding-top:var(--idc-r,79%)}
+#idc-card-stage.idc-wait>#idc-sample-img,#idc-card-stage.idc-fail>#idc-sample-img,#idc-card-stage.idc-wait>.idc-ov-photo,#idc-card-stage.idc-fail>.idc-ov-photo,#idc-card-stage.idc-wait>.idc-ov-name,#idc-card-stage.idc-fail>.idc-ov-name{display:none!important}
+#idc-card-stage.idc-wait .bc-ag-wait-box,#idc-card-stage.idc-fail .bc-ag-wait-box{display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;text-align:center;font-size:.8rem;color:#605e5c}
+#idc-card-stage.idc-wait .bc-ag-wait-box{background:linear-gradient(100deg,#f6f5f4 30%,#fdfdfc 50%,#f6f5f4 70%);background-size:300% 100%;animation:bcAgShim 1.4s ease-in-out infinite}
+#idc-card-stage.idc-fail .t-fail,#idc-card-stage.idc-fail .bc-ag-fail-ico{display:block}
+#idc-card-stage.idc-fail .t-wait,#idc-card-stage.idc-fail .bc-ag-spin{display:none}
+#idc-card-stage.idc-pv-in>#idc-sample-img,#idc-card-stage.idc-pv-in>.idc-ov-photo,#idc-card-stage.idc-pv-in>.idc-ov-name{animation:bcPvIn .32s ease-out}
+@media (prefers-reduced-motion:reduce){#idc-card-stage.idc-wait .bc-ag-wait-box,#idc-card-stage.idc-pv-in>*{animation:none}}
+@media (max-width:600px){#idc-card-stage.idc-wait .bc-ag-wait-box,#idc-card-stage.idc-fail .bc-ag-wait-box{gap:6px;padding:10px 12px;font-size:.74rem}}
 .bc-ag-fail-ico{color:#c19c00}
 .bc-ag-retry{margin-top:8px;padding:5px 14px;border:1px solid #d2d0ce;border-radius:999px;background:#fff;color:#0b5cad;font-size:.76rem;font-weight:600;font-family:inherit;cursor:pointer}
 .bc-ag-retry:hover{border-color:#0078d4;background:#eef6fd}
@@ -1078,10 +1089,11 @@ window.apsYear = (function () {
         <div class="card-title">Employee ID Card Order 신청서</div>
         <div class="section-title">1. 사원증 미리보기</div>
         <div style="display:flex;justify-content:center">
-          <div id="idc-card-stage" style="position:relative;border:1px solid #d2d0ce;border-radius:6px;overflow:hidden;width:100%;max-width:560px;box-shadow:0 2px 8px rgba(0,0,0,.1)">
-            <img id="idc-sample-img" src="" alt="ID Card Sample" style="width:100%;display:block;min-height:160px;background:#f3f2f1" onload="idcCalibrate()">
+          <div id="idc-card-stage" class="idc-wait" style="position:relative;border:1px solid #d2d0ce;border-radius:6px;overflow:hidden;width:100%;max-width:560px;box-shadow:0 2px 8px rgba(0,0,0,.1)">
+            <img id="idc-sample-img" src="" alt="ID Card Sample" style="width:100%;display:block;min-height:160px;background:#f3f2f1" onload="idcCalibrate()" onerror="idcImgErr(this)">
             <div id="idc-ov-photo" class="idc-ov-photo" hidden><img id="idc-ov-photo-img" alt=""></div>
             <div id="idc-ov-name" class="idc-ov-name" hidden></div>
+            <div class="bc-ag-wait-box" role="status" aria-live="polite"><span class="bc-ag-spin" aria-hidden="true"></span><svg class="bc-ag-fail-ico" width="22" height="22" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 4.6v4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11.2" r=".95" fill="currentColor"/></svg><span class="t-wait">사원증 샘플 불러오는 중…</span><span class="t-fail">사원증 샘플 이미지를 불러오지 못했습니다.<br>미리보기 없이도 신청할 수 있습니다. (신청에는 영향 없음)<br><button type="button" class="bc-ag-retry" onclick="idcRetry()">다시 시도</button></span></div>
           </div>
         </div>
         <div class="ga-pv-note" role="note"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg><span>미리보기는 참고용이며, 실제 발급되는 사원증과 사진 · 글꼴 · 크기 · 위치가 다를 수 있습니다.</span></div>
@@ -1895,8 +1907,9 @@ async function loadSampleImages() {
     const drivesRes = await api('/sites/' + siteId + '/drives');
     let docDrive = (drivesRes.value || []).find(d => ['Documents','문서','Shared Documents'].includes(d.name));
     if (!docDrive && drivesRes.value) docDrive = drivesRes.value[0];
-    if (!docDrive) return;
+    if (!docDrive) throw new Error('문서 라이브러리 없음');   // 10-12 — 예전엔 그냥 끝나 「불러오는 중」 이 멈춰 있었다
     window._gaDocDriveId = docDrive.id;   // QR 명함 샘플을 나중에(체크할 때) 받기 위해(10-09)
+    idcLoadSample();   // ID Card 샘플(10-12) — 명함을 다 받을 때까지 기다리지 않고 함께 받는다
     bcAgPreload();   // STK Agent 샘플(10-11) — 기다리지 않고 함께 받아 둔다
     // BC 샘플 이미지
     const bcRes = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/Business_card-sample-image.png:/content',
@@ -1911,17 +1924,49 @@ async function loadSampleImages() {
     }
     else { console.warn('명함 샘플 불러오기 실패: HTTP ' + bcRes.status); _bcBaseFail = true; }
     bcAgPaint();
-    // IDC 샘플 이미지
-    const idcRes = await fetch(GRAPH + '/drives/' + docDrive.id + '/root:/Employee_ID_card-sample-image.png:/content',
-      { headers: { Authorization: 'Bearer ' + t } });
-    if (idcRes.ok) {
-      const idcBlob = await idcRes.blob();
-      const idcUrl = URL.createObjectURL(idcBlob);
-      const idcImg = document.getElementById('idc-sample-img');
-      if (idcImg) idcImg.src = idcUrl;
-    }
-  } catch(e) { console.warn('샘플 이미지 로드 실패:', e.message); if (!_bcAgUrl && !_bcAgPromise) _bcAgFail = true; if (!window._bcBaseUrl) _bcBaseFail = true; bcAgPaint(); }
+  } catch(e) { console.warn('샘플 이미지 로드 실패:', e.message); if (!_bcAgUrl && !_bcAgPromise) _bcAgFail = true; if (!window._bcBaseUrl) _bcBaseFail = true; bcAgPaint(); if (!_idcUrl && !_idcPromise) { _idcFail = true; idcPaint(); } }
 }
+/* ID Card 샘플(10-12) — 명함(bcAgPaint)과 같은 규칙: 다 그려지기 전에는 그림(alt 글자 · 빈 그림) · 겹친 사진 · 이름을 숨기고
+   같은 틀에 「사원증 샘플 불러오는 중…」, 다 받으면 부드럽게, 실패하면 안내 + 다시 시도. 미리보기일 뿐 신청 · 저장에는 영향 없음. */
+var _idcUrl = null, _idcPromise = null, _idcFail = false, _idcErrSrc = '';
+const IDC_SAMPLE = 'Employee_ID_card-sample-image.png', IDC_RATIO_KEY = 'ga_idc_sample_ratio';
+function idcLoadSample() {
+  if (_idcUrl || _idcPromise || !window._gaDocDriveId) return _idcPromise;
+  _idcFail = false; idcPaint();
+  _idcPromise = (async function () {
+    try {
+      const t = await token();
+      const res = await fetch(GRAPH + '/drives/' + window._gaDocDriveId + '/root:/' + IDC_SAMPLE + ':/content', { headers: { Authorization: 'Bearer ' + t } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      _idcUrl = URL.createObjectURL(await res.blob());
+    } catch (e) { console.warn('사원증 샘플 불러오기 실패:', e && e.message); _idcFail = true; }
+    finally { _idcPromise = null; }
+    const img = document.getElementById('idc-sample-img');
+    if (img && _idcUrl && img.src !== _idcUrl) img.src = _idcUrl;
+    idcPaint();
+  })();
+  return _idcPromise;
+}
+function idcPaint() {
+  const stg = document.getElementById('idc-card-stage'), img = document.getElementById('idc-sample-img'); if (!stg || !img) return;
+  const src = img.getAttribute('src') ? img.src : '';
+  const ready = !!_idcUrl && src === _idcUrl && img.complete && img.naturalWidth > 0;
+  const m = ready ? '' : ((!_idcUrl && _idcFail && !_idcPromise) || (_idcUrl && _idcErrSrc === _idcUrl && src === _idcUrl)) ? 'fail' : 'wait';
+  const prev = stg.dataset.pv === undefined ? 'wait' : stg.dataset.pv;
+  stg.classList.toggle('idc-wait', m === 'wait'); stg.classList.toggle('idc-fail', m === 'fail');
+  if (!m && prev !== '') { stg.classList.remove('idc-pv-in'); void stg.offsetWidth; stg.classList.add('idc-pv-in'); clearTimeout(idcPaint._t); idcPaint._t = setTimeout(() => stg.classList.remove('idc-pv-in'), 450); }
+  stg.dataset.pv = m;
+}
+function idcImgErr(img) { if (img.getAttribute('src')) _idcErrSrc = img.src; idcPaint(); }
+function idcRetry() {
+  _idcErrSrc = ''; _idcFail = false;
+  const img = document.getElementById('idc-sample-img');
+  if (_idcUrl && img) { idcPaint(); img.removeAttribute('src'); img.src = _idcUrl; return; }
+  if (window._gaDocDriveId) { idcLoadSample(); return; }
+  idcPaint(); loadSampleImages();   // 문서 라이브러리부터 다시
+}
+// 틀 비율 — 지난번 받은 샘플 비율을 기억해 두었다가 다음 접속의 「불러오는 중」 틀에 쓴다(없으면 CSS 추정값). 저장이 막혀도 동작에는 영향 없음.
+(function () { try { const r = parseFloat(localStorage.getItem(IDC_RATIO_KEY)); const st = document.getElementById('idc-card-stage'); if (st && r > 10 && r < 300) st.style.setProperty('--idc-r', r.toFixed(3) + '%'); } catch (e) {} })();
 async function loadEmployees(){
   try{
     const drivesData=await api('/sites/'+siteId+'/drives');
@@ -3265,6 +3310,8 @@ let _idcBox = IDC_BOX_DEFAULT;
 function idcCalibrate() {
   const img = document.getElementById('idc-sample-img');
   if (!img || !img.naturalWidth) return;
+  _idcErrSrc = ''; idcPaint();   // 10-12 — 다 그려졌으면 「불러오는 중」 을 풀고 부드럽게
+  try { const r = img.naturalHeight / img.naturalWidth * 100, st = document.getElementById('idc-card-stage'); if (st) st.style.setProperty('--idc-r', r.toFixed(3) + '%'); localStorage.setItem(IDC_RATIO_KEY, r.toFixed(3)); } catch (e) {}
   let box = IDC_BOX_DEFAULT;
   try {
     const { W, H, s, comps } = gaFindDarkBoxes(img, 1600);
