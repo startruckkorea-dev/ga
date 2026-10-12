@@ -871,7 +871,8 @@ window.apsYear = (function () {
         <!-- 결재 라인 미리보기 · 결재자 블록 — ACC Voucher 와 같은 모양(09-30) -->
         <div class="appr-line-preview">
         <div class="appr-line-title">📋 결재 라인 (Stationery 신청 기준 자동 구성)</div>
-        <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge">1차</span><span class="line-step-label">Department Head (부서장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">2차</span><span class="line-step-label">GA Specialist</span></span></div>
+        <!-- 10-12: 1·2차 사이에 CFO(system_config 의 GA_CFO)를 자동 지정 — GA Specialist 는 3차로 -->
+        <div class="appr-line-steps"><span class="line-step"><span class="line-step-badge">1차</span><span class="line-step-label">Department Head (부서장)</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">2차</span><span class="line-step-label">CFO</span><span class="line-arrow">→</span></span><span class="line-step"><span class="line-step-badge fixed">3차</span><span class="line-step-label">GA Specialist</span></span></div>
       </div>
         <div class="appr-block appr-fixed appr-flex" id="stn-a1-block"><div class="appr-block-title">1차 결재자 <span class="req-mark">*</span><span class="appr-tag flex">Flex 연동</span> <span class="hint">— Department Head (부서장)</span></div>
         <div class="appr-select-row" style="display:none">
@@ -883,7 +884,8 @@ window.apsYear = (function () {
           <input type="text" id="stn-a1-name" readonly placeholder="이름">
           <input type="email" id="stn-a1-email" readonly placeholder="이메일">
         </div></div>
-        <div class="appr-block appr-fixed"><div class="appr-block-title">2차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— GA Specialist</span></div><div class="appr-info"><input type="text" id="cfg-a3-stn-name" value="" readonly placeholder="이름"><input type="email" id="cfg-a3-stn-email" value="" readonly placeholder="이메일"></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-block-title">2차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— CFO</span></div><div class="appr-info"><input type="text" id="cfg-cfo-stn-name" value="" readonly placeholder="이름"><input type="email" id="cfg-cfo-stn-email" value="" readonly placeholder="이메일"></div></div>
+        <div class="appr-block appr-fixed"><div class="appr-block-title">3차 결재자<span class="appr-tag auto">자동 지정</span> <span class="hint">— GA Specialist</span></div><div class="appr-info"><input type="text" id="cfg-a3-stn-name" value="" readonly placeholder="이름"><input type="email" id="cfg-a3-stn-email" value="" readonly placeholder="이메일"></div></div>
       </div>
       <div class="btn-row"><button class="btn-secondary" onclick="stnReset()">Reset</button><button class="btn-primary" onclick="stnSubmit()">Submit</button></div>
     </div></div>
@@ -1237,6 +1239,8 @@ let _configLoaded = false;
 const A2={name:'',email:'',role:'인사팀장',order:2};
 // 3차: 윤혜진 GA담당자 (테스트: jimmy.lee)
 const A3={name:'',email:'',role:'GA담당자',order:3};
+// Stationery 2차: CFO — system_config 의 GA_CFO(10-12). STN 결재선이 부서장 → CFO → GA담당자 3단계가 됐다(예전엔 부서장 → GA담당자).
+const ACFO={name:'',email:'',role:'CFO',order:2};
 
 let employeeData=[];
 let COST_CENTERS=[];
@@ -1735,12 +1739,14 @@ async function boot(account){
       }
       Object.assign(A2, cfgVal(_cfg,'GA_PERSONNEL_MGR',A2));
       Object.assign(A3, cfgVal(_cfg,'GA_OFFICER',A3));
+      Object.assign(ACFO, cfgVal(_cfg,'GA_CFO',ACFO));   // Stationery 2차 CFO(10-12)
       // UI 결재자 표시 업데이트
       // 문의 이메일 업데이트
       const _gaContact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:''}));
       setHdrContact('ga-contact-email', _gaContact.email);
       // 모든 고정 결재자 input DOM 업데이트
-      [['cfg-a3-stn-name',A3.name],['cfg-a3-stn-email',A3.email],
+      [['cfg-cfo-stn-name',ACFO.name],['cfg-cfo-stn-email',ACFO.email],
+       ['cfg-a3-stn-name',A3.name],['cfg-a3-stn-email',A3.email],
        ['cfg-a2-bc-name',A2.name], ['cfg-a2-bc-email',A2.email],
        ['cfg-a3-bc-name',A3.name], ['cfg-a3-bc-email',A3.email],
        ['cfg-a2-idc-name',A2.name],['cfg-a2-idc-email',A2.email],
@@ -2151,10 +2157,10 @@ async function createApprovals(cat,reqId,extra){
   const a1name=document.getElementById(cat+'-a1-name').value;
   const a1email=document.getElementById(cat+'-a1-email').value;
   if(!a1email){throw new Error('1차 결재자(Department Head)를 선택해주세요.');}
-  // STN: 1차 Dept.Head → 2차 GA담당자 (인사팀장 없음)
+  // STN: 1차 Dept.Head → 2차 CFO(GA_CFO) → 3차 GA담당자 (10-12 — 예전엔 2차 GA담당자로 끝났다. 이미 상신된 2단계 건은 그대로 진행)
   // BC/IDC: 1차 Dept.Head → 2차 인사팀장 → 3차 GA담당자
   let approvers=cat==='stn'
-    ?[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A3.name,email:A3.email,role:A3.role,order:2}]
+    ?[{name:a1name,email:a1email,role:'Department Head',order:1},{name:ACFO.name,email:ACFO.email,role:ACFO.role,order:2},{name:A3.name,email:A3.email,role:A3.role,order:3}]
     :[{name:a1name,email:a1email,role:'Department Head',order:1},{name:A2.name,email:A2.email,role:A2.role,order:2},{name:A3.name,email:A3.email,role:A3.role,order:3}];
   // 명함 추가 결재자(10-11) — 1차 다음부터 차례로, HR Head · GA Specialist 는 그만큼 뒤로(없으면 지금과 똑같은 3건)
   if(cat==='bc'&&extra&&extra.length){
@@ -2558,6 +2564,9 @@ async function stnSubmit(){
   // 수령 주소(국문)는 필수(09-29) — 지점을 고르면 자동으로 채워지고, 목록에 없으면 직접 적는다.
   if(!(document.getElementById('stn-address-kor')?.value||'').trim()){alert('수령 주소를 입력해주세요.\n\n지점 목록에서 고르면 국문 · 영문 주소가 자동으로 채워집니다. 목록에 없으면 국문 주소를 직접 입력해 주세요.');document.getElementById('stn-address-select')?.focus();return;}
   if(!document.getElementById('stn-a1-email').value){alert('1차 결재자(Department Head)를 지정해주세요.');return;}
+  // 2차 CFO · 3차 GA Specialist 는 system_config_final.xlsx 의 GA_CFO · GA_OFFICER 에서 자동 지정된다(10-12).
+  // 못 읽은 채 상신하면 메일 없는 결재행이 생겨 그 단계에서 멈추므로, 신청을 만들기 전에 막는다.
+  if(!ACFO.email||!A3.email){alert('자동 지정 결재자(2차 CFO · 3차 GA Specialist)를 불러오지 못했습니다.\n새로고침 후 다시 시도해 주세요. 계속되면 IT팀(stk_it@hyosung.com)에 알려주세요.');return;}
   loading(true);
   try{
     const total=orderItems.reduce((s,i)=>s+i.price*i.qty,0);
