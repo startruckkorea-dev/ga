@@ -1985,7 +1985,7 @@ async function loadEmployees(){
     const buf=await res.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array'});
     const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-    employeeData=rows.map(r=>({dept:r['Department']||'',team:r['Team']||'',name:r['EngName']||'',email:(r['EMail']||r['email']||''),boss:String(r['Boss']||'').trim(),boss2:String(r['Boss of Boss']||'').trim()})).filter(r=>r.email&&r.name);   // boss = G열 팀장 · boss2 = H열 부서장 (Flex 연동 결재자, 10-01)
+    employeeData=rows.map(r=>({dept:r['Department']||'',team:r['Team']||'',name:r['EngName']||'',email:(r['EMail']||r['email']||''),boss:String(r['Boss']||'').trim(),boss2:String(r['Boss of Boss']||'').trim(),orgTm:String(r['Team Manager']||'').trim(),orgDh:String(r['Department Head']||'').trim(),orgRd:String(r['RD']||'').trim()})).filter(r=>r.email&&r.name);   // boss = G열 팀장 · boss2 = H열 부서장 (Flex 연동 결재자, 10-01) · orgTm/orgDh/orgRd = I·J·K 고정 조직도 Team Manager · Department Head · RD (10-14, 헤더 없으면 빈칸 → 예전 규칙)
     // 로드 후 부서 드롭다운 초기화
     for(const prefix of ['stn','bc','idc']) gaInitDept(prefix);
     try{bcExRender();}catch(e){console.warn(e);}   // 명함 추가 결재자 부서 목록(10-11)
@@ -2505,7 +2505,16 @@ function stnAddressSelect(){ addressSelectApply('stn-address-select','stn-addres
    · 부서장(H)이 '-' 이면(본부장 본인 신청) G(직속 상사 = 대표)를 부서장으로 본다. 같은 사람이 두 단계에 올 수 있다(09-19 규칙과 같음).
    · 신청자가 명부에 없거나(서비스 계정 · 신규 입사) 상사 이름을 못 찾으면 예전처럼 직접 선택 칸을 열어 두고 안내를 띄운다 — 업무를 막지 않고
      Logging_data 에 「결재자 Flex 연동 실패」 로 남겨 IT 가 명부를 고치게 한다.
-   입력칸(…-name · …-email)과 상신 로직은 그대로 — 값을 자동으로 채우고 칸을 읽기 전용(회색)으로 둘 뿐이다. */
+   입력칸(…-name · …-email)과 상신 로직은 그대로 — 값을 자동으로 채우고 칸을 읽기 전용(회색)으로 둘 뿐이다.
+   ── 10-14 조직도 3열(I · J · K) ──
+   G · H 열(Boss · Boss of Boss)은 「신청자 기준 상대값」이라(팀장이 올리면 Boss = 본부장, Boss of Boss = 대표) 부서장 단계에 대표(RD)가 들어가는
+   원칙 위반이 있었다. HFS 가 I · J · K 열에 고정 직책 Team Manager · Department Head · RD(EngName, 없으면 '-')를 함께 넣으면 그것을 쓴다.
+   · 팀장 단계 = Team Manager, '-' 면 Department Head, 그것도 '-' 면 RD. 부서장 단계 = Department Head, '-' 면 RD.
+   · 신청자 본인이 그 단계 결재자면 본인이 결재한다(건너뛰거나 위로 올리지 않는다). 팀장 · 부서장이 같은 사람이면 지금처럼 두 번 결재.
+   · 새 열이 없거나(HFS 반영 전) 그 사람 행의 세 칸이 모두 비어 있으면 예전 규칙(Boss / Boss of Boss) 그대로 — 먼저 배포해도 동작이 바뀌지 않는다.
+   · 적힌 이름을 명부에서 못 찾으면 위로 올려 채우지 않고 예전처럼 직접 선택 + 안내 + 「결재자 Flex 연동 실패」 기록. */
+function flexPick(){ for(const v of arguments){ const k=flexNorm(v); if(k && k!=='-') return String(v).trim(); } return ''; }   // '-' · 빈칸을 건너뛴 첫 이름(10-14)
+function flexHasOrg(rec){ return !!rec && [rec.orgTm, rec.orgDh, rec.orgRd].some(v=>flexNorm(v)); }   // 3열 중 한 칸이라도 적혀 있으면 새 규칙(10-14)
 const FLEX_SLOTS = [{id: "stn-a1", role: "dh"}, {id: "bc-a1", role: "dh"}, {id: "idc-a1", role: "dh"}];   // id = 이름/이메일 칸 접두어(id-name · id-email), role: tl(팀장 = G열) · dh(부서장 = H열)
 const FLEX_SYS = "GA";
 function flexNorm(s){ return String(s||'').trim().toLowerCase().replace(/\s+/g,' '); }
@@ -2515,8 +2524,12 @@ function flexResolve(){
   const u = user; const me=[u&&u.email, u&&u.username].map(flexNorm).filter(Boolean);
   const rec=flexEmp().find(e=>me.includes(flexNorm(e.email)))||null;
   if(!rec) return {rec:null, tl:null, dh:null};
+  if(flexHasOrg(rec)){   // 10-14: I · J · K 고정 조직도 — 팀장 단계 TM→DH→RD, 부서장 단계 DH→RD(본인이어도 그대로 본인)
+    const tlName=flexPick(rec.orgTm, rec.orgDh, rec.orgRd), dhName=flexPick(rec.orgDh, rec.orgRd);
+    return {rec, tl:flexByName(tlName), dh:flexByName(dhName), org:true, tlName, dhName};
+  }
   const tl=flexByName(rec.boss);
-  const dh=flexByName(rec.boss2)||flexByName(rec.boss);   // 부서장이 없으면(본부장 본인) 직속 상사(대표)
+  const dh=flexByName(rec.boss2)||flexByName(rec.boss);   // 부서장이 없으면(본부장 본인) 직속 상사(대표) — 3열 없는 명부(10-14 이전)용
   return {rec, tl, dh};
 }
 function applyFlexApprovers(){
@@ -2540,13 +2553,13 @@ function applyFlexApprovers(){
       block.classList.remove('appr-fixed','appr-flex');
       if(tag){ tag.className='appr-tag manual'; tag.textContent='직접 선택'; }
       if(!note){ note=document.createElement('div'); note.className='flex-note'; title ? title.insertAdjacentElement('afterend', note) : block.insertBefore(note, block.firstChild); }
-      const what = s.role==='tl' ? '팀장(Boss)' : '부서장(Boss of Boss)';
+      const what = r.org ? (s.role==='tl' ? '팀장(Team Manager)' : '부서장(Department Head)') : (s.role==='tl' ? '팀장(Boss)' : '부서장(Boss of Boss)');   // 10-14: 3열을 썼으면 그 열 이름
       note.textContent = nodata
         ? '⚠ 직원 명부(employee_search)를 읽지 못해 결재자를 직접 선택합니다 — 새로고침 후에도 같으면 IT팀(stk_it@hyosung.com)에 알려주세요.'
         : r.rec
-        ? '⚠ Flex 명부(employee_search)에서 '+what+' 「'+((s.role==='tl'?r.rec.boss:(r.rec.boss2||r.rec.boss))||'(빈칸)')+'」 을(를) 찾지 못해 직접 선택합니다 — IT팀(stk_it@hyosung.com)에 알려주세요.'
+        ? '⚠ Flex 명부(employee_search)에서 '+what+' 「'+((r.org ? (s.role==='tl'?r.tlName:r.dhName) : (s.role==='tl'?r.rec.boss:(r.rec.boss2||r.rec.boss)))||'(빈칸)')+'」 을(를) 찾지 못해 직접 선택합니다 — IT팀(stk_it@hyosung.com)에 알려주세요.'
         : '⚠ 신청자 계정이 Flex 명부(employee_search)에 없어 결재자를 직접 선택합니다 — IT팀(stk_it@hyosung.com)에 알려주세요.';
-      why.push(s.id+': '+(r.rec ? (s.role==='tl' ? 'Boss 못 찾음('+(r.rec.boss||'')+')' : 'Boss of Boss 못 찾음('+(r.rec.boss2||'')+'/'+(r.rec.boss||'')+')') : '명부에 없음'));
+      why.push(s.id+': '+(r.rec && r.org ? (s.role==='tl' ? 'Team Manager 못 찾음('+(r.tlName||'')+')' : 'Department Head 못 찾음('+(r.dhName||'')+')') : r.rec ? (s.role==='tl' ? 'Boss 못 찾음('+(r.rec.boss||'')+')' : 'Boss of Boss 못 찾음('+(r.rec.boss2||'')+'/'+(r.rec.boss||'')+')') : '명부에 없음'));
     }
   });
   if(why.length && !nodata && !applyFlexApprovers._logged){
