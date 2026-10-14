@@ -1235,8 +1235,12 @@ const SITE_PATH='startruckkorea.sharepoint.com:/sites/STK-DB:';
 const GRAPH='https://graph.microsoft.com/v1.0';
 const SCOPES=['User.Read','Sites.ReadWrite.All','Files.ReadWrite.All'];
 const LISTS={stn:{req:'STN_Requests',apr:'STN_Approvals'},bc:{req:'BC_Requests',apr:'BC_Approvals'},idc:{req:'IDC_Requests',apr:'IDC_Approvals'}};
-const ADMIN_EMAILS=['','',''];
-let _configLoaded = false;
+/* 관리자 명단(10-15) — system_config_final.xlsx 의 GA_ADMIN_N · ADMIN_SP 로만 채운다. 기본은 빈 명단(관리자 0명 · 닫힌 쪽).
+   예전 기본값 ['','',''] 은 05-03(6a77125) 실명 제거 때 남은 빈 자리였다. 설정 파일에 GA_ADMIN_1 · GA_ADMIN_2 · ADMIN_SP 가 없으면 그대로 남았고,
+   05-23(b5199d6) 관리자 탭 검사가 username 과도 비교하게 됐는데 GA 의 user 는 {name, email} 이라 username 이 없어(→ '') '' === '' 로 누구나 통과했다. */
+const ADMIN_EMAILS = [];
+let _configLoaded = false;   // 설정 확인이 끝났다(읽음 · 못 읽음 모두, 10-15) — 관리자 탭은 이 뒤에 판정한다
+let _cfgFailed = false;      // 설정 파일을 못 읽었다(10-15) — 관리자 0명으로 본다
 // 2차: Robin 인사팀장 (테스트: jimmy.lee)
 const A2={name:'',email:'',role:'인사팀장',order:2};
 // 3차: 윤혜진 GA담당자 (테스트: jimmy.lee)
@@ -1727,6 +1731,9 @@ async function boot(account){
     await loadMyDelegations();   // 내가 대리인으로 받은 위임 — 결재함 판정에 쓴다(AAC)
     // system_config_final.xlsx 로드 후 설정 반영
     const _cfg = await loadSystemConfig();
+    // 10-15: 설정 파일을 못 읽으면 관리자 판정은 「아님」 으로 끝낸다(fail-closed). 예전에는 _configLoaded 가 영영 false 라
+    // 관리자 탭이 1.5초마다 재시도만 하고 아무 안내가 없었다(ACC Voucher 09-29 와 같은 증상). 신청 · 결재 등 다른 기능은 그대로.
+    if (!_cfg) { _cfgFailed = true; _configLoaded = true; }
     if (_cfg) {
       const _contact = cfgVal(_cfg,'GA_CONTACT',cfgVal(_cfg,'CONTACT_EMAIL',{email:''}));
       // 예전에는 .sub 중 @ 가 든 요소를 모두 덮어썼다. 연락처가 프레임 안으로 들어가면서
@@ -1761,7 +1768,10 @@ async function boot(account){
     loadCCTRMaster();
     loadSampleImages();
     loadAddressList();   // 지점 주소 목록 — 예전에는 직원 파일(loadEmployees)이 끝나야 드롭다운이 채워져 늦거나 비어 있었다(09-29)
-  }catch(e){alert('SharePoint 연결 오류: '+e.message);}
+  }catch(e){
+    if (!_configLoaded) { _cfgFailed = true; _configLoaded = true; }   // 10-15: 설정 확인 전에 끊겼으면 관리자 아님으로 끝낸다(관리자 탭 무한 재시도 방지)
+    alert('SharePoint 연결 오류: '+e.message);
+  }
 
   // 배지 자동 갱신 (60초마다)
   setInterval(function(){ try{loadApprovalBadge();}catch(e){} }, 60000);
@@ -1828,13 +1838,14 @@ function switchTab(t){
       }, 1500);
       return;
     }
-    const _emails = typeof ADMIN_EMAILS !== 'undefined' ? ADMIN_EMAILS : [];
+    // 10-15: 명단 · 내 계정 값을 trim · 소문자로 맞추고 빈 값은 버린 뒤 비교한다. user 는 {name, email} 이라 username 이 없어(undefined → '')
+    // 예전 비교는 명단의 빈 자리('')와 맞아 설정에 GA_ADMIN_N · ADMIN_SP 가 없으면 누구나 관리자 탭에 들어왔다.
+    const _emails = (typeof ADMIN_EMAILS !== 'undefined' ? ADMIN_EMAILS : []).map(e => String(e || '').trim().toLowerCase()).filter(Boolean);
     const _user = typeof user !== 'undefined' ? user : null;
-    const _isAdmin = _user && _emails.map(e=>e.toLowerCase()).some(e =>
-      e === (_user.username||'').toLowerCase() || e === (_user.email||'').toLowerCase()
-    );
+    const _mine = _user ? [_user.username, _user.email].map(v => String(v || '').trim().toLowerCase()).filter(Boolean) : [];
+    const _isAdmin = !_cfgFailed && _emails.length > 0 && _mine.some(v => _emails.includes(v));
     if (!_isAdmin) {
-      logAction('GA', '관리자 탭 접근 차단', { reason: '관리자 명단에 없음', admins: _emails.length });   // 권한이 없어 막혀도 이력은 남긴다(09-30 · SSC 입장 차단과 같은 취지)
+      logAction('GA', '관리자 탭 접근 차단', { reason: _cfgFailed ? '설정 읽기 실패' : '관리자 명단에 없음', admins: _emails.length });   // 권한이 없어 막혀도 이력은 남긴다(09-30 · SSC 입장 차단과 같은 취지)
       const m = document.getElementById('no-auth-modal');
       if (m) m.style.display = 'flex';
       return;
