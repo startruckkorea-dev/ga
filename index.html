@@ -677,7 +677,7 @@ html, * { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
   var av = document.getElementById('aps-av'), av2 = document.getElementById('aps-av2'), nm = document.getElementById('aps-acct-nm');
   function draw() {
     var full = ((src.querySelector('.hdr-user-name') || src).textContent || '').trim();
-    var en = full.match(/\(([A-Za-z][A-Za-z .'-]*)\)\s*$/);                 // 「… (Jimmy Lee)」
+    var en = full.match(/\(([A-Za-z][A-Za-z .'-]*)\)\s*$/);                 // 「… (Gildong Hong)」
     var latin = /^[A-Za-z]/.test(full);                                      // 영문만 있는 이름(John Smith) 은 앞 두 단어 · 두 글자 이니셜
     var short = en ? en[1].trim() : (latin ? full.split(/\s+/).slice(0, 2).join(' ') : (full.split(/\s+/)[0] || ''));
     var ini = (en || latin) ? short.split(/\s+/).map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase() : short.slice(0, 1);
@@ -1241,9 +1241,9 @@ const LISTS={stn:{req:'STN_Requests',apr:'STN_Approvals'},bc:{req:'BC_Requests',
 const ADMIN_EMAILS = [];
 let _configLoaded = false;   // 설정 확인이 끝났다(읽음 · 못 읽음 모두, 10-15) — 관리자 탭은 이 뒤에 판정한다
 let _cfgFailed = false;      // 설정 파일을 못 읽었다(10-15) — 관리자 0명으로 본다
-// 2차: Robin 인사팀장 (테스트: jimmy.lee)
+// 2차: 인사팀장
 const A2={name:'',email:'',role:'인사팀장',order:2};
-// 3차: 윤혜진 GA담당자 (테스트: jimmy.lee)
+// 3차: GA담당자
 const A3={name:'',email:'',role:'GA담당자',order:3};
 // Stationery 2차: CFO — system_config 의 GA_CFO(10-12). STN 결재선이 부서장 → CFO → GA담당자 3단계가 됐다(예전엔 부서장 → GA담당자).
 const ACFO={name:'',email:'',role:'CFO',order:2};
@@ -1427,7 +1427,7 @@ function escHtml(s){
 /* ── 대리 처리 표기 (AAC 연동) ────────────────────────────────────────
    AAC(결재 대리 지정)가 대리인이 처리한 결재행의 ApproverRole 뒤에
    '· 대리(이름 <메일>)' 를 덧붙인다. 그 꼬리를 그대로 화면에 뿌리면
-   '1차결재자 · 대리(Jimmy Lee <jimmy.lee@hyosung.com>)' 처럼 날값이 노출된다.
+   '1차결재자 · 대리(Gildong Hong <hong.gildong@hyosung.com>)' 처럼 날값이 노출된다.
    본래 역할만 남기고, 대리였다는 사실은 알약으로 따로 보여준다.
    IT-Ticket(1877행 부근)·Goodwill-Approval·aps 와 같은 표기·같은 색이다.
    대리가 아니면 aacRolePill 이 빈 문자열을 돌려주므로 호출부에 조건이 필요 없다. */
