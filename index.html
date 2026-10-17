@@ -938,7 +938,7 @@ window.apsYear = (function () {
         </div>
         <div class="form-row">
           <div class="form-group"><label>Department <span class="req-mark">*</span></label><input type="text" id="bc-dept" placeholder="Finance &amp; Controlling" oninput="bcUpdatePreview()"></div>
-          <div class="form-group"><label>Email<span> <span class="req-mark">*</span></span></label><input type="email" id="bc-email" placeholder="email@hyosung.com" oninput="bcUpdatePreview()"></div>
+          <div class="form-group"><label>Email<span> <span class="req-mark">*</span></span></label><input type="email" id="bc-email" placeholder="email@example.com" oninput="bcUpdatePreview()"></div>
         </div>
 
         <div class="form-row bc-fax-row">
@@ -1427,7 +1427,7 @@ function escHtml(s){
 /* ── 대리 처리 표기 (AAC 연동) ────────────────────────────────────────
    AAC(결재 대리 지정)가 대리인이 처리한 결재행의 ApproverRole 뒤에
    '· 대리(이름 <메일>)' 를 덧붙인다. 그 꼬리를 그대로 화면에 뿌리면
-   '1차결재자 · 대리(Gildong Hong <hong.gildong@hyosung.com>)' 처럼 날값이 노출된다.
+   '1차결재자 · 대리(Gildong Hong <user@example.com>)' 처럼 날값이 노출된다.
    본래 역할만 남기고, 대리였다는 사실은 알약으로 따로 보여준다.
    IT-Ticket(1877행 부근)·Goodwill-Approval·aps 와 같은 표기·같은 색이다.
    대리가 아니면 aacRolePill 이 빈 문자열을 돌려주므로 호출부에 조건이 필요 없다. */
@@ -1439,7 +1439,7 @@ function _aacRoleParse(role){
   if(!m) return null;
   const im = m[2].match(/^([\s\S]*?)\s*<([^>]+)>\s*$/);
   const nm = (im ? im[1] : m[2]).trim(), em = im ? im[2].trim() : '';
-  // 이름이 없으면 메일을 이름 자리에 쓴다 — 'on behalf of  · a@x.com' 처럼 비지 않게
+  // 이름이 없으면 메일을 이름 자리에 쓴다 — 'on behalf of  · a@example.com' 처럼 비지 않게
   return { base: m[1].trim(), name: nm || em, email: nm ? em : '' };
 }
 function aacRoleBase(role){
@@ -1726,6 +1726,33 @@ async function loadSystemConfig() {
     return null;
   }
 }
+/* IT 문의 메일(10-17) — 코드에 메일 주소를 두지 않는다. system_config_final.xlsx 의 GA_IT_CONTACT(C열) → 없으면 CONTACT_EMAIL 순으로 채우고,
+   설정을 못 읽었으면(로그인 전 · 읽기 실패) 메일 없이 「IT팀」 만 보인다. 형식이 맞는 메일만 받으므로 HTML 에 그대로 넣어도 안전하다.
+   data-it-contact 가 붙은 화면 칸은 설정을 읽은 뒤 메일 링크로 바뀐다. */
+var IT_CONTACT_KEY = 'GA_IT_CONTACT', __itMail = '';
+function itTeam(label) { label = label || 'IT팀'; return __itMail ? label + '(' + __itMail + ')' : label; }
+function itApplyDom() {
+  try {
+    document.querySelectorAll('[data-it-contact]').forEach(function (el) {
+      el.textContent = '';
+      if (!__itMail) { el.textContent = el.getAttribute('data-it-contact') || 'IT팀'; return; }
+      var a = document.createElement('a'); a.href = 'mailto:' + __itMail; a.textContent = __itMail;
+      a.style.color = '#0078d4'; a.style.textDecoration = 'none'; el.appendChild(a);
+    });
+  } catch (e) {}
+}
+function itSetFromCfg(cfg) {
+  try {
+    if (!cfg || typeof cfg !== 'object') return;
+    var keys = Object.keys(cfg);
+    var pick = function (k) { var kk = keys.find(function (x) { return String(x).trim().toUpperCase() === k.toUpperCase(); }); return kk && cfg[kk] ? String(cfg[kk].email || '').trim().toLowerCase() : ''; };
+    var ok = function (v) { return /^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(v); };
+    var mail = [pick(IT_CONTACT_KEY), pick('CONTACT_EMAIL')].find(ok);
+    if (mail) __itMail = mail;
+    itApplyDom();
+  } catch (e) {}
+}
+loadSystemConfig = (function (orig) { return async function () { var c = await orig.apply(this, arguments); itSetFromCfg(c || (typeof _sysConfig !== 'undefined' ? _sysConfig : null)); return c; }; })(loadSystemConfig);
 function cfgVal(cfg, key, defaultObj) {
   if (!cfg || !cfg[key]) return defaultObj;
   const v = cfg[key];
@@ -2593,10 +2620,10 @@ function applyFlexApprovers(){
       if(!note){ note=document.createElement('div'); note.className='flex-note'; title ? title.insertAdjacentElement('afterend', note) : block.insertBefore(note, block.firstChild); }
       const what = r.org ? (s.role==='tl' ? '팀장(Team Manager)' : '부서장(Department Head)') : (s.role==='tl' ? '팀장(Boss)' : '부서장(Boss of Boss)');   // 10-14: 3열을 썼으면 그 열 이름
       note.textContent = nodata
-        ? '⚠ 직원 명부(employee_search)를 읽지 못해 결재자를 직접 선택합니다 — 새로고침 후에도 같으면 IT팀(stk_it@hyosung.com)에 알려주세요.'
+        ? '⚠ 직원 명부(employee_search)를 읽지 못해 결재자를 직접 선택합니다 — 새로고침 후에도 같으면 '+itTeam('IT팀')+'에 알려주세요.'
         : r.rec
-        ? '⚠ Flex 명부(employee_search)에서 '+what+' 「'+((r.org ? (s.role==='tl'?r.tlName:r.dhName) : (s.role==='tl'?r.rec.boss:(r.rec.boss2||r.rec.boss)))||'(빈칸)')+'」 을(를) 찾지 못해 직접 선택합니다 — IT팀(stk_it@hyosung.com)에 알려주세요.'
-        : '⚠ 신청자 계정이 Flex 명부(employee_search)에 없어 결재자를 직접 선택합니다 — IT팀(stk_it@hyosung.com)에 알려주세요.';
+        ? '⚠ Flex 명부(employee_search)에서 '+what+' 「'+((r.org ? (s.role==='tl'?r.tlName:r.dhName) : (s.role==='tl'?r.rec.boss:(r.rec.boss2||r.rec.boss)))||'(빈칸)')+'」 을(를) 찾지 못해 직접 선택합니다 — '+itTeam('IT팀')+'에 알려주세요.'
+        : '⚠ 신청자 계정이 Flex 명부(employee_search)에 없어 결재자를 직접 선택합니다 — '+itTeam('IT팀')+'에 알려주세요.';
       why.push(s.id+': '+(r.rec && r.org ? (s.role==='tl' ? 'Team Manager 못 찾음('+(r.tlName||'')+')' : 'Department Head 못 찾음('+(r.dhName||'')+')') : r.rec ? (s.role==='tl' ? 'Boss 못 찾음('+(r.rec.boss||'')+')' : 'Boss of Boss 못 찾음('+(r.rec.boss2||'')+'/'+(r.rec.boss||'')+')') : '명부에 없음'));
     }
   });
@@ -2619,7 +2646,7 @@ async function stnSubmit(){
   if(!document.getElementById('stn-a1-email').value){alert('1차 결재자(Department Head)를 지정해주세요.');return;}
   // 2차 CFO · 3차 GA Specialist 는 system_config_final.xlsx 의 GA_CFO · GA_OFFICER 에서 자동 지정된다(10-12).
   // 못 읽은 채 상신하면 메일 없는 결재행이 생겨 그 단계에서 멈추므로, 신청을 만들기 전에 막는다.
-  if(!ACFO.email||!A3.email){alert('자동 지정 결재자(2차 CFO · 3차 GA Specialist)를 불러오지 못했습니다.\n새로고침 후 다시 시도해 주세요. 계속되면 IT팀(stk_it@hyosung.com)에 알려주세요.');return;}
+  if(!ACFO.email||!A3.email){alert('자동 지정 결재자(2차 CFO · 3차 GA Specialist)를 불러오지 못했습니다.\n새로고침 후 다시 시도해 주세요. 계속되면 '+itTeam('IT팀')+'에 알려주세요.');return;}
   loading(true);
   try{
     const total=orderItems.reduce((s,i)=>s+i.price*i.qty,0);
@@ -2911,7 +2938,7 @@ async function bcSubmit(){
   _need.push(['bc-address','명함에 들어갈 주소 — 🇰🇷 국문 주소'],['bc-address-eng','명함에 들어갈 주소 — 🇺🇸 English Address']);   // 두 구분 모두(10-14)
   const _miss=_need.filter(x=>!_bv(x[0]));
   if(_miss.length){alert((_bcAgent?'STK Agent':'STK 내부직원')+' 명함 신청 — 아래 필수 항목을 입력해 주세요.\n\n· '+_miss.map(x=>x[1]).join('\n· '));bcFocus(_miss[0][0]);return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(_bv('bc-email'))){alert('Email 형식이 올바르지 않습니다. (예: '+(_bcAgent?'name@gmail.com':'name@hyosung.com')+')');bcFocus('bc-email');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(_bv('bc-email'))){alert('Email 형식이 올바르지 않습니다. (예: '+(_bcAgent?'name@example.net':'name@example.com')+')');bcFocus('bc-email');return;}
   if(!qty||!stickerQty||!costCenter){alert('필수 항목을 모두 입력해주세요.');return;}
   // QR 코드 적용(10-09) — 체크했으면 QR 이미지가 꼭 있어야 한다(인쇄할 그림이 없으면 GA 가 만들 수 없음)
   // 추가 결재자(10-11) — 칸을 만들었으면 직원까지 골라야 한다(IT 와 같은 안내)
@@ -3159,7 +3186,7 @@ function bcApplyTypeFields(){
     if(ag){if(!jt.readOnly){_bcKeep['bc-job-title']=jt.value;jt.readOnly=true;jt.classList.add('bc-fixed');jt.setAttribute('aria-readonly','true');jt.title='STK Agent 명함은 고정값';}jt.value=BC_AG_JOB;}
     else if(jt.readOnly){jt.readOnly=false;jt.classList.remove('bc-fixed');jt.removeAttribute('aria-readonly');jt.removeAttribute('title');jt.value=_bcKeep['bc-job-title']||'';delete _bcKeep['bc-job-title'];}
   }
-  [['bc-mobile','010-0000-0000'],['bc-job-title','세일즈 에이전트'],['bc-dept','서울&중부지역 본부'],['bc-email','email@gmail.com']].forEach(function(p){const m=document.getElementById(p[0]);if(!m)return;if(!m.dataset.ph)m.dataset.ph=m.placeholder;m.placeholder=ag?p[1]:m.dataset.ph;});   // Agent 예시(10-11)
+  [['bc-mobile','010-0000-0000'],['bc-job-title','세일즈 에이전트'],['bc-dept','서울&중부지역 본부'],['bc-email','email@example.net']].forEach(function(p){const m=document.getElementById(p[0]);if(!m)return;if(!m.dataset.ph)m.dataset.ph=m.placeholder;m.placeholder=ag?p[1]:m.dataset.ph;});   // Agent 예시(10-11)
   const q=document.getElementById('bc-qr-on');
   if(q){
     if(ag){if(!q.disabled){_bcKeep.qr=q.checked;q.disabled=true;q.setAttribute('aria-disabled','true');}if(!q.checked){q.checked=true;bcQrToggle();}}
@@ -3329,15 +3356,15 @@ function bcAgUpdatePreview(){
   // ③ 주소 ← 국문 주소
   const addr=v('bc-address');
   if(addr){const F=A.addr,r=fit(addr,baseFs(F),F.wt,(A.right-F.x)*sx,0);box(el.addr,F.c0,F.y0,F.y1);put(el.addr,F,F.c0,F.y0,addr,r.fs,F.x,r.w,0);}
-  // ④ 연락처 줄(10-14 새 샘플) 「Mobile {Mobile Number} | E-mail {Email}」 — 칸마다 값이 있으면 그 값, 없으면 샘플 글자(010-0000-0000 · abc@gmail.com).
+  // ④ 연락처 줄(10-14 새 샘플) 「Mobile {Mobile Number} | E-mail {Email}」 — 칸마다 값이 있으면 그 값, 없으면 샘플 글자(010-0000-0000 · user@example.com).
   //    둘 다 비면 샘플 그대로. 「Mobile」 은 그림 글자 그대로 두고 그 뒤를 다시 쓴다(구분선 · 굵은 E-mail 은 샘플 간격). Fax 는 명함에 나오지 않는다.
   //    글자 크기 · 세로 자리는 조각마다 샘플 글자에 맞춘다 — 번호: 숫자 높이, 「|」: 막대 높이, 「E-mail」 · 메일: 샘플 글자 폭(1319~1412 · 1427~1654)
   const mob=v('bc-mobile'),eml=v('bc-email');
   if(mob||eml){
     const F=A.mobile,avail=(A.right-F.x)*sx;
-    const FP=Object.assign({},F,{ref:'|',top:479,bot:510}),FL=Object.assign({},F,{wt:700,ref:'E-mail',top:483,bot:505}),FV=Object.assign({},F,{ref:'abc@gmail.com',top:483,bot:510});
+    const FP=Object.assign({},F,{ref:'|',top:479,bot:510}),FL=Object.assign({},F,{wt:700,ref:'E-mail',top:483,bot:505}),FV=Object.assign({},F,{ref:'user@example.com',top:483,bot:510});
     const byW=(t,wt,w)=>100*w*sx/Math.max(1,tw0(t,100,wt));
-    const seg=[{t:mob||'010-0000-0000',f:F,fs:baseFs(F),g:0},{t:'|',f:FP,fs:baseFs(FP),g:16},{t:'E-mail',f:FL,fs:byW('E-mail',700,94),g:18},{t:eml||'abc@gmail.com',f:FV,fs:byW('abc@gmail.com',400,228),g:14}];
+    const seg=[{t:mob||'010-0000-0000',f:F,fs:baseFs(F),g:0},{t:'|',f:FP,fs:baseFs(FP),g:16},{t:'E-mail',f:FL,fs:byW('E-mail',700,94),g:18},{t:eml||'user@example.com',f:FV,fs:byW('user@example.com',400,228),g:14}];
     const tot=k=>seg.reduce((s,x)=>s+x.g*sx*k+tw0(x.t,x.fs*k,x.f.wt),0);
     let k=1;if(tot(1)>avail*.96)k=Math.max(.74,avail*.96/tot(1));   // 화면 글자가 캔버스로 잰 폭보다 조금 넓을 수 있어 4% 여유
     box(el.mobile,F.c0,F.y0,F.y1);
@@ -3647,7 +3674,7 @@ async function confirmApproval(){
       if(!_rows.length){
         console.error('[GA] 결재 행 조회 결과가 비어 있음 — 승인완료 전환 중단. cat:', cat, 'RequestID:', reqId);
         _lg(_lgAct,'승인 기록 · 다음 단계로 넘기지 못함(결재 행 조회 0건)');
-        alert('승인은 기록되었으나 다음 단계로 넘기지 못했습니다.\n잠시 후 결재함에서 상태를 다시 확인해 주세요.\n계속 같은 증상이면 IT팀(stk_it@hyosung.com)에 알려주세요.' + (aprRowsRetry.lastError ? '\n(원인: ' + aprRowsRetry.lastError + ')' : ''));
+        alert('승인은 기록되었으나 다음 단계로 넘기지 못했습니다.\n잠시 후 결재함에서 상태를 다시 확인해 주세요.\n계속 같은 증상이면 '+itTeam('IT팀')+'에 알려주세요.' + (aprRowsRetry.lastError ? '\n(원인: ' + aprRowsRetry.lastError + ')' : ''));
         loadApprovalQueue(cat); loadApprovalBadge();
         return;
       }
