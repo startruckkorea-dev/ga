@@ -383,6 +383,16 @@ html.aps-wtx #app{transition:max-width .2s ease}
 #stn-mix-modal{display:none;position:fixed;inset:0;background:rgba(15,39,68,.45);z-index:700;align-items:center;justify-content:center;padding:16px}
 #stn-mix-modal.open{display:flex}
 .smx-box{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:28px 28px 22px;word-break:keep-all;box-shadow:0 12px 40px rgba(15,39,68,.22);text-align:center;font-family:'Segoe UI','Malgun Gothic',sans-serif;animation:smxIn .16s ease-out}
+/* 10-26 Cost Center 불러오는 중 — 선택칸 안에 회색 안내 + 점 3개(ACC Voucher 로딩 점과 같은 모양) */
+.cc-box{position:relative;display:block;min-width:0}
+.cc-box>select{width:100%}
+select.cc-loading{color:#8a8886;background-color:#faf9f8;cursor:progress}
+.cc-dots{position:absolute;right:34px;top:50%;transform:translateY(-50%);display:none;align-items:center;gap:3px;pointer-events:none}
+.cc-box.loading .cc-dots{display:inline-flex}
+.cc-dots i{width:4px;height:4px;border-radius:50%;background:#0078d4;opacity:.25;animation:ccDot 1.15s ease-in-out infinite}
+.cc-dots i:nth-child(2){animation-delay:.18s}.cc-dots i:nth-child(3){animation-delay:.36s}
+@keyframes ccDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.cc-dots i{animation:none;opacity:.55}}
 @keyframes smxIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 .smx-ic{width:52px;height:52px;border-radius:50%;background:#fff4e5;color:#c2410c;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
 .smx-title{font-size:1.02rem;font-weight:700;color:#1e293b;margin-bottom:6px}
@@ -2127,7 +2137,30 @@ async function loadEmployees(){
   }catch(e){console.warn('직원 데이터 로드 실패:',e); applyFlexApprovers();}   // 못 읽었으면 직접 선택 칸을 연다
 }
 // Cost Center 마스터 로드 (acc_cctr_list.xlsx — acc_voucher와 동일 파일/시트 공유)
-async function loadCCTRMaster(){
+// 10-26: Cost Center 목록을 읽는 동안 — 선택칸을 잠그고 「코스트센터 불러오는 중」 + 점 애니메이션(예전엔 빈 「코스트센터 선택」 만 떠서 목록이 없는 것처럼 보였다)
+const CC_SELECT_IDS=['stn-costcenter','bc-costcenter','idc-costcenter'];
+function ccSetState(state){
+  CC_SELECT_IDS.forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    let box=el.parentElement;
+    if(!box.classList.contains('cc-box')){
+      box=document.createElement('span'); box.className='cc-box';
+      if(el.style.flex){box.style.flex=el.style.flex;}
+      el.parentNode.insertBefore(box,el); box.appendChild(el);
+      box.insertAdjacentHTML('beforeend','<span class="cc-dots" aria-hidden="true"><i></i><i></i><i></i></span>');
+    }
+    const loading=state==='loading';
+    box.classList.toggle('loading',loading);
+    el.classList.toggle('cc-loading',loading);
+    el.disabled=loading;
+    el.setAttribute('aria-busy',loading?'true':'false');
+    if(loading) el.innerHTML='<option value="">코스트센터 불러오는 중</option>';
+    else if(state==='error') el.innerHTML='<option value="">코스트센터 목록을 불러오지 못했습니다 · 새로고침해 주세요</option>';
+  });
+}
+ccSetState('loading');   // 화면이 뜨자마자(설정 · 목록을 읽기 전부터) 불러오는 중으로
+async function loadCCTRMaster(_retry){
+  if(!COST_CENTERS.length) ccSetState('loading');
   try{
     const t = await token();
     const searchRes = await api("/sites/"+siteId+"/drive/root/search(q='acc_cctr_list')");
@@ -2153,8 +2186,14 @@ async function loadCCTRMaster(){
       newCCTR.forEach(c=>COST_CENTERS.push(c));
       console.log('[CCTR] Loaded:', COST_CENTERS.length, 'entries from acc_cctr_list.xlsx');
     }
+    ccSetState('ready');
     renderCostCenterSelects();
-  }catch(e){ console.warn('[CCTR] 로드 실패:', e.message); }
+  }catch(e){
+    console.warn('[CCTR] 로드 실패:', e.message);
+    if(COST_CENTERS.length){ ccSetState('ready'); renderCostCenterSelects(); return; }
+    if(!_retry){ setTimeout(()=>loadCCTRMaster(1),2500); return; }   // 한 번 더 시도 — 그동안은 불러오는 중 표시 유지
+    ccSetState('error');
+  }
 }
 // STN/BC Cost Center 목록(select) 옵션 채우기
 function renderCostCenterSelects(){
