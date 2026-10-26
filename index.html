@@ -2389,9 +2389,15 @@ function addListKey(e){
     if(nx&&nx.dataset.idx!=null){e.preventDefault();tr.tabIndex=-1;nx.tabIndex=0;nx.focus();nx.scrollIntoView({block:'nearest'});}
   }
 }
+/* 10-26: 봉투(Envelope)는 명함 업체가 만든다 — 다른 Stationery 와 한 신청서에 섞지 않는다(최종 승인 뒤 주문 메일이 업체별로 갈림).
+   봉투 구분은 Stationery list.xlsx 의 카테고리 이름(「봉투」 · 「Envelope」 포함) — GA 가 목록에서 카테고리를 관리하면 그대로 따른다. */
+function stnIsEnv(d){return /봉투|envelope/i.test(String((d&&d.category)||''));}
+function stnMixed(list){let e=false,o=false;(list||[]).forEach(d=>{if(stnIsEnv(d))e=true;else o=true;});return e&&o;}
+const STN_MIX_MSG='봉투(Envelope)는 다른 Stationery 품목과 함께 신청할 수 없습니다.\n\n봉투는 명함 업체에서 따로 제작 · 발송하기 때문에 신청서를 나눠야 합니다.\n봉투만 담은 신청 1건, 나머지 품목을 담은 신청 1건 — 2건으로 나눠 신청해 주세요.';
 let _pendingItems=[];
 function togglePendingItem(d,tr){
   const idx=_pendingItems.indexOf(d);
+  if(idx<0&&stnMixed([...orderItems,..._pendingItems,d])){alert(STN_MIX_MSG);return;}
   if(idx>=0)_pendingItems.splice(idx,1);else _pendingItems.push(d);
   const sel=idx<0;
   if(tr){tr.classList.toggle('sel',sel);tr.setAttribute('aria-selected',sel);const cb=tr.querySelector('.al-chk');if(cb)cb.checked=sel;}
@@ -2401,6 +2407,7 @@ function togglePendingItem(d,tr){
 function clearPendingItems(){_pendingItems=[];renderAddList();_addSyncFooter();}
 function confirmAddItems(){
   if(!_pendingItems.length)return;
+  if(stnMixed([...orderItems,..._pendingItems])){alert(STN_MIX_MSG);return;}
   _pendingItems.forEach(d=>{
     const exists=orderItems.find(i=>i.code===d.code&&i.name===d.name);   // 코드가 비거나 겹치는 다른 품목은 따로 담는다
     if(exists) exists.qty++; else orderItems.push({...d,qty:1});
@@ -2671,6 +2678,7 @@ async function stnSubmit(){
   if(!costCenter){alert('Cost Center를 입력해주세요.');return;}
   if(!orderItems.length){alert('주문 항목을 추가해주세요.');return;}
   if(orderItems.some(i=>!(Number(i.qty)>0))){alert('수량이 0인 주문 항목이 있습니다. 수량을 입력하거나 항목을 지워 주세요.');return;}
+  if(stnMixed(orderItems)){alert(STN_MIX_MSG);return;}   // 10-26 봉투 + 다른 품목은 상신 불가
   if(!(document.getElementById('stn-ord-name')?.value||'').trim()){alert('주문자 이름을 입력해주세요.');return;}
   if(!(document.getElementById('stn-ord-phone')?.value||'').trim()){alert('주문자 연락처를 입력해주세요.');return;}
   if(!(document.getElementById('stn-requester-name')?.value||'').trim()){alert('수령자 이름을 입력해주세요.');return;}
@@ -2690,7 +2698,17 @@ async function stnSubmit(){
     const _stnAddrEng=(document.getElementById('stn-address-eng')?.value||'').trim();
     const _stnDesc=(document.getElementById('stn-desc')?.value||'').trim();
     if(!_stnName){alert('수령자 이름을 입력해주세요.');loading(false);return;}
-    const item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:{Title:'STN-tmp',Company:'STK',CostCenter:costCenter,ItemCount:orderItems.length,TotalAmount:total,ItemsData:JSON.stringify(orderItems.map(i=>{return{code:i.code,name:i.name,unit:i.unit,price:i.price,qty:i.qty,rowTotal:i.price*i.qty};})),ItemsDataHTML:_itemsHtml,OrdName:document.getElementById('stn-ord-name')?.value.trim()||'',OrdPhone:document.getElementById('stn-ord-phone')?.value.trim()||'',StnName:_stnName,StnDept:_stnDept,Address:_stnAddrKor,AddressEng:_stnAddrEng,Description:_stnDesc,Status:'대기',RequesterEmail:user.email,RequestDate:new Date().toISOString()}});
+    const _stnFields={Title:'STN-tmp',Company:'STK',CostCenter:costCenter,ItemCount:orderItems.length,TotalAmount:total,ItemsData:JSON.stringify(orderItems.map(i=>{return{code:i.code,name:i.name,unit:i.unit,price:i.price,qty:i.qty,rowTotal:i.price*i.qty};})),ItemsDataHTML:_itemsHtml,OrdName:document.getElementById('stn-ord-name')?.value.trim()||'',OrdPhone:document.getElementById('stn-ord-phone')?.value.trim()||'',StnName:_stnName,StnDept:_stnDept,Address:_stnAddrKor,AddressEng:_stnAddrEng,Description:_stnDesc,Status:'대기',RequesterEmail:user.email,RequestDate:new Date().toISOString()};
+    // 10-26: 주문 구분 — 최종 승인 메일(Power Automate STN_Email_Notification)이 OrderType 으로 업체를 나눈다(Envelope → 명함 업체, Stationery → 문구 업체)
+    const _orderType=orderItems.some(stnIsEnv)?'Envelope':'Stationery';
+    let item;
+    try{ item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:{..._stnFields,OrderType:_orderType}}); }
+    catch(e){
+      if(!/OrderType/i.test(String(e&&e.message))) throw e;
+      // STN_Requests 에 OrderType 열이 아직 없을 때 — 봉투는 업체 구분이 안 되면 문구 업체로 잘못 발주되므로 막고, 일반 Stationery 는 그대로 신청한다
+      if(_orderType==='Envelope'){ logChange('GA/STN', '상신 실패', () => ({ 오류: 'STN_Requests.OrderType 열 없음(봉투)' })); alert('봉투 신청을 위한 설정이 아직 끝나지 않았습니다.\n잠시 후 다시 시도해 주세요. 계속되면 '+itTeam('IT팀')+'에 알려주세요.'); loading(false); return; }
+      item=await api('/sites/'+siteId+'/lists/STN_Requests/items','POST',{fields:_stnFields});
+    }
     const _stnId=parseInt(item.id);
     await api('/sites/'+siteId+'/lists/STN_Requests/items/'+_stnId,'PATCH',{fields:{Title:'STN-'+new Date(new Date().getTime()+9*3600*1000).toISOString().slice(0,10)+'_ID-'+_stnId}});
     await createApprovals('stn',_stnId);
