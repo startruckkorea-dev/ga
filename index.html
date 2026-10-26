@@ -448,6 +448,13 @@ select.cc-loading{color:#8a8886;background-color:#faf9f8;cursor:progress}
 .add-sel-info b{color:#0078d4;font-variant-numeric:tabular-nums}
 .add-sel-clear{margin-left:8px;border:none;background:none;padding:0;color:#605e5c;font-size:.74rem;font-family:inherit;text-decoration:underline;cursor:pointer}
 .add-sel-clear:hover{color:#a4262c}
+/* 봉투(Envelope) 별도 요청 안내(10-26) — 봉투 칩을 보거나 봉투를 담았을 때 하단에 빨간 띠로 */
+.add-sel-info{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.add-env-note{display:flex;align-items:flex-start;gap:8px;max-width:560px;padding:7px 12px 7px 10px;border:1px solid #f1bbbc;border-left:3px solid #c50f1f;border-radius:8px;background:linear-gradient(90deg,#fdf3f4,#fff8f8);color:#8e1b24;font-size:.76rem;line-height:1.45;box-shadow:0 1px 2px rgba(197,15,31,.06);animation:envIn .18s ease-out}
+.add-env-note svg{flex:0 0 auto;margin-top:1px;color:#c50f1f}
+.add-env-note b{color:#c50f1f;font-weight:700}
+.add-env-note .env-sub{color:#a4545b}
+@keyframes envIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 #add-confirm-btn{white-space:nowrap}
 #add-confirm-btn:disabled{background:#c8c6c4;cursor:default}
 @media(max-width:640px){
@@ -464,6 +471,11 @@ select.cc-loading{color:#8a8886;background-color:#faf9f8;cursor:progress}
   .add-footer{padding:10px 12px}
   .add-footer .btn-secondary,.add-footer .btn-primary{padding:8px 14px;white-space:nowrap}
   .add-sel-clear,.add-sel-hint,.add-sel-sum{display:none}
+  .add-env-note{font-size:.72rem;padding:6px 9px;max-width:none;width:100%;box-sizing:border-box}
+  .add-env-note .env-sub{display:none}
+  .add-footer{flex-wrap:wrap;row-gap:8px}
+  .add-sel-info:has(.add-env-note){flex:1 1 100%}
+  .add-footer>div:last-child{margin-left:auto}
 }
 
 
@@ -2406,7 +2418,7 @@ function buildCatFilter(){
 // 칩 줄이 넘치면(카테고리가 늘어 폭을 넘을 때) 넘친 쪽 끝을 흐리게 — 가로로 밀어 볼 수 있다는 표시
 function _catEdge(){const w=document.getElementById('cat-filter');if(!w)return;const max=w.scrollWidth-w.clientWidth;w.classList.toggle('more-l',w.scrollLeft>2);w.classList.toggle('more-r',max-w.scrollLeft>2);}
 function setCat(c){
-  _activeCat=c;
+  _activeCat=c;_addSyncFooter();
   document.querySelectorAll('#cat-filter .cat-btn').forEach(b=>{const on=(b.dataset.cat||'')===c;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);});
   renderAddList();
   const w=document.querySelector('#add-modal .add-list-wrap');if(w)w.scrollTop=0;
@@ -2417,7 +2429,10 @@ function _addSyncFooter(){
   const cntEl=document.getElementById('add-confirm-cnt'),btn=document.getElementById('add-confirm-btn'),info=document.getElementById('add-selected-count');
   if(cntEl)cntEl.textContent=cnt;
   if(btn)btn.disabled=!cnt;
-  if(info)info.innerHTML=cnt?`<b>${cnt}개</b> 선택<span class="add-sel-sum"> · 단가 합계 <b>${sum.toLocaleString()}</b>원</span><button type="button" class="add-sel-clear" onclick="clearPendingItems()">선택 해제</button>`:'<span class="add-sel-hint">항목을 눌러 선택하세요 · 여러 개 고를 수 있습니다</span>';
+  // 봉투(Envelope) — 봉투 칩을 보고 있거나, 봉투를 고르거나 이미 담았으면 별도 요청 안내를 빨간 띠로 함께 보여 준다
+  const envOn=/봉투|envelope/i.test(_activeCat||'')||_pendingItems.some(stnIsEnv)||(typeof orderItems!=='undefined'&&orderItems.some(stnIsEnv));
+  const envNote=envOn?'<div class="add-env-note" role="note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span><b>봉투(Envelope)는 별도 요청</b>으로만 신청할 수 있습니다<span class="env-sub"> — 다른 문구류와 함께 담을 수 없으니, 봉투만 골라 따로 한 건으로 신청해 주세요.</span></span></div>':'';
+  if(info)info.innerHTML=(cnt?`<span><b>${cnt}개</b> 선택<span class="add-sel-sum"> · 단가 합계 <b>${sum.toLocaleString()}</b>원</span><button type="button" class="add-sel-clear" onclick="clearPendingItems()">선택 해제</button></span>`:'<span class="add-sel-hint">항목을 눌러 선택하세요 · 여러 개 고를 수 있습니다</span>')+envNote;
 }
 function openAddModal(){
   _pendingItems=[];_activeCat='';
