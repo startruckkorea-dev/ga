@@ -3764,7 +3764,8 @@ async function showDetail(cat,id){
    GA 상세와 APS 상세가 「같은 코드」를 쓴다(ga · aps 두 파일에 똑같이 둔다 — 고칠 때 함께 고친다).
    · 명함: 문서 라이브러리의 샘플(내부직원 Business_card-sample-image.png · Agent Business_card-sample-image_agent.png) 위에
      GA 신청서 작성 화면의 미리보기와 같은 규칙(bcUpdatePreview · bcAgUpdatePreview)으로 신청 값을 캔버스에 덮어 그린다.
-   · 사원증: 첨부 중 그림 파일(jpg · png · gif · webp · bmp)만 작게. 누르면 크게 / 다시 작게.
+   · 사원증: 첨부 중 그림 파일(jpg · png · gif · webp · bmp)만 작게.
+   · 누르면 화면 가운데 크게(10-27 v2 — 바깥 · ✕ · Esc 로 닫기). 명함 안내 문구는 GA 신청서 미리보기 안내와 같은 빨간 글씨.
    · 화면 참고용일 뿐 저장 · 결재에는 영향 없음. 그림은 Graph 로 받아 blob 으로만 쓴다(통합 CSP img-src blob: 안).
    쓰는 법: 상세 HTML 을 만들 때 GAPV.slot('bc', 신청 fields) · GAPV.slot('img', {drive, item, name} | {name, reqId}) 로 자리를 넣고,
             그 HTML 을 화면에 넣은 「뒤」 GAPV.run() — 자리마다 따로 받아 그린다(실패하면 그 자리만 안내 글자). */
@@ -3826,10 +3827,50 @@ var GAPV = (function () {
     });
   }
   function sample(name) { if (!imgs[name]) imgs[name] = sampleBlob(name).then(loadImg).catch(function (e) { delete imgs[name]; throw e; }); return imgs[name]; }
-  // 작게 ↔ 크게(누를 때마다)
-  function zoomable(node, small) {
-    node.style.cursor = 'zoom-in'; node.title = '누르면 크게 / 다시 누르면 작게';
-    node.addEventListener('click', function () { var big = node.dataset.big === '1'; node.dataset.big = big ? '' : '1'; node.style.maxWidth = big ? small : '100%'; node.style.maxHeight = big ? (node.tagName === 'IMG' ? '180px' : '') : (node.tagName === 'IMG' ? '480px' : ''); node.style.cursor = big ? 'zoom-in' : 'zoom-out'; });
+  // 누르면 화면 가운데 크게(10-27 v2 — 예전엔 칸 폭까지만 커져 글자가 잘 안 보였다). 바깥 · ✕ · Esc 로 닫는다
+  var INFO_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true" style="display:inline-block;width:13px;height:13px;vertical-align:-2px;margin-right:5px;flex:none"><circle cx="8" cy="8" r="6.9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.9" r=".95" fill="currentColor"/></svg>';
+  var CARD_NOTE = '미리보기는 참고용이며, 실제 인쇄되는 명함과 글꼴 · 크기 · 위치가 다를 수 있습니다.';
+  function noteEl(color) {
+    var n = document.createElement('div');
+    n.setAttribute('role', 'note');
+    n.style.cssText = 'margin-top:6px;font-size:11.5px;line-height:1.5;font-weight:500;word-break:keep-all;color:' + color;
+    n.innerHTML = INFO_SVG; n.appendChild(document.createTextNode(CARD_NOTE));
+    return n;
+  }
+  function openBig(node, note) {
+    var prevFocus = document.activeElement;
+    var ov = document.createElement('div');
+    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', '미리보기 크게 보기');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;box-sizing:border-box;cursor:zoom-out';
+    var big;
+    if (node.tagName === 'CANVAS') {
+      big = document.createElement('canvas'); big.width = node.width; big.height = node.height;
+      big.getContext('2d').drawImage(node, 0, 0);
+      var ratio = node.width / node.height;
+      big.style.cssText = 'display:block;width:min(1200px,94vw,calc(84vh * ' + ratio.toFixed(4) + '));height:auto;background:#fff;border-radius:8px;box-shadow:0 24px 64px rgba(0,0,0,.5)';
+    } else {
+      big = document.createElement('img'); big.src = node.src; big.alt = node.alt || '';
+      big.style.cssText = 'display:block;height:min(84vh,760px);width:auto;max-width:94vw;object-fit:contain;background:#fff;border-radius:8px;box-shadow:0 24px 64px rgba(0,0,0,.5)';
+    }
+    big.setAttribute('role', 'img'); big.setAttribute('aria-label', node.getAttribute('aria-label') || node.alt || '미리보기');
+    ov.appendChild(big);
+    if (note) { var n = noteEl('#ffd9de'); n.style.fontSize = '12.5px'; n.style.margin = '0'; ov.appendChild(n); }
+    var x = document.createElement('button');
+    x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', '닫기');
+    x.style.cssText = 'position:fixed;top:14px;right:18px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:18px;line-height:38px;cursor:pointer';
+    ov.appendChild(x);
+    var close = function () { document.removeEventListener('keydown', key, true); ov.remove(); try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {} };
+    var key = function (e) { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); close(); } };
+    ov.addEventListener('click', close);   // 어디를 눌러도 닫힘(그림 위 포함 — 커서가 zoom-out)
+    document.addEventListener('keydown', key, true);   // 상세 창의 Esc 보다 먼저 받아 큰 그림만 닫는다
+    document.body.appendChild(ov);
+    try { x.focus(); } catch (e) {}
+  }
+  function zoomable(node, note) {
+    node.style.cursor = 'zoom-in'; node.title = '누르면 크게 보기';
+    node.tabIndex = 0;
+    node.addEventListener('click', function () { openBig(node, note); });
+    node.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openBig(node, note); } });
   }
 
   // ── 사원증 첨부 사진 ──
@@ -3840,13 +3881,14 @@ var GAPV = (function () {
     im.style.cssText = 'display:block;max-width:180px;max-height:180px;border:1px solid #edebe9;border-radius:4px;background:#faf9f8';
     im.onerror = function () { URL.revokeObjectURL(u); el.textContent = '이 파일은 미리보기를 표시할 수 없습니다.'; };
     im.src = u;
-    zoomable(im, '180px');
+    zoomable(im, false);
     el.textContent = ''; el.style.cssText = 'margin-top:6px'; el.appendChild(im);
   }
 
   // ── 명함 ──
   function canvasOf(img) {
-    var s = Math.min(1, 1600 / img.naturalWidth), W = Math.max(1, Math.round(img.naturalWidth * s)), H = Math.max(1, Math.round(img.naturalHeight * s));
+    // 글자를 또렷하게 — 2000px 폭을 기준으로 그린다(작은 샘플은 키우고, 2400px 를 넘는 샘플은 줄인다)
+    var s = Math.min(2400 / img.naturalWidth, Math.max(1, 2000 / img.naturalWidth)), W = Math.max(1, Math.round(img.naturalWidth * s)), H = Math.max(1, Math.round(img.naturalHeight * s));
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, W, H);
     return { cv: cv, cx: cx, W: W, H: H };
@@ -4011,11 +4053,10 @@ var GAPV = (function () {
     var cv = ag ? drawAgent(img, f) : drawStaff(img, f);
     cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', '신청 내용으로 그린 명함 미리보기');
     cv.style.cssText = 'display:block;width:100%;max-width:340px;height:auto;border:1px solid #edebe9;border-radius:4px;background:#fff';
-    zoomable(cv, '340px');
+    zoomable(cv, true);
     el.textContent = ''; el.style.cssText = 'margin-top:2px';
     el.appendChild(cv);
-    var n = document.createElement('div'); n.style.cssText = NOTE; n.textContent = (ag ? 'STK Agent' : 'STK 내부직원') + ' 샘플 위에 신청 값을 얹은 참고용 — 실제 인쇄물과 다를 수 있습니다';
-    el.appendChild(n);
+    el.appendChild(noteEl('#c4314b'));   // GA 신청서 미리보기 안내(.ga-pv-note)와 같은 문구 · 색
   }
   function run() {
     Object.keys(jobs).forEach(function (id) {
