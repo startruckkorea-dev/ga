@@ -3730,7 +3730,7 @@ async function showDetail(cat,id){
       if(f.ItemsData){try{const _raw=f.ItemsData.replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#34;/g,'"').replace(/&#58;/g,':').replace(/&#123;/g,'{').replace(/&#125;/g,'}').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim();const items=JSON.parse(_raw);const tot=items.reduce((s,i)=>s+i.rowTotal,0);ih=`<table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-top:6px"><thead><tr style="background:#4472C4;color:#fff"><th style="padding:7px 10px;text-align:left">상품명</th><th style="padding:7px 8px;text-align:center">코드</th><th style="padding:7px 8px;text-align:center">단위</th><th style="padding:7px 8px;text-align:center">Q'ty</th><th style="padding:7px 8px;text-align:right">단가</th><th style="padding:7px 8px;text-align:right">소계</th></tr></thead><tbody>${items.map(i=>`<tr style="border-bottom:1px solid #edebe9"><td style="padding:6px 10px">${escHtml(i.name)}</td><td style="padding:6px 8px;text-align:center;color:#605e5c">${escHtml(i.code)}</td><td style="padding:6px 8px;text-align:center">${escHtml(i.unit)}</td><td style="padding:6px 8px;text-align:center">${escHtml(i.qty)}</td><td style="padding:6px 8px;text-align:right">${Number(i.price).toLocaleString()}</td><td style="padding:6px 8px;text-align:right;font-weight:600">${Number(i.rowTotal).toLocaleString()}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#4472C4;color:#fff"><td colspan="5" style="padding:7px 10px;text-align:right;font-weight:700">Total Sum</td><td style="padding:7px 8px;text-align:right;font-weight:700">${tot.toLocaleString()}원</td></tr></tfoot></table>`;}catch(e){}}
       body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+rowRaw('상태',`<span class="badge-${escHtml((function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status))}">${escHtml(f.Status||'대기')}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Company',f.Company)+row('Cost Center',f.CostCenter)+sec('주문자 정보')+row('주문자',f.OrdName||'-')+row('주문자 연락처',f.OrdPhone||'-')+(f.StnName?row('수령자',f.StnName):'')+( f.StnDept?row('수령자 부서',f.StnDept):'')+( f.Address?rowLines('수령 주소 (국문)',f.Address):'')+( f.AddressEng&&f.Address?rowLines('수령 주소 (영문)',f.AddressEng):'')+( f.Description?row('Description',f.Description):'')+row('항목 수',f.ItemCount+'건')+row('Total',fmtAmt(f.TotalAmount))+sec('주문 항목')+ih;
     }else if(cat==='bc'){
-      body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+rowRaw('상태',`<span class="badge-${escHtml((function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status))}">${escHtml(f.Status||'대기')}</span>`)+row('신청일',fmtDate(f.RequestDate))+rowRaw('명함 구분',bcCtDetail(f))+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+(f.JobTitle?row('Job Title',f.JobTitle):'')+(f.JobPosition?row('Job Position',f.JobPosition):'')+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?rowLines('주소 (국문)',f.Address):'')+( f.AddressEng?rowLines('Address (EN)',f.AddressEng):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+(bcFax(f)?row('Fax Number',bcFax(f)):'')+( f.SalesAgentCompany?row('세일즈 에이전트 상호명<br><span style="font-size:.88em;opacity:.72;white-space:nowrap">(사업자등록증에 기재된)</span>',f.SalesAgentCompany):'');
+      body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+rowRaw('상태',`<span class="badge-${escHtml((function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status))}">${escHtml(f.Status||'대기')}</span>`)+row('신청일',fmtDate(f.RequestDate))+rowRaw('명함 구분',bcCtDetail(f))+row('Name (EN)',f.NameEN)+row('Name (KO)',f.NameKO)+(f.JobTitle?row('Job Title',f.JobTitle):'')+(f.JobPosition?row('Job Position',f.JobPosition):'')+row('Department',f.Department)+row('Email',f.Email)+row('Quantity',f.Quantity+'매')+row('Sticker Qty',f.StickerQty+'매')+row('Cost Center',f.CostCenter)+row('Description',f.Description)+(f.Address?rowLines('주소 (국문)',f.Address):'')+( f.AddressEng?rowLines('Address (EN)',f.AddressEng):'')+( f.MobileNumber?row('Mobile Number',f.MobileNumber):'')+rowRaw('명함 미리보기',GAPV.slot('bc',f))+(bcFax(f)?row('Fax Number',bcFax(f)):'')+( f.SalesAgentCompany?row('세일즈 에이전트 상호명<br><span style="font-size:.88em;opacity:.72;white-space:nowrap">(사업자등록증에 기재된)</span>',f.SalesAgentCompany):'');
     }else{
       // IDC 첨부파일 처리
       let _idcFiles = '';
@@ -3742,14 +3742,14 @@ async function showDetail(cat,id){
             try{
               const dec = decodeURIComponent(escape(atob(parts[1])));
               const [driveId, itemId] = dec.split('###');
-              return `<div style="margin:3px 0"><a href="#" data-drive="${escHtml(driveId==null?'':driveId)}" data-id="${escHtml(itemId==null?'':itemId)}" data-name="${escHtml(name)}" onclick="downloadAttachment(this.dataset.drive,this.dataset.id,this.dataset.name);return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${escHtml(name)}</a></div>`;
+              return `<div style="margin:3px 0"><a href="#" data-drive="${escHtml(driveId==null?'':driveId)}" data-id="${escHtml(itemId==null?'':itemId)}" data-name="${escHtml(name)}" onclick="downloadAttachment(this.dataset.drive,this.dataset.id,this.dataset.name);return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${escHtml(name)}</a>${GAPV.imgSlot(name,{drive:driveId,item:itemId})}</div>`;
             }catch(e){return `<div style="margin:3px 0">${escHtml(name)}</div>`;}
           }
           return `<div style="margin:3px 0">${escHtml(name)}</div>`;
         }).join('');
         if(_links) _idcFiles = rowRaw('첨부파일', _links);
       } else if(f.PhotoFileName){
-        _idcFiles = rowRaw('첨부파일', `<a href="#" data-name="${escHtml(f.PhotoFileName)}" onclick="downloadIDCPhoto(this.dataset.name,${parseInt(id)});return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${escHtml(f.PhotoFileName)}</a>`);
+        _idcFiles = rowRaw('첨부파일', `<a href="#" data-name="${escHtml(f.PhotoFileName)}" onclick="downloadIDCPhoto(this.dataset.name,${parseInt(id)});return false;" style="color:#0078d4;font-size:.82rem;cursor:pointer">${escHtml(f.PhotoFileName)}</a>${GAPV.imgSlot(f.PhotoFileName,{name:f.PhotoFileName,reqId:parseInt(id)})}`);
       }
       body=sec('기본 정보')+row('제목',f.Title)+row('신청자',f.RequesterEmail)+rowRaw('상태',`<span class="badge-${escHtml((function(s){var v=(s||'대기').trim();return v.indexOf('철회')===0?'철회':(v==='승인'?'승인완료':v);})(f.Status))}">${escHtml(f.Status||'대기')}</span>`)+row('신청일',fmtDate(f.RequestDate))+row('Issue Type',f.IssueType)+row('Cost Center',f.CostCenter)+row('Name <span style="font-size:.78em;font-weight:400;color:#8a8886;margin-left:3px">(사원증 표기 이름)</span>',f.Name)+row('Description',f.Description)+_idcFiles;
     }
@@ -3757,8 +3757,280 @@ async function showDetail(cat,id){
     document.getElementById('modal-content').innerHTML=body+ah;
     const myAppr=apprList.find(a=>(a.fields.ApproverEmail||'')===user.email&&a.fields.Status==='대기');
     if(myAppr)document.getElementById('modal-content').innerHTML+=`<div class="modal-action"><button class="btn-approve" onclick="showConfirm(${myAppr.id},'승인',${id},'${cat}')">✅ 승인</button><button class="btn-reject" onclick="showConfirm(${myAppr.id},'반려',${id},'${cat}')">❌ 반려</button></div>`;
+    GAPV.run();   // 10-27 상세 미리보기(명함 · 사원증 사진) — 상세 HTML 을 다 넣은 뒤
   }catch(e){document.getElementById('modal-content').innerHTML='<div style="color:#a4262c;padding:20px">로드 오류: '+escHtml(e.message)+'</div>';}
 }
+/* ══ 상세 미리보기(10-27 · gapv) — 명함 신청 내용으로 그린 명함 · 사원증 첨부 사진을 상세 화면에 작게 보여 준다 ══
+   GA 상세와 APS 상세가 「같은 코드」를 쓴다(ga · aps 두 파일에 똑같이 둔다 — 고칠 때 함께 고친다).
+   · 명함: 문서 라이브러리의 샘플(내부직원 Business_card-sample-image.png · Agent Business_card-sample-image_agent.png) 위에
+     GA 신청서 작성 화면의 미리보기와 같은 규칙(bcUpdatePreview · bcAgUpdatePreview)으로 신청 값을 캔버스에 덮어 그린다.
+   · 사원증: 첨부 중 그림 파일(jpg · png · gif · webp · bmp)만 작게. 누르면 크게 / 다시 작게.
+   · 화면 참고용일 뿐 저장 · 결재에는 영향 없음. 그림은 Graph 로 받아 blob 으로만 쓴다(통합 CSP img-src blob: 안).
+   쓰는 법: 상세 HTML 을 만들 때 GAPV.slot('bc', 신청 fields) · GAPV.slot('img', {drive, item, name} | {name, reqId}) 로 자리를 넣고,
+            그 HTML 을 화면에 넣은 「뒤」 GAPV.run() — 자리마다 따로 받아 그린다(실패하면 그 자리만 안내 글자). */
+var GAPV = (function () {
+  var seq = 0, jobs = {}, imgs = {}, boxCache = {}, docDrive = null, attDrive = null;
+  var IMG_RE = /\.(jpe?g|png|gif|webp|bmp)$/i;
+  var NOTE = 'font-size:10.5px;color:#a19f9d;margin-top:4px';
+  // 내부직원 샘플의 자리(0~1 비율) — GA BC_BOX_DEFAULT 와 같은 값. 샘플을 읽어 띠를 찾으면 그 값을 쓴다
+  var STAFF_DEF = {
+    nameEn: { x: .5327, y: .4383, w: .1191, h: .0604, lim: .6585 }, nameKo: { x: .6638, y: .4383, w: .1191, h: .0604, lim: .9611 },
+    jobTitle: { x: .5327, y: .5118, w: .1528, h: .0420, lim: .6923 }, jobPos: { x: .6965, y: .5118, w: .1032, h: .0420, lim: .9611 },
+    addrKo: { x: .6891, y: .6772, w: .2645, h: .0420, lim: .9611 }, addrEn: { x: .5327, y: .7297, w: .2508, h: .0394, lim: .9611 },
+    email: { x: .5327, y: .7769, w: .1528, h: .0420, lim: .6875 }, mobile: { x: .7101, y: .7769, w: .1117, h: .0420, lim: .9611 } };
+  // Agent 샘플 자리(1750×645 기준 px) — GA BC_AG 와 같은 값
+  var AG = { W: 1750, H: 645, right: 1708, cover: 1726,
+    name:   { x: 924,  top: 217, bot: 269, c0: 914,  y0: 204, y1: 282, ref: '홍길동', wt: 700 },
+    role:   { x: 1132, top: 244, bot: 268, c0: 1124, y0: 236, y1: 276, ref: '세일즈에이전트', wt: 400, def: '세일즈 에이전트' },
+    region: { x: 1282, top: 344, bot: 373, c0: 1273, y0: 334, y1: 384, ref: '서울중부지역본부', wt: 600 },
+    addr:   { x: 926,  top: 395, bot: 424, c0: 916,  y0: 387, y1: 433, ref: '경기도평택시진위면', wt: 400 },
+    mobile: { x: 1044, top: 481, bot: 506, c0: 1037, y0: 472, y1: 518, ref: '0100000', wt: 400 } };
+
+  function txt(v) {
+    var s = String(v == null ? '' : v);
+    if (/[<&]/.test(s)) { try { s = new DOMParser().parseFromString(s, 'text/html').body.textContent || ''; } catch (e) { s = s.replace(/<[^>]*>/g, ''); } }
+    return s.replace(/\s+/g, ' ').trim();
+  }
+  function isAgent(f) { var v = String((f && f.CardType) || '').trim(); return v ? /agent|에이전트/i.test(v) : /\[명함 구분:\s*(STK\s*)?Agent\]/i.test(String((f && f.Description) || '')); }
+  function slot(kind, data) {
+    var id = 'gapv-' + (++seq);
+    jobs[id] = { kind: kind, data: data };
+    return '<div id="' + id + '" class="gapv" style="' + NOTE + '">미리보기 불러오는 중…</div>';
+  }
+  function imgSlot(name, data) { return IMG_RE.test(String(name || '')) ? slot('img', data) : ''; }
+
+  // ── Graph 받기(두 앱 공통 이름: token · api · siteId · GRAPH) ──
+  var drivesP = null;   // 자리 여러 개가 한꺼번에 받아도 드라이브 목록은 한 번만
+  function drives() { if (!drivesP) drivesP = api('/sites/' + siteId + '/drives').then(function (r) { return r.value || []; }).catch(function (e) { drivesP = null; throw e; }); return drivesP; }
+  async function getBlob(url) {
+    var t = await token();
+    var res = await fetch(url, { headers: { Authorization: 'Bearer ' + t } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.blob();
+  }
+  async function sampleBlob(name) {
+    if (!docDrive) { var v = await drives(); var d = v.find(function (x) { return ['Documents', '문서', 'Shared Documents'].indexOf(x.name) >= 0; }) || v[0]; if (!d) throw new Error('문서 라이브러리 없음'); docDrive = d.id; }
+    return getBlob(GRAPH + '/drives/' + docDrive + '/root:/' + encodeURIComponent(name) + ':/content');
+  }
+  async function fileBlob(d) {
+    if (d.drive && d.item) return getBlob(GRAPH + '/drives/' + d.drive + '/items/' + d.item + '/content');
+    if (!attDrive) { var v = await drives(); var a = v.find(function (x) { return x.name === 'AttachedFiles'; }) || v[0]; if (!a) throw new Error('AttachedFiles 없음'); attDrive = a.id; }
+    return getBlob(GRAPH + '/drives/' + attDrive + '/root:/IDC_Requests_AttachedFiles/' + encodeURIComponent(d.reqId) + '/' + encodeURIComponent(d.name) + ':/content');
+  }
+  function loadImg(blob) {
+    return new Promise(function (ok, no) {
+      var u = URL.createObjectURL(blob), im = new Image();
+      im.onload = function () { ok(im); };
+      im.onerror = function () { URL.revokeObjectURL(u); no(new Error('그림을 읽지 못함')); };
+      im.src = u;
+    });
+  }
+  function sample(name) { if (!imgs[name]) imgs[name] = sampleBlob(name).then(loadImg).catch(function (e) { delete imgs[name]; throw e; }); return imgs[name]; }
+  // 작게 ↔ 크게(누를 때마다)
+  function zoomable(node, small) {
+    node.style.cursor = 'zoom-in'; node.title = '누르면 크게 / 다시 누르면 작게';
+    node.addEventListener('click', function () { var big = node.dataset.big === '1'; node.dataset.big = big ? '' : '1'; node.style.maxWidth = big ? small : '100%'; node.style.maxHeight = big ? (node.tagName === 'IMG' ? '180px' : '') : (node.tagName === 'IMG' ? '480px' : ''); node.style.cursor = big ? 'zoom-in' : 'zoom-out'; });
+  }
+
+  // ── 사원증 첨부 사진 ──
+  async function showImg(el, d) {
+    var blob = await fileBlob(d), u = URL.createObjectURL(blob);
+    var im = document.createElement('img');
+    im.alt = '첨부 사진 미리보기';
+    im.style.cssText = 'display:block;max-width:180px;max-height:180px;border:1px solid #edebe9;border-radius:4px;background:#faf9f8';
+    im.onerror = function () { URL.revokeObjectURL(u); el.textContent = '이 파일은 미리보기를 표시할 수 없습니다.'; };
+    im.src = u;
+    zoomable(im, '180px');
+    el.textContent = ''; el.style.cssText = 'margin-top:6px'; el.appendChild(im);
+  }
+
+  // ── 명함 ──
+  function canvasOf(img) {
+    var s = Math.min(1, 1600 / img.naturalWidth), W = Math.max(1, Math.round(img.naturalWidth * s)), H = Math.max(1, Math.round(img.naturalHeight * s));
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, W, H);
+    return { cv: cv, cx: cx, W: W, H: H };
+  }
+  // 그 글자가 maxW 안에 들어가게 끝을 … 로 줄인다(지금 cx.font 기준)
+  function ell(cx, t, maxW) {
+    if (cx.measureText(t).width <= maxW) return t;
+    var a = Array.from(t);
+    while (a.length && cx.measureText(a.join('') + '…').width > maxW) a.pop();
+    return a.length ? a.join('') + '…' : '';
+  }
+  // 샘플 그림의 검은(또는 isOn) 점 덩어리 — GA gaFindDarkBoxes 와 같다
+  function darkBoxes(img, maxW, isOn) {
+    var s = Math.min(1, maxW / img.naturalWidth), W = Math.max(1, Math.round(img.naturalWidth * s)), H = Math.max(1, Math.round(img.naturalHeight * s));
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(img, 0, 0, W, H);
+    var d = cx.getImageData(0, 0, W, H).data, N = W * H, dark = new Uint8Array(N), seen = new Uint8Array(N), comps = [], st = [];
+    for (var i = 0; i < N; i++) dark[i] = (isOn ? isOn(d[i * 4], d[i * 4 + 1], d[i * 4 + 2]) : (d[i * 4] < 45 && d[i * 4 + 1] < 45 && d[i * 4 + 2] < 45)) ? 1 : 0;
+    for (var j = 0; j < N; j++) {
+      if (!dark[j] || seen[j]) continue;
+      var x0 = W, y0 = H, x1 = 0, y1 = 0, n = 0; seen[j] = 1; st.push(j);
+      while (st.length) {
+        var k = st.pop(), px = k % W, py = (k - px) / W; n++;
+        if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py;
+        if (px > 0 && dark[k - 1] && !seen[k - 1]) { seen[k - 1] = 1; st.push(k - 1); }
+        if (px < W - 1 && dark[k + 1] && !seen[k + 1]) { seen[k + 1] = 1; st.push(k + 1); }
+        if (py > 0 && dark[k - W] && !seen[k - W]) { seen[k - W] = 1; st.push(k - W); }
+        if (py < H - 1 && dark[k + W] && !seen[k + W]) { seen[k + W] = 1; st.push(k + W); }
+      }
+      comps.push({ x0: x0, y0: y0, x1: x1, y1: y1, n: n, w: x1 - x0 + 1, h: y1 - y0 + 1 });
+    }
+    return { W: W, H: H, comps: comps };
+  }
+  // 내부직원 샘플의 자리표시 띠 8개 — GA bcCalibrate 와 같은 규칙(배치가 [2,2,1,1,2] 가 아니면 기본 비율)
+  function staffBoxes(img) {
+    if (boxCache[img.src]) return boxCache[img.src];
+    var box = STAFF_DEF;
+    try {
+      var r = darkBoxes(img, 1600), W = r.W, H = r.H;
+      var fill = function (c) { return c.n / (c.w * c.h); };
+      var bars = r.comps.filter(function (c) { return c.x0 > W * .4 && c.h >= H * .015 && c.h <= H * .12 && c.w > c.h * 2.5 && c.w > W * .04 && fill(c) > .45; })
+                        .sort(function (a, b) { return (a.y0 + a.h / 2) - (b.y0 + b.h / 2); });
+      var rows = [];
+      bars.forEach(function (c) { var yc = c.y0 + c.h / 2, rw = rows[rows.length - 1];
+        if (rw && Math.abs(yc - rw.yc) < Math.max(rw.hmax, c.h) * .6) { rw.items.push(c); rw.hmax = Math.max(rw.hmax, c.h); } else rows.push({ yc: yc, hmax: c.h, items: [c] }); });
+      if (rows.length === 5 && rows.map(function (x) { return x.items.length; }).join() === '2,2,1,1,2') {
+        rows.forEach(function (x) { x.items.sort(function (a, b) { return a.x0 - b.x0; }); });
+        var lim = Math.min(.985, Math.max.apply(null, bars.map(function (c) { return c.x1; })) / W + .008);
+        var keys = [['nameEn', 'nameKo'], ['jobTitle', 'jobPos'], ['addrKo'], ['addrEn'], ['email', 'mobile']];
+        box = {};
+        rows.forEach(function (x, i) { x.items.forEach(function (c, j) {
+          var nx = x.items[j + 1];
+          box[keys[i][j]] = { x: c.x0 / W, y: c.y0 / H, w: c.w / W, h: c.h / H, lim: nx ? (keys[i][j] === 'email' ? (c.x1 + 1) / W : (nx.x0 - 3) / W) : lim };
+        }); });
+      }
+    } catch (e) { console.warn('[미리보기] 명함 자리 찾기 실패 — 기본 비율:', e && e.message); }
+    boxCache[img.src] = box;
+    return box;
+  }
+  function drawStaff(img, f) {
+    var c = canvasOf(img), cx = c.cx, sw = c.W, sh = c.H, B = staffBoxes(img);
+    var val = { nameEn: txt(f.NameEN), nameKo: txt(f.NameKO), jobTitle: txt(f.JobTitle), jobPos: txt(f.JobPosition),
+                addrKo: txt(f.Address), addrEn: txt(f.AddressEng), email: txt(f.Email), mobile: txt(f.MobileNumber) };
+    var FONT = "'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif";
+    var nameFs = B.nameEn.h * sh * .78, infoFs = Math.min(B.jobTitle.h, B.addrKo.h, B.addrEn.h) * sh * .84;
+    var font = function (fs, bold) { cx.font = (bold ? '600 ' : '400 ') + fs + 'px ' + FONT; };
+    var tw = function (t, fs, bold) { font(fs, bold); return Math.ceil(cx.measureText(t).width) + 2; };
+    var X = function (k) { return B[k].x * sw; }, R = function (k) { return (B[k].x + B[k].w) * sw; }, LIM = function (k) { return B[k].lim * sw; };
+    // 흰 상자(띠보다 2px 씩 크게)에 값을 왼쪽부터, 넘치면 …
+    var put = function (k, left, width, fs, bold) {
+      var b = B[k], y = b.y * sh - 2, h = b.h * sh + 4;
+      cx.fillStyle = '#fff'; cx.fillRect(left - 2, y, width + 4, h);
+      cx.save(); cx.beginPath(); cx.rect(left - 2, y, width + 4, h); cx.clip();
+      font(fs, bold); cx.fillStyle = '#111'; cx.textBaseline = 'middle';
+      cx.fillText(ell(cx, val[k], width), left, y + h / 2);
+      cx.restore();
+    };
+    var single = function (k, base, bold, lim) {
+      var x = X(k), avail = Math.max(R(k) - x, lim - x), fs = base, w = tw(val[k], fs, bold);
+      if (w > avail) { fs = Math.max(base * .55, base * avail / w); w = tw(val[k], fs, bold); }
+      put(k, x, Math.max(R(k) - x, Math.min(w, avail)), fs, bold);
+    };
+    var pair = function (a, b2, base, bold) {
+      if (val[a] && val[b2]) {
+        var x = X(a), avail = LIM(b2) - x, gap = Math.max(X(b2) - R(a), base * .5), fs = base, wa = tw(val[a], fs, bold), wc = tw(val[b2], fs, bold);
+        if (wa + gap + wc > avail) { fs = Math.max(base * .55, base * (avail - gap) / (wa + wc)); wa = tw(val[a], fs, bold); wc = tw(val[b2], fs, bold); }
+        var cxx = x + wa + gap;
+        put(a, x, Math.max(R(a) - x, cxx - x), fs, bold);
+        put(b2, cxx, Math.max(R(b2) - cxx, Math.min(wc, LIM(b2) - cxx)), fs, bold);
+      } else if (val[a]) single(a, base, bold, X(b2) - 3);
+      else if (val[b2]) single(b2, base, bold, LIM(b2));
+    };
+    pair('nameEn', 'nameKo', nameFs, 1);
+    pair('jobTitle', 'jobPos', infoFs, 0);
+    if (val.addrKo) single('addrKo', infoFs, 0, LIM('addrKo'));
+    if (val.addrEn) single('addrEn', infoFs, 0, LIM('addrEn'));
+    if (val.email) single('email', infoFs, 0, LIM('email'));
+    if (val.mobile) single('mobile', infoFs, 0, LIM('mobile'));
+    return c.cv;
+  }
+  function drawAgent(img, f) {
+    var c = canvasOf(img), cx = c.cx, A = AG, sx = c.W / A.W, sy = c.H / A.H, fsc = sx;
+    var FONT = "'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif";
+    var met = function (t, fs, wt) { cx.font = wt + ' ' + fs + 'px ' + FONT; return cx.measureText(t); };
+    var tw0 = function (t, fs, wt, ls) { return met(t, fs, wt).width + (ls || 0) * Math.max(0, Array.from(t).length - 1); };
+    var tw = function (t, fs, wt, ls) { return Math.ceil(tw0(t, fs, wt, ls) * 1.04) + 2; };
+    var baseFs = function (F) { var m = met(F.ref, 100, F.wt), gh = (m.actualBoundingBoxAscent || 0) + (m.actualBoundingBoxDescent || 0); return (F.bot - F.top + 1) * fsc * 100 / (gh > 20 ? gh : 88); };
+    var box = function (F) { cx.fillStyle = '#fefefe'; cx.fillRect(F.c0 * sx, F.y0 * sy, (A.cover - F.c0) * sx, (F.y1 - F.y0) * sy); };
+    // 글자 한 줄 — 샘플 글자의 세로 가운데에 기준선, 줄 상자(L) 안으로 자르고 넘치면 …
+    var put = function (L, F, text, fs, x, w, ls) {
+      var m = met(F.ref, fs, F.wt), asc = m.actualBoundingBoxAscent || fs * .85, dsc = m.actualBoundingBoxDescent || fs * .08;
+      var base = (F.top + F.bot + 1) / 2 * sy + (asc - dsc) / 2, px = x * sx;
+      cx.save(); cx.beginPath(); cx.rect(px, L.y0 * sy, Math.max(0, w), (L.y1 - L.y0) * sy); cx.clip();
+      met(text, fs, F.wt); cx.fillStyle = '#0a0a0a'; cx.textBaseline = 'alphabetic';
+      if (ls && tw0(text, fs, F.wt, ls) <= w) {   // 글자 사이 띄움(이름) — 한 글자씩
+        Array.from(text).forEach(function (ch) { cx.fillText(ch, px, base); px += cx.measureText(ch).width + ls; });
+      } else cx.fillText(ell(cx, text, w), px, base);
+      cx.restore();
+    };
+    var fit = function (t, fs, wt, avail) { var w = tw(t, fs, wt, 0); if (w > avail) { fs *= Math.max(.74, avail / w); } return fs; };
+    var v = function (k) { return txt(f[k]); };
+    // ① 이름 · 직함
+    var nm = v('NameKO') || v('NameEN'), job = v('JobPosition') || v('JobTitle');
+    if (nm) {
+      var N = A.name, Rr = A.role, avail = (A.right - N.x) * sx, role = job || Rr.def;
+      var spaced = /^[가-힣]{2,5}$/.test(nm);
+      var fn = baseFs(N), fr = baseFs(Rr), lsn = spaced ? fn * .24 : 0, gap = (Rr.x - 1104) * sx;
+      var wn = tw(nm, fn, N.wt, lsn), wr = tw(role, fr, Rr.wt);
+      if (wn + gap + wr > avail) { var k = Math.max(.74, (avail - gap) / (wn + wr)); fn *= k; fr *= k; lsn *= k; wn = tw(nm, fn, N.wt, lsn); wr = tw(role, fr, Rr.wt); }
+      var wn0 = Math.min(wn, tw0(nm, fn, N.wt, lsn));
+      if (wn + gap + wr > avail) { var nmax = Math.max(avail * .6, avail - gap - wr); wn = Math.min(wn, nmax); wn0 = Math.min(wn0, wn); }
+      box(N);
+      put(N, N, nm, fn, N.x, wn + (lsn || 0), lsn);
+      put(N, Rr, role, fr, N.x + (wn0 + gap) / sx, Math.max(0, avail - wn0 - gap), 0);
+    } else if (job) {
+      var R2 = A.role; box(R2); put(R2, R2, job, fit(job, baseFs(R2), R2.wt, (A.right - R2.x) * sx), R2.x, (A.right - R2.x) * sx, 0);
+    }
+    // ② 본부 ← Department · ③ 주소 ← 국문 주소
+    [['region', v('Department')], ['addr', v('Address')]].forEach(function (p) {
+      if (!p[1]) return;
+      var F = A[p[0]], av = (A.right - F.x) * sx;
+      box(F); put(F, F, p[1], fit(p[1], baseFs(F), F.wt, av), F.x, av, 0);
+    });
+    // ④ 연락처 줄 「{Mobile} | E-mail {Email}」 — 빈 칸은 샘플 글자, 둘 다 비면 샘플 그대로
+    var mob = v('MobileNumber'), eml = v('Email');
+    if (mob || eml) {
+      var F = A.mobile, av = (A.right - F.x) * sx;
+      var FP = Object.assign({}, F, { ref: '|', top: 479, bot: 510 }), FL = Object.assign({}, F, { wt: 700, ref: 'E-mail', top: 483, bot: 505 }), FV = Object.assign({}, F, { ref: 'user@example.com', top: 483, bot: 510 });
+      var byW = function (t, wt, w) { return 100 * w * sx / Math.max(1, tw0(t, 100, wt)); };
+      var seg = [{ t: mob || '010-0000-0000', f: F, fs: baseFs(F), g: 0 }, { t: '|', f: FP, fs: baseFs(FP), g: 16 }, { t: 'E-mail', f: FL, fs: byW('E-mail', 700, 94), g: 18 }, { t: eml || 'user@example.com', f: FV, fs: byW('user@example.com', 400, 228), g: 14 }];
+      var tot = function (k) { return seg.reduce(function (s, x) { return s + x.g * sx * k + tw0(x.t, x.fs * k, x.f.wt); }, 0); };
+      var kk = 1; if (tot(1) > av * .96) kk = Math.max(.74, av * .96 / tot(1));
+      box(F);
+      var x = F.x * sx;
+      seg.forEach(function (s, i) { x += s.g * sx * kk; var w = i === seg.length - 1 ? Math.max(0, F.x * sx + av - x) : tw(s.t, s.fs * kk, s.f.wt); put(F, s.f, s.t, s.fs * kk, x / sx, w, 0); x += tw0(s.t, s.fs * kk, s.f.wt); });
+    }
+    return c.cv;
+  }
+  async function showCard(el, f) {
+    var ag = isAgent(f);
+    var img = await sample(ag ? 'Business_card-sample-image_agent.png' : 'Business_card-sample-image.png');
+    var cv = ag ? drawAgent(img, f) : drawStaff(img, f);
+    cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', '신청 내용으로 그린 명함 미리보기');
+    cv.style.cssText = 'display:block;width:100%;max-width:340px;height:auto;border:1px solid #edebe9;border-radius:4px;background:#fff';
+    zoomable(cv, '340px');
+    el.textContent = ''; el.style.cssText = 'margin-top:2px';
+    el.appendChild(cv);
+    var n = document.createElement('div'); n.style.cssText = NOTE; n.textContent = (ag ? 'STK Agent' : 'STK 내부직원') + ' 샘플 위에 신청 값을 얹은 참고용 — 실제 인쇄물과 다를 수 있습니다';
+    el.appendChild(n);
+  }
+  function run() {
+    Object.keys(jobs).forEach(function (id) {
+      var job = jobs[id]; delete jobs[id];
+      var el = document.getElementById(id); if (!el) return;   // 그사이 다른 상세로 바뀌었으면 건너뜀
+      (job.kind === 'bc' ? showCard(el, job.data) : showImg(el, job.data)).catch(function (e) {
+        console.warn('[미리보기] 실패:', e && e.message);
+        if (document.body.contains(el)) { el.style.cssText = NOTE; el.textContent = '미리보기를 불러오지 못했습니다.'; }
+      });
+    });
+  }
+  return { slot: slot, imgSlot: imgSlot, run: run };
+})();
+
+
 async function downloadAttachment(driveId, itemId, fileName){
   try{
     const t = await token();
